@@ -2,8 +2,7 @@
 
 namespace ReallySpecific\WP_Util;
 
-use ReallySpecific\WP_Util;
-use ReallySpecific\WP_ContentSync\Server;
+use ReallySpecific\WP_Util as Util;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -17,6 +16,8 @@ class Plugin  {
 
 	private $services = [];
 
+	private $i18n_domain = null;
+
 	function __construct( array $props = [] ) {
 		if ( ! empty( $props['file'] ) ) {
 			$this->root_file = $props['file'];
@@ -25,11 +26,29 @@ class Plugin  {
 				add_filter('update_plugins_' . $props['update_host'], [ $this, 'update_check' ], 10, 4  );
 			}
 		}
+		if ( ! empty( $props['i18n_domain'] ) ) {
+			load_plugin_textdomain( $props['i18n_domain'], false, $props['i18n_path'] ?? __DIR__ . '/languages' );
+			$this->i18n_domain = $props['i18n_domain'];
+		}
 	}
 
-	public function attach_service( $load_action, $name, $callback, $callback_args = [] ) {
-		add_action( $load_action, function() use ( $this, $name, $callback, $callback_args ) {
-			$this->load_service( $name, $callback, $callback_args );
+	public function __get( $name ) {
+		switch( $name ) {
+			case 'domain':
+			case 'text_domain':
+			case 'i18n_domain':
+				return $this->i18n_domain;
+			default:
+				return null;
+		}
+	}
+
+	public function attach_service( $load_action, $service_name, $callback, $callback_args = [], $admin_only = false ) {
+		if ( $admin_only && ! is_admin() ) {
+			return;
+		}
+		add_action( $load_action, function() use ( $this, $service_name, $callback, $callback_args ) {
+			$this->load_service( $service_name, $callback, $callback_args );
 		} );
 	}
 

@@ -1,124 +1,317 @@
 <?php
 
-namespace ReallySpecific\WP_ContentSync\Settings;
+namespace ReallySpecific\WP_Util;
 
-function install() {
+use ReallySpecific\WP_Util as Util;
 
-	add_submenu_page(
-		'tools.php',
-		__( 'Content Sync', 'content-sync' ),
-		__( 'Content Sync', 'content-sync' ),
-		'manage_options',
-		'content-sync-settings',
-		 __NAMESPACE__ . '\render',
-	);
+class Settings {
 
-	add_action( 'admin_init', __NAMESPACE__ . '\save' );
+	private $settings = null;
 
-}
+	private $hook = null;
 
-function save() {
+	private $sections = [];
 
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
+	private $slug = null;
+
+	/**
+	 * Constructor for the class.
+	 *
+	 * @param Plugin $plugin The plugin object.
+	 * @param string $menu_title The title of the menu.
+	 * @param array $props Additional properties for the settings.
+	 */
+	public function __construct( Plugin $plugin, string $menu_title, array $props = [] ) {
+		$this->settings = wp_parse_args( $props, [
+			'parent'     => false,
+			'slug'       => sanitize_title( $menu_title ) . '-settings',
+			'capability' => 'manage_options',
+			'page_title' => $menu_title . ' ' . __( 'Settings', $plugin->i18n_domain ),
+			'form_title' => $menu_title . ' ' . __( 'Settings', $plugin->i18n_domain ),
+			'menu_title' => $menu_title,
+		] );
+		$this->slug = $this->settings['slug'];
+		if ( ! isset( $this->settings['option_name'] ) ) {
+			$this->settings['option_name'] = $this->slug;
+		}
+		add_action( 'admin_menu', [ $this, 'install' ] );
 	}
 
-	if ( ( $_GET['page'] ?? '' ) !== 'content-sync-settings' ){
-		return;
+	/**
+	 * Installs the menu page or submenu page based on the settings.
+	 *
+	 * @return void
+	 */
+	public function install() {
+		if ( $this->settings['parent'] === false ) {
+			$this->hook = add_menu_page(
+				$this->settings['page_title'],
+				$this->settings['menu_title'],
+				$this->settings['capability'],
+				$this->slug,
+				[ $this, 'render' ],
+				$this->settings['icon_url'] ?? null,
+				$this->settings['position'] ?? null
+			);
+		} else {
+			add_submenu_page(
+				$this->settings['parent'],
+				$this->settings['page_title'],
+				$this->settings['menu_title'],
+				$this->settings['capability'],
+				$this->slug,
+				[ $this, 'render' ],
+				$this->settings['position'] ?? null
+			);
+		}
 	}
 
-	if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'content-sync-settings' ) ) {
-		return;
+	/**
+	 * Adds a section to the sections array with the given ID and properties.
+	 *
+	 * @param string $id The ID of the section.
+	 * @param array $props The properties of the section. Default is an empty array.
+	 * @return void
+	 */
+	public function add_section( string $id, array $props = [] ) {
+		$this->sections[ $id ] = wp_parse_args( $props, [
+			'title'       => null,
+			'description' => null,
+			'order'       => ( count( $this->sections ) + 1 ) * 10,
+			'fields'      => [],
+		] );
 	}
 
-	$settings = [
-		'import_url' => sanitize_text_field( $_POST['source-url'] ?? '' ),
-		'import_token' => sanitize_text_field( $_POST['source-token'] ?? '' ),
-		'export_whitelist' => sanitize_text_field( $_POST['destination-whitelist'] ?? '' ),
-		'export_token' => sanitize_text_field( $_POST['destination-token'] ?? '' ),
-		'export_enabled' => isset( $_POST['destination-enabled'] ) ? 'true' : '',
-	];
+	/**
+	 * Sets the title for a section in the settings object.
+	 *
+	 * @param string $id The ID of the section.
+	 * @param string $title The title to set for the section.
+	 * @return void
+	 */
+	public function set_section_title( string $id, string $title ) {
+		if ( ! isset( $this->sections[ $id ] ) ) {
+			$this->add_section( $id );
+		}
+		$this->sections[ $id ]['title'] = $title;
+	}
 
-	update_option( 'content-sync-settings', $settings, false );
+	/**
+	 * Sets the description for a section in the settings object.
+	 *
+	 * @param string $id The ID of the section.
+	 * @param string $title The description to set for the section.
+	 * @return void
+	 */
+	public function set_section_description( string $id, string $title ) {
+		if ( ! isset( $this->sections[ $id ] ) ) {
+			$this->add_section( $id );
+		}
+		$this->sections[ $id ]['description'] = $title;
+	}
 
-}
+	/**
+	 * Adds a field to a section in the settings.
+	 *
+	 * @param array $props The properties of the field.
+	 * @param string|null $section_id The ID of the section to add the field to. If not provided, the field will be added to the default section.
+	 * @throws \Exception If the field does not have a name.
+	 * @return void
+	 */
+	public function add_field( array $props, string $section_id = null ) {
+		if ( $section_id === null ) {
+			$section_id = 'default';
+			if ( ! isset( $this->sections['default'] ) ) {
+				$this->add_section( 'default', [ 'order' => 0 ] );
+			}
+		}
+		if ( ! isset( $this->sections[ $section_id ] ) ) {
+			$this->add_section( $section_id );
+		}
+		if ( ! isset( $props['name'] ) ) {
+			throw new \Exception( 'Cannot attach fields without a name.' );
+		}
+		$this->sections[ $section_id ]['fields'][] = wp_parse_args( $props, [
+			'type'        => 'text',
+			'order'       => ( count( $this->sections[ $section_id ]['fields'] ) + 1 ) * 10,
+			'label'       => $props['name'],
+			'id'          => $section_id . '__' . $props['name'],
+			'default'     => null,
+			'placeholder' => null,
+			'description' => null,
+		] );
+	}
 
-function get( ?string $key = null ) {
-	$settings = wp_cache_get( 'content-sync-settings' ) ?: get_option( 'content-sync-settings' ) ?: [];
-	return $settings[ $key ] ?? null;
-}
+	public function render() {
 
-function render() {
+		$current_values = get_option( $this->slug, [] );
+		
+		?>
+		<div class="wrap">
+			<h2><?php echo $this->settings['form_title']; ?></h2>
+			<?php do_action( $this->slug . '_rs_util_settings_render_form_beforestart', $this ); ?>
+			<?php do_action( 'rs_util_settings_render_form_beforestart', $this ); ?>
+			<form method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
+				<?php do_action( $this->slug . '_rs_util_settings_render_form_afterstart', $this ); ?>
+				<?php do_action( 'rs_util_settings_render_form_afterstart', $this ); ?>
+				<?php wp_nonce_field( $this->slug ); ?>
+				<?php foreach( $this->sections as $section ) : ?>
+					
+					<?php if ( isset( $section['title'] ) ) : ?>
+					<h3><?php echo $section['title']; ?></h3>
+					<?php endif; ?>
+					<?php if ( isset( $section['description'] ) ) : ?>
+					<p class="description"><?php echo $section['description']; ?></p>
+					<?php endif; ?>
 
-	$settings = get_option( 'content-sync-settings' );
+					<?php if ( isset( $section['fields'] ) ) : ?>
+					<?php do_action( $this->slug . '_rs_util_settings_render_section_beforestart', $section, $this ); ?>
+					<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
+					<table class="form-table">
+						<?php foreach( $section['fields'] as $field ) : ?>
+							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
+							<?php do_action( 'rs_util_settings_render_fieldrow_beforestart', $field, $section, $this ); ?>
+							<?php $this->render_field_row( $field, $current_values[ $field['name'] ] ?? null ); ?>
+							<?php do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
+							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
+						<?php endforeach; ?>
+					</table>
+					<?php do_action( $this->slug . '_rs_util_settings_render_section_afterend', $section, $this ); ?>
+					<?php do_action( 'rs_util_settings_render_section_afterend', $section, $this ); ?>
+					<?php endif; ?>
+				<?php endforeach; ?>
+				<?php submit_button(); ?>
+				<?php do_action( 'rs_util_settings_render_form_beforeend', $this ); ?>
+				<?php do_action( $this->slug . '_rs_util_settings_render_form_beforeend', $this ); ?>
+			</form>
+			<?php do_action( 'rs_util_settings_render_form_afterend', $this ); ?>
+			<?php do_action( $this->slug . '_rs_util_settings_render_form_afterend', $this ); ?>
+		</div>
+		<?php
 
-	?>
-	<div class="wrap">
-		<h2><?php _e( 'Content Sync Settings', 'content-sync' ); ?></h2>
-		<form method="post" action="admin.php?page=content-sync-settings">
-			<?php wp_nonce_field( 'content-sync-settings' ); ?>
-			<h3><?php _e( 'Content import settings', 'content-sync' ); ?></h3>
-			<table class="form-table">
-				<tr>
-					<th scope="row">
-						<label for="source-url"><?php _e( 'Source site', 'content-sync' ); ?></label>
-					</th>
-					<td>
-						<input type="text" name="source-url" id="source-url" value="<?php echo esc_attr( $settings['import_url'] ?? '' ); ?>" class="regular-text" placeholder="https://staging-site.website.example">
-						<p>Synchronization happens via client-side AJAX, so development URLs are allowed.</p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<label for="source-token"><?php _e( 'Access Token', 'content-sync' ); ?></label>
-					</th>
-					<td>
-						<input type="text" name="source-token" id="source-token" value="<?php echo esc_attr( $settings['import_token'] ?? '' ); ?>" class="regular-text">
-						<p>Use either a WordPress user application password in the format <code>username:password</code>, or a global access token created on the source site.</p>
-					</td>
-				</tr>
-			</table>
-			<hr>
-			<h3><?php _e( 'Source server / export settings', 'content-sync' ); ?></h3>
-			<table class="form-table">
-				<tr>
-					<th scope="row">
-						<label for="destination-url"><?php _e( 'Enable export', 'content-sync' ); ?></label>
-					</th>
-					<td>
-						<input type="checkbox" <?php checked( $settings['export_enabled'] ?? '', 'true' ); ?> name="destination-enabled" id="destination-enabled">
-						<label for="destination-enabled"><?php _e( 'Enable export to other sites', 'content-sync' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<label for="destination-whitelist"><?php _e( 'Allowed websites', 'content-sync' ); ?></label>
-					</th>
-					<td>
-						<textarea rows="4" name="destination-whitelist" id="destination-whitelist" value="<?php echo esc_attr( $settings['export_whitelist'] ?? '' ); ?>" class="regular-text">
+	}
 
-						</textarea>
-						<p>One per line, enter <code>*</code> to allow from all. (Not recommended.)</p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<label for="destination-token"><?php _e( 'Global Access Token', 'content-sync' ); ?></label>
-					</th>
-					<td>
-						<input style="font-family:monospace" size="30" type="text" name="destination-token" id="destination-token" value="<?php echo esc_attr( $settings['export_token'] ?? '' ); ?>" class="regular-text"> <button type="button" class="button" id="refresh-access-token">Regenerate</button>
-						<p>Leave blank to only allow exports from registered users with appropriate access tokens.</p>
-					</td>
-				</tr>
-			</table>
-			<?php submit_button(); ?>
-		</form>
-		<script>
-			document.getElementById('refresh-access-token').addEventListener('click', function() {
-				var token = Array.from(Array(30), () => Math.floor(Math.random() * 36).toString(36)).join('');
-				document.getElementById('destination-token').value = token;
-			});
-		</script>
-	</div>
-	<?php
+	public function render_field_row( array $field, $value = null, $echo = true ) {
+
+		$label = apply_filters( $this->slug . '_rs_util_settings_render_field_row_label', $field['label'] ?? '', $field, $value, $this );
+		$label = apply_filters( 'rs_util_settings_render_field_row_label', $label, $field, $value, $this );
+
+		$description = apply_filters( $this->slug . '_rs_util_settings_render_field_row_description', $field['description'] ?? null, $field, $value, $this );
+		$description = apply_filters( 'rs_util_settings_render_field_row_description', $description, $field, $value, $this );
+
+		ob_start();
+		?>
+		<tr>
+			<th scope="row">
+				<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
+			</th>
+			<td>
+				<?php $this->render_field( $field, $value ); ?>
+				<?php if ( ! empty( $description ) ) : ?>
+				<label for="<?php echo esc_attr( $field['id'] ); ?>" class="description">
+					<?php echo $description; ?>
+				</label>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+		
+		$rendered = ob_get_clean();
+		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_row', $rendered, $field, $value, $this );
+		$rendered = apply_filters( 'rs_util_settings_render_field_row', $rendered, $field, $value, $this );
+		
+		if ( $echo ) {
+			echo $rendered;
+		}
+		return $rendered;
+
+	}
+
+	public function render_field( array $field, $value = null, $echo = true ) {
+		$tag = match( $field['type'] ) {
+			'options' => 'select',
+			'select'  => 'select',
+			default   => 'input',
+		};
+		$attrs = wp_parse_args( $field['attrs'] ?? [], [
+			'id'       => $field['id'],
+			'name'     => $field['name'],
+			'required' => filter_var( $field['required'], FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
+			'class'    => [],
+		] );
+		$attrs['class']       = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
+		$attrs['class'][]     = match( $field['type'] ) {
+			'text'  => 'regular-text',
+		};
+		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
+		switch( $tag ) {
+			case 'input':
+				$attrs['type']        = $field['type'] ?? 'text';
+				$attrs['placeholder'] = $field['placeholder'] ?? null;
+				if ( $field['type'] === 'checkbox' || $field['type'] === 'radio' ) {
+					$checked = filter_var( $value ?? $field['default'] ?? null, FILTER_VALIDATE_BOOLEAN );
+					$attrs['checked'] = $checked ? 'checked' : '';
+					$value = null;
+				}
+				if ( $field['type'] !== 'checked' ) {
+					$attrs['value'] = $value ?? $field['default'] ?? null;
+				}
+				$render_template = '<input %1$s>';
+				break;
+		}
+		$rendered = sprintf( $render_template ?? '', Util\array_to_attr_string( $attrs ) );
+		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_' . $field['name'], $rendered, $field, $value, $this );
+		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field', $rendered, $field, $value, $this );
+		$rendered = apply_filters( 'rs_util_settings_render_field', $rendered, $field, $value, $this );
+		if ( ! empty( $rendered ) && $echo ) {
+			echo $rendered;
+		}
+		return $rendered ?? '';
+	}
+
+	public function save() {
+
+		if ( ! current_user_can( $this->settings['capability'] ) ) {
+			return;
+		}
+
+		if ( ( $_GET['page'] ?? '' ) !== $this->slug ){
+			return;
+		}
+
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], $this->slug ) ) {
+			return;
+		}
+
+		$new_setting_values = [];
+
+		foreach( $this->sections as $section ) {
+			foreach( $section['fields'] as $field ) {
+				if ( isset( $_POST[ $field['name'] ] ) ) {
+					$new_setting_values[ $field['name'] ] = sanitize_text_field( $_POST[ $field['name'] ] );
+				}
+			}
+		}
+
+		update_option( $this->settings['option_name'], $new_setting_values, false );
+
+	}
+
+	public function get( ?string $key = null ) {
+		$options = get_option( $this->settings['option_name'], [] );
+		return $key ? $options[ $key ] : $options;
+	}
+
+	public function __get( $key ) {
+		return $this->get( $key );
+	}
+
+	public function add_action( $hook, $callback, $priority = 10, $args = 0 ) {
+		add_action( $this->slug . '_' . $hook, $callback, $priority, $args );
+	}
+
+	public function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
+		add_filter( $this->slug . '_' . $hook, $callback, $priority, $args );
+	}
+
 }
