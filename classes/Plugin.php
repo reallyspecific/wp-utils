@@ -1,9 +1,9 @@
 <?php
 
-namespace ReallySpecific\Util;
+namespace ReallySpecific\WP_Util;
 
-use ReallySpecific\Util;
-use ReallySpecific\ContentSync\Server;
+use ReallySpecific\WP_Util;
+use ReallySpecific\WP_ContentSync\Server;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly

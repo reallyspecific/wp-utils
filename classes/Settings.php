@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\ContentSync\Settings;
+namespace ReallySpecific\WP_ContentSync\Settings;
 
 function install() {
 

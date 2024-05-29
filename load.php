@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\Util;
+namespace ReallySpecific\WP_Util;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
