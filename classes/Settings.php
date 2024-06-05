@@ -2,8 +2,6 @@
 
 namespace ReallySpecific\WP_Util;
 
-use ReallySpecific\WP_Util as Util;
-
 class Settings {
 
 	private $settings = null;
@@ -54,7 +52,7 @@ class Settings {
 				$this->settings['position'] ?? null
 			);
 		} else {
-			add_submenu_page(
+			$this->hook = add_submenu_page(
 				$this->settings['parent'],
 				$this->settings['page_title'],
 				$this->settings['menu_title'],
@@ -64,6 +62,7 @@ class Settings {
 				$this->settings['position'] ?? null
 			);
 		}
+		add_action( $this->hook, [ $this, 'save' ], -1 );
 	}
 
 	/**
@@ -74,12 +73,21 @@ class Settings {
 	 * @return void
 	 */
 	public function add_section( string $id, array $props = [] ) {
+		if ( ! empty( $props['fields'] ) ) {
+			$fields = $props['fields'];
+			unset( $props['fields'] );
+		}
 		$this->sections[ $id ] = wp_parse_args( $props, [
 			'title'       => null,
 			'description' => null,
 			'order'       => ( count( $this->sections ) + 1 ) * 10,
 			'fields'      => [],
 		] );
+		if ( ! empty( $fields ) ) {
+			foreach( $fields as $field ) {
+				$this->add_field( $field, $id );
+			}
+		}
 	}
 
 	/**
@@ -229,28 +237,32 @@ class Settings {
 
 	public function render_field( array $field, $value = null, $echo = true ) {
 		$tag = match( $field['type'] ) {
-			'options' => 'select',
-			'select'  => 'select',
-			default   => 'input',
+			'options'   => 'select',
+			'select'    => 'select',
+			'textarea'  => 'textarea',
+			default     => 'input',
 		};
 		$attrs = wp_parse_args( $field['attrs'] ?? [], [
 			'id'       => $field['id'],
 			'name'     => $field['name'],
-			'required' => filter_var( $field['required'], FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
-			'class'    => [],
+			'required' => filter_var( $field['required'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
+			'class'    => $field['class'] ?? [],
 		] );
 		$attrs['class']       = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
 		$attrs['class'][]     = match( $field['type'] ) {
-			'text'  => 'regular-text',
+			'checkbox' => '',
+			'textarea' => 'large-text',
+			default    => 'regular-text',
 		};
 		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
 		switch( $tag ) {
 			case 'input':
+				$attrs['size']        = $field['size'] ?? null;
 				$attrs['type']        = $field['type'] ?? 'text';
 				$attrs['placeholder'] = $field['placeholder'] ?? null;
 				if ( $field['type'] === 'checkbox' || $field['type'] === 'radio' ) {
 					$checked = filter_var( $value ?? $field['default'] ?? null, FILTER_VALIDATE_BOOLEAN );
-					$attrs['checked'] = $checked ? 'checked' : '';
+					$attrs['checked'] = $checked ? 'checked' : null;
 					$value = null;
 				}
 				if ( $field['type'] !== 'checked' ) {
@@ -258,8 +270,14 @@ class Settings {
 				}
 				$render_template = '<input %1$s>';
 				break;
+			case 'textarea':
+				$value = $value ?? $field['default'] ?? '';
+				$attrs['rows'] = $field['rows'] ?? null;
+				$attrs['cols'] = $field['cols'] ?? null;
+				$render_template = '<textarea %1$s>' . esc_html( $value ) . '</textarea>';
+				break;
 		}
-		$rendered = sprintf( $render_template ?? '', Util\array_to_attr_string( $attrs ) );
+		$rendered = sprintf( $render_template ?? '', array_to_attr_string( $attrs ) );
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_' . $field['name'], $rendered, $field, $value, $this );
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field', $rendered, $field, $value, $this );
 		$rendered = apply_filters( 'rs_util_settings_render_field', $rendered, $field, $value, $this );
@@ -298,8 +316,8 @@ class Settings {
 	}
 
 	public function get( ?string $key = null ) {
-		$options = get_option( $this->settings['option_name'], [] );
-		return $key ? $options[ $key ] : $options;
+		$options = get_option( $this->settings['option_name'], [] ) ?: [];
+		return $key ? ( $options[ $key ] ?? null ) : $options;
 	}
 
 	public function __get( $key ) {
