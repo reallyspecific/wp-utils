@@ -104,7 +104,11 @@ class Plugin  {
 	}
 
 	public function get_setting( $namespace = 'default', $key = null ) {
-		return $this->settings[ $namespace ]->get( $key );
+		$settings = $this->settings[ $namespace ] ?? null;
+		if ( empty( $settings ) ) {
+			return null;
+		}
+		return $settings->get( $key );
 	}
 
 	public function add_new_settings( $namespace = 'default', string $menu_title = null, array $props = [] ) {
