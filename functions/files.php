@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Creates a directory, recursively building subfolders as needed
  *
  * @param [type] $path
- * @return void
+ * @return bool mkdir was successful
  */
-function recursive_mk_dir( $path ) {
+function recursive_mk_dir( $path ): bool {
 	$parent_path = dirname( $path );
 	if ( ! is_dir( $parent_path ) ) {
 		$success = recursive_mk_dir( $parent_path );
