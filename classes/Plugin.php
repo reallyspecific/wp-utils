@@ -19,6 +19,8 @@ class Plugin  {
 
 	private $i18n_domain = null;
 
+	private $i18n_path = null;
+
 	private $name = null;
 
 	private $settings = [];
@@ -32,14 +34,19 @@ class Plugin  {
 			}
 		}
 		if ( ! empty( $props['i18n_domain'] ) ) {
-			load_plugin_textdomain( $props['i18n_domain'], false, $props['i18n_path'] ?? __DIR__ . '/languages' );
+			add_action( 'init', [ $this, 'install_textdomain' ] );
 			$this->i18n_domain = $props['i18n_domain'];
+			$this->i18n_path   = $props['i18n_path'] ?? $this->root_path . '/languages';
 		}
 		if ( ! empty( $props['name'] ) ) {
 			$this->name = $props['name'];
 		} else {
 			$this->name = basename( $this->root_file );
 		}
+	}
+
+	public function install_textdomain() {
+		load_plugin_textdomain( $this->i18n_domain, false, $this->i18n_path );
 	}
 
 	public function __get( $name ) {
