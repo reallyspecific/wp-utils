@@ -97,6 +97,10 @@ class Plugin  {
 		return untrailingslashit( $this->get_root_path() . '/' . $relative_path );
 	}
 
+	public function debug_mode() {
+		return apply_filters( 'content_sync_debug_mode', defined( 'WP_DEBUG' ) && WP_DEBUG, $this );
+	}
+
 	public function update_check( $update, $plugin_data, $plugin_file ) {
 		if ( $plugin_file == $this->root_file ) {
 			$request      = wp_remote_get( $plugin_data['UpdateURI'] );

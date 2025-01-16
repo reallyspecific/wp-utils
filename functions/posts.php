@@ -26,5 +26,5 @@ function get_post_by_slug( string $slug, string $post_type = 'any' ) {
 	if ( empty( $post ) ) {
 		return null;
 	}
-	return $post[0]->to_array();
+	return $post[0]?->to_array() ?? null;
 }

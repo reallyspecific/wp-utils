@@ -33,6 +33,7 @@ class Settings {
 			$this->settings['option_name'] = $this->slug;
 		}
 		add_action( 'admin_menu', [ $this, 'install' ] );
+		add_filter( 'rs_util_settings_sanitize_field_value', [ static::class, 'sanitize_textarea_field' ], 9, 2 );
 	}
 
 	/**
@@ -306,7 +307,11 @@ class Settings {
 		foreach( $this->sections as $section ) {
 			foreach( $section['fields'] as $field ) {
 				if ( isset( $_POST[ $field['name'] ] ) ) {
-					$new_setting_values[ $field['name'] ] = sanitize_text_field( $_POST[ $field['name'] ] );
+					$sanitization_function = apply_filters( 'rs_util_settings_sanitize_field_value', $field['sanitization_callback'] ?? null, $field );
+					if ( empty( $sanitization_function ) ) {
+						$sanitization_function = 'sanitize_text_field';
+					}
+					$new_setting_values[ $field['name'] ] = call_user_func( $sanitization_function, $_POST[ $field['name'] ] );
 				}
 			}
 		}
@@ -330,6 +335,19 @@ class Settings {
 
 	public function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
 		add_filter( $this->slug . '_' . $hook, $callback, $priority, $args );
+	}
+
+	public static function sanitize_textarea_field( $callback_function, $field = []) {
+
+		if ( ! empty( $callback_function ) ) {
+			return $callback_function;
+		}
+
+		if ( ( $field['type'] ?? null ) === 'textarea' ) {
+			return 'sanitize_textarea_field';
+		}
+
+		return $callback_function;
 	}
 
 }

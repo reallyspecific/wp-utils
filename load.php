@@ -6,8 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-require_once __DIR__ . "/functions/text.php";
+require_once __DIR__ . "/functions/files.php";
+require_once __DIR__ . "/functions/network.php";
 require_once __DIR__ . "/functions/posts.php";
+require_once __DIR__ . "/functions/text.php";
 
 /**
  * Loads a utility class file if the class does not already exist.
