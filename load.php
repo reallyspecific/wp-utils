@@ -5,7 +5,7 @@
  * @since 0.1.0
  */
 
-namespace ReallySpecific;
+namespace ReallySpecific\WP_Util;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * @since 0.1.0;
  */
-class WP_Util {
+class Helper {
 
 	private static $self;
 
@@ -68,6 +68,6 @@ class WP_Util {
 
 }
 
-function rs_wp_util() {
-	return WP_Util::self();
+function helper() {
+	return Helper::self();
 }
