@@ -1,0 +1,11 @@
+{
+    "name": "reallyspecific/wp-utils",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Really Specific",
+            "email": "reallyspecific@pm.me"
+        }
+    ],
+    "require": {}
+}
