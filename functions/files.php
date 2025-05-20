@@ -81,3 +81,16 @@ function canonical_path( $path, $separator = '/' )
 
 	return join( $separator, $canonical );
 }
+
+function get_extension_from_mime_type( $mime_type ) {
+
+	$mime_list = wp_get_mime_types();
+
+	foreach ( $mime_list as $extensions => $mime ) {
+		if ( $mime_type === $mime ) {
+			return $extensions;
+		}
+	}
+
+	return null;
+}
