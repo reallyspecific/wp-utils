@@ -25,3 +25,31 @@ function recursive_mk_dir( $path ): bool {
 	}
 	return true;
 }
+
+/**
+ * Takes a relative URL and returns an absolute URL based
+ * on the base URL passed to the constructor.
+ *
+ * @param string $path The relative URL.
+ * @return string The absolute URL.
+ */
+function join_path( $base, $path ) {
+	if ( empty( $path ) ) {
+		return $base;
+	}
+	if ( substr( $path, 0, 1 ) === '/' ) {
+		return $base . $path;
+	}
+	if ( substr( $path, 0, 1 ) === '.' ) {
+		return $base . substr( $path, 1 );
+	}
+
+	$url = parse_url( $path );
+
+	$cleaned = $url['scheme'] . '://' . $url['host'] . $url['path'];
+	if ( $url['query'] ) {
+		$cleaned .= '?' . $url['query'];
+	}
+
+	return $cleaned;
+}
