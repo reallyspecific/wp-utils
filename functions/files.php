@@ -40,13 +40,15 @@ function join_path( $base, $path ) {
 	if ( substr( $path, 0, 1 ) === '/' ) {
 		return $base . $path;
 	}
-	if ( substr( $path, 0, 1 ) === '.' ) {
-		return $base . substr( $path, 1 );
-	}
+
+	$path = trailingslashit( $base ) . $path;
 
 	$url = parse_url( $path );
 
-	$cleaned = $url['scheme'] . '://' . $url['host'] . $url['path'];
+	$cleaned = $url['path'];
+	if ( $url['scheme'] && $url['host'] ) {
+		$cleaned = $url['scheme'] . '://' . $url['host'] . $url['path'];
+	}
 	if ( $url['query'] ) {
 		$cleaned .= '?' . $url['query'];
 	}
