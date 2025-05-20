@@ -92,5 +92,20 @@ function get_extension_from_mime_type( $mime_type ) {
 		}
 	}
 
-	return null;
+	// not found, use our own list
+	$mime_list = wp_cache_get( 'mime_types', 'rs_wp_util' );
+	if ( ! $mime_list ) {
+		$csv_list = fopen( __DIR__ . '/../assets/mime-types.csv', 'r' );
+		$mime_list = [];
+		while ( ( $line = fgetcsv( $csv_list ) ) !== false ) {
+			if ( isset( $mime_list[ $line[1] ] ) ) {
+				$mime_list[ $line[1] ] .= '|' . $line[0];
+			} else {
+				$mime_list[ $line[1] ] = $line[0];
+			}
+		}
+		wp_cache_set( 'mime_types', $mime_list, 'rs_wp_util' );
+	}
+
+	return $mime_list[ $mime_type ] ?? null;
 }
