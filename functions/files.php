@@ -26,6 +26,23 @@ function recursive_mk_dir( $path ): bool {
 	return true;
 }
 
+function recursive_rm_dir( $src ) {
+	$dir = opendir( $src );
+	while ( false !== ( $file = readdir( $dir ) ) ) {
+		if ( ( $file != '.' ) && ( $file != '..' ) ) {
+			$full = $src . '/' . $file;
+			if ( is_dir( $full ) ) {
+				recursive_rm_dir( $full );
+			}
+			else {
+				unlink( $full );
+			}
+		}
+	}
+	closedir( $dir );
+	rmdir( $src );
+}
+
 /**
  * Takes a relative URL and returns an absolute URL based
  * on the base URL passed to the constructor.
@@ -33,35 +50,34 @@ function recursive_mk_dir( $path ): bool {
  * @param string $path The relative URL.
  * @return string The absolute URL.
  */
-function join_path( $base, $path ) {
-	if ( empty( $path ) ) {
-		return $base;
+function join_path( ...$paths ) {
+	if ( empty( $paths ) ) {
+		return '';
 	}
-	$path = ltrim( $path, '/' );
-	$base = rtrim( $base, '/' );
-
-	$combined = $base . '/' . $path;
-
+	$combined = rtrim( array_shift( $paths ), '/' );
+	while ( count( $paths ) > 0 ) {
+		$combined .= '/' . ltrim( array_shift( $paths ), '/' );
+	}
 	return canonical_path( $combined );
 }
 
 function canonical_path( $path, $separator = '/' )
 {
-    $canonical = [];
-    $path = explode( $separator, $path );
+	$canonical = [];
+	$path = explode( $separator, $path );
 
-    foreach ( $path as $segment ) {
-        switch ( $segment ) {
-            case '.':
-                continue;
-            case '..':
-                array_pop( $canonical );
-                break;
-            default:
-                $canonical[] = $segment;
-                break;
-        }
-    }
+	foreach ( $path as $segment ) {
+		switch ( $segment ) {
+			case '.':
+				continue;
+			case '..':
+				array_pop( $canonical );
+				break;
+			default:
+				$canonical[] = $segment;
+				break;
+		}
+	}
 
-    return join( $separator, $canonical );
+	return join( $separator, $canonical );
 }
