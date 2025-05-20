@@ -49,3 +49,7 @@ function class_loader(string $class_name, $namespace = null, $loader_path = null
 	}
 	require_once $loader_path . "/{$class_name}.php";
 }
+
+function assets_dir() {
+	return __DIR__ . '/assets';
+}

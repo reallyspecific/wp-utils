@@ -2,6 +2,8 @@
 
 namespace ReallySpecific\WP_Util\Filesystem;
 
+use ReallySpecific\WP_Util;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -95,7 +97,7 @@ function get_extension_from_mime_type( $mime_type ) {
 	// not found, use our own list
 	$mime_list = wp_cache_get( 'mime_types', 'rs_wp_util' );
 	if ( ! $mime_list ) {
-		$csv_list = fopen( __DIR__ . '/../assets/mime-types.csv', 'r' );
+		$csv_list = fopen( WP_Util\assets_dir() . '/mime-types.csv', 'r' );
 		$mime_list = [];
 		while ( ( $line = fgetcsv( $csv_list ) ) !== false ) {
 			if ( isset( $mime_list[ $line[1] ] ) ) {
