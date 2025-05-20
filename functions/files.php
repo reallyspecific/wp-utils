@@ -37,21 +37,31 @@ function join_path( $base, $path ) {
 	if ( empty( $path ) ) {
 		return $base;
 	}
-	if ( substr( $path, 0, 1 ) === '/' ) {
-		return $base . $path;
-	}
+	$path = ltrim( $path, '/' );
+	$base = rtrim( $base, '/' );
 
-	$path = trailingslashit( $base ) . $path;
+	$combined = $base . '/' . $path;
 
-	$url = parse_url( $path );
+	return canonical_path( $combined );
+}
 
-	$cleaned = $url['path'];
-	if ( $url['scheme'] && $url['host'] ) {
-		$cleaned = $url['scheme'] . '://' . $url['host'] . $url['path'];
-	}
-	if ( $url['query'] ) {
-		$cleaned .= '?' . $url['query'];
-	}
+function canonical_path( $path, $separator = '/' )
+{
+    $canonical = [];
+    $path = explode( $separator, $path );
 
-	return $cleaned;
+    foreach ( $path as $segment ) {
+        switch ( $segment ) {
+            case '.':
+                continue;
+            case '..':
+                array_pop( $canonical );
+                break;
+            default:
+                $canonical[] = $segment;
+                break;
+        }
+    }
+
+    return join( $separator, $canonical );
 }
