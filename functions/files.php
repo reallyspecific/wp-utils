@@ -86,15 +86,8 @@ function canonical_path( $path, $separator = '/' )
 
 function get_extension_from_mime_type( $mime_type ) {
 
-	$mime_list = wp_get_mime_types();
+	// wordpress's mime list is too limited, we gonna use our own
 
-	foreach ( $mime_list as $extensions => $mime ) {
-		if ( $mime_type === $mime ) {
-			return $extensions;
-		}
-	}
-
-	// not found, use our own list
 	$mime_list = wp_cache_get( 'mime_types', 'rs_wp_util' );
 	if ( ! $mime_list ) {
 		$csv_list = fopen( WP_Util\assets_dir() . '/mime-types.csv', 'r' );

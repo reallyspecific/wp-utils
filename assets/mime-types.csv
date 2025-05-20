@@ -437,6 +437,7 @@
 .roff,application/x-troff
 .rp,image/vnd.rn-realpix
 .rpm,audio/x-pn-realaudio-plugin
+.rss,application/rss+xml
 .rt,text/richtext
 .rt,text/vnd.rn-realtext
 .rtf,application/rtf
