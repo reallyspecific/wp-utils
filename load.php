@@ -53,3 +53,7 @@ function class_loader(string $class_name, $namespace = null, $loader_path = null
 function assets_dir() {
 	return __DIR__ . '/assets';
 }
+
+function is_debug_mode() {
+	return  ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ( defined( 'RS_UTIL_DEBUG' ) && RS_UTIL_DEBUG );
+}

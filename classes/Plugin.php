@@ -11,19 +11,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Plugin  {
 
-	private $root_path = null;
+	use Service_Host;
 
-	private $root_file = null;
+	protected $root_path = null;
 
-	private $services = [];
+	protected $root_file = null;
 
-	private $i18n_domain = null;
+	protected $services = [];
 
-	private $i18n_path = null;
+	protected $i18n_domain = null;
 
-	private $name = null;
+	protected $i18n_path = null;
 
-	private $settings = [];
+	protected $name = null;
+
+	protected $settings = [];
 
 	function __construct( array $props = [] ) {
 		if ( ! empty( $props['file'] ) ) {
@@ -60,27 +62,6 @@ class Plugin  {
 		}
 	}
 
-	public function attach_service( $load_action, $service_name, $callback, $callback_args = [], $admin_only = false, $load_priority = 10 ) {
-		if ( $admin_only && ! is_admin() ) {
-			return;
-		}
-		add_action( $load_action, function() use ( $service_name, $callback, $callback_args ) {
-			$this->load_service( $service_name, $callback, $callback_args );
-		}, $load_priority );
-	}
-
-	public function load_service( $name, $callback, $callback_args = [] ) {
-		if ( class_exists( $callback ) ) {
-			$this->services[ $name ] = new $callback( $this, ...$callback_args );
-		} else if ( is_callable( $callback ) ) {
-			$this->services[ $name ] = call_user_func_array( $callback, [ $this ] + $callback_args );
-		}
-	}
-
-	public function &service( $name ) {
-		return $this->services[ $name ];
-	}
-
 	public function get_root_path() {
 		return $this->root_path;
 	}
@@ -98,7 +79,7 @@ class Plugin  {
 	}
 
 	public function debug_mode() {
-		return apply_filters( 'content_sync_debug_mode', defined( 'WP_DEBUG' ) && WP_DEBUG, $this );
+		return is_debug_mode();
 	}
 
 	public function update_check( $update, $plugin_data, $plugin_file ) {
