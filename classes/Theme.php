@@ -13,7 +13,12 @@ class Theme extends Plugin {
 		'scripts' => [],
 	];
 
+	protected static $self = null;
+
 	function __construct( array $props = [] ) {
+
+		static::$self = $this;
+
 		parent::__construct( [ 'update_plugin_filter' => 'update_themes', ...$props ] );
 	
 		$this->attach_assets( $props['stylesheets'] ?? [], 'stylesheet' );
@@ -22,6 +27,10 @@ class Theme extends Plugin {
 		add_action( 'wp_enqueue_scripts', [ $this, 'install_public_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'install_admin_assets' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
+	}
+
+	public static function instance() {
+		return static::$self;
 	}
 
 	private function attach_assets( $assets, $type, $dest = 'public' ) {
