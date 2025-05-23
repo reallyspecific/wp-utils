@@ -8,8 +8,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Theme extends Plugin {
 
+	protected $assets = [
+		'stylesheets' => [],
+		'scripts' => [],
+	];
+
 	function __construct( array $props = [] ) {
 		parent::__construct( [ 'update_plugin_filter' => 'update_themes', ...$props ] );
+	
+		$this->attach_assets( $props['stylesheets'] ?? [], 'stylesheet' );
+		$this->attach_assets( $props['scripts'] ?? [], 'script' );
+
+		add_action( 'wp_enqueue_scripts', [ $this, 'install_public_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'install_admin_assets' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
+	}
+
+	private function attach_assets( $assets, $type, $dest = 'public' ) {
+		foreach ( $assets as $handle => $resource ) {
+			list( $name, $dest ) = explode( '|', $handle ) + [ null, $dest ];
+			if ( ! is_array( $resource ) ) {
+				$resource = [ 'path' => $resource ];
+			}
+			$path = substr( $resource['path'], 0, 1 ) === '/' 
+				? $resource['path'] 
+				: get_theme_file_path( $resource['path'] );
+			$this->assets[ $type . 's' ][] = [
+				'name' => $name,
+				'dest' => $dest,
+				'path' => $path,
+				'version' => $resource['version'] ?? $this->get_version(),
+				'dependencies' => $resource['dependencies'] ?? [],
+				'in_footer' => $resource['in_footer'] ?? true,
+			];
+		}
 	}
 
 	public function install_textdomain() {
@@ -28,13 +60,61 @@ class Theme extends Plugin {
 	public function get_version() {
 		$version = wp_cache_get( 'version', $this->name );
 		if ( ! $version ) {
-			$version = include get_parent_theme_file_path( 'assets/dist/version.php' );
+			$version = include get_theme_file_path( 'assets/dist/version.php' );
 			if ( empty( $version ) ) {
 				$version = wp_get_theme()->get( 'Version' );
 			}
 			wp_cache_set( 'version', $version, $this->name );
 		}
 		return $version;
+	}
+
+	public function install_public_assets() {
+		$this->install_scripts( 'public' );
+		$this->install_styles( 'public' );
+	}
+
+	public function install_admin_assets() {
+		$this->install_scripts( 'admin' );
+		$this->install_styles( 'admin' );
+	}
+
+	public function install_editor_assets() {
+
+		$this->install_scripts( 'editor' );
+		foreach( $this->assets['stylesheets'] as $stylesheet ) {
+			add_editor_style( $stylesheet['path'] );
+		}
+
+	}
+
+	private function install_scripts( $dest ) {
+		foreach( $this->assets['scripts'] as $script ) {
+			if ( $script['dest'] !== $dest ) {
+				continue;
+			}
+			wp_enqueue_script(
+				$script['name'],
+				$script['path'],
+				$script['dependencies'] ?? [],
+				$script['version'] ?? $this->get_version(),
+				$script['in_footer'] ?? true
+			);
+		}
+	}
+
+	private function install_styles( $dest ) {
+		foreach( $this->assets['stylesheets'] as $stylesheet ) {
+			if ( $stylesheet['dest'] !== $dest ) {
+				continue;
+			}
+			wp_enqueue_style(
+				$stylesheet['name'],
+				$stylesheet['path'],
+				$stylesheet['dependencies'] ?? [],
+				$stylesheet['version'] ?? $this->get_version(),
+			);
+		}
 	}
 
 }
