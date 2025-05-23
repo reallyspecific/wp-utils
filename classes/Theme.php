@@ -9,27 +9,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Theme extends Plugin {
 
 	function __construct( array $props = [] ) {
-		if ( ! empty( $props['file'] ) ) {
-			$this->root_file = $props['file'];
-			$this->root_path = dirname( $props['file'] );
-			if ( ! empty( $props['update_host'] ) ) {
-				add_filter( 'update_themes_' . $props['update_host'], [ $this, 'update_check' ], 10, 4  );
-			}
-		}
-		if ( ! empty( $props['i18n_domain'] ) ) {
-			add_action( 'init', [ $this, 'install_textdomain' ] );
-			$this->i18n_domain = $props['i18n_domain'];
-			$this->i18n_path   = $props['i18n_path'] ?? $this->root_path . '/languages';
-		}
-		if ( ! empty( $props['name'] ) ) {
-			$this->name = $props['name'];
-		} else {
-			$this->name = basename( $this->root_file );
-		}
+		parent::__construct( [ 'update_plugin_filter' => 'update_themes', ...$props ] );
 	}
 
 	public function install_textdomain() {
 		load_theme_textdomain( $this->i18n_domain, false, $this->i18n_path );
+	}
+
+	public function __get( $name ) {
+		switch( $name ) {
+			case 'version':
+				return $this->get_version();
+			default:
+				return parent::__get( $name );
+		}
+	}
+
+	public function get_version() {
+		$version = wp_cache_get( 'version', $this->name );
+		if ( ! $version ) {
+			$version = include get_parent_theme_file_path( 'assets/dist/version.php' );
+			if ( empty( $version ) ) {
+				$version = wp_get_theme()->get( 'Version' );
+			}
+			wp_cache_set( 'version', $version, $this->name );
+		}
+		return $version;
 	}
 
 }

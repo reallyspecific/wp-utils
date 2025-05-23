@@ -28,11 +28,14 @@ class Plugin  {
 	protected $settings = [];
 
 	function __construct( array $props = [] ) {
+		$props = wp_parse_args( $props, [
+			'update_plugin_filter' => 'update_plugins',
+		] );
 		if ( ! empty( $props['file'] ) ) {
 			$this->root_file = $props['file'];
 			$this->root_path = dirname( $props['file'] );
 			if ( ! empty( $props['update_host'] ) ) {
-				add_filter('update_plugins_' . $props['update_host'], [ $this, 'update_check' ], 10, 4  );
+				add_filter( "{$props['update_plugin_filter']}_{$props['update_host']}", [ $this, 'update_check' ], 10, 4  );
 			}
 		}
 		if ( ! empty( $props['i18n_domain'] ) ) {
