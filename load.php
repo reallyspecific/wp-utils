@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function setup() {
 	autoload_directory( __DIR__ . '/functions' );
+	autoload_directory( __DIR__ . '/classes' );
 }
 
 /**
