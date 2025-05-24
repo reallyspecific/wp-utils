@@ -39,19 +39,20 @@ class Theme extends Plugin {
 			if ( ! is_array( $resource ) ) {
 				$resource = [ 'path' => $resource ];
 			}
-			$path = substr( $resource['path'], 0, 1 ) === '/' 
+			$asset_path = substr( $resource['path'], 0, 1 ) === '/' 
 				? $resource['path'] 
 				: get_theme_file_path( $resource['path'] );
-			if ( file_exists( dirname( $path ) . '/' . basename( $path ) . '.asset.php' ) ) {
-				$asset = include dirname( $path ) . '/' . basename( $path ) . '.asset.php';
-				foreach( $asset as $key => $value ) {
+			$dep_path = file_exists( dirname( $asset_path ) . '/' . basename( $asset_path, '.js' ) . '.asset.php' );
+			if ( $dep_path ) {
+				$dep = include $dep_path;
+				foreach( $dep as $key => $value ) {
 					$resource[ $key ] ??= $value;
 				}
 			}
 			$this->assets[ $type . 's' ][] = [
 				'name' => $name,
 				'dest' => $dest,
-				'path' => $path,
+				'path' => $asset_path,
 				'version' => $resource['version'] ?? $this->get_version(),
 				'dependencies' => $resource['dependencies'] ?? [],
 				'in_footer' => $resource['in_footer'] ?? true,
