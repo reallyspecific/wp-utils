@@ -40,8 +40,9 @@ class Theme extends Plugin {
 				$resource = [ 'path' => $resource ];
 			}
 			$asset_path = substr( $resource['path'], 0, 1 ) === '/' 
-				? $resource['path'] 
+				? $resource['path']
 				: get_theme_file_path( $resource['path'] );
+			$asset_uri = get_theme_file_uri( $resource['path'] );
 			$dep_path = file_exists( dirname( $asset_path ) . '/' . basename( $asset_path, '.js' ) . '.asset.php' );
 			if ( $dep_path ) {
 				$dep = include $dep_path;
@@ -52,7 +53,7 @@ class Theme extends Plugin {
 			$this->assets[ $type . 's' ][] = [
 				'name' => $name,
 				'dest' => $dest,
-				'path' => $asset_path,
+				'path' => $asset_uri,
 				'version' => $resource['version'] ?? $this->get_version(),
 				'dependencies' => $resource['dependencies'] ?? [],
 			];
