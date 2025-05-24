@@ -43,8 +43,8 @@ class Theme extends Plugin {
 				? $resource['path']
 				: get_theme_file_path( $resource['path'] );
 			$asset_uri = get_theme_file_uri( $resource['path'] );
-			$dep_path = file_exists( dirname( $asset_path ) . '/' . basename( $asset_path, '.js' ) . '.asset.php' );
-			if ( $dep_path ) {
+			$dep_path = dirname( $asset_path ) . '/' . basename( $asset_path, '.js' ) . '.asset.php';
+			if ( file_exists( $dep_path ) ) {
 				$dep = include $dep_path;
 				foreach( $dep as $key => $value ) {
 					$resource[ $key ] ??= $value;
