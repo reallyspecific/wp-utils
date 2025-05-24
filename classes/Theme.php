@@ -42,6 +42,12 @@ class Theme extends Plugin {
 			$path = substr( $resource['path'], 0, 1 ) === '/' 
 				? $resource['path'] 
 				: get_theme_file_path( $resource['path'] );
+			if ( file_exists( basename( $path ) . '.asset.php' ) ) {
+				$asset = include basename( $path ) . '.asset.php';
+				foreach( $asset as $key => $value ) {
+					$resource[ $key ] ??= $value;
+				}
+			}
 			$this->assets[ $type . 's' ][] = [
 				'name' => $name,
 				'dest' => $dest,
