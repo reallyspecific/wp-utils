@@ -55,7 +55,6 @@ class Theme extends Plugin {
 				'path' => $asset_path,
 				'version' => $resource['version'] ?? $this->get_version(),
 				'dependencies' => $resource['dependencies'] ?? [],
-				'in_footer' => $resource['in_footer'] ?? true,
 			];
 		}
 	}
@@ -97,14 +96,17 @@ class Theme extends Plugin {
 
 	public function install_editor_assets() {
 
-		$this->install_scripts( 'editor' );
+		$this->install_scripts( 'editor', false );
 		foreach( $this->assets['stylesheets'] as $stylesheet ) {
+			if ( $stylesheet['dest'] !== 'editor' ) {
+				continue;
+			}
 			add_editor_style( $stylesheet['path'] );
 		}
 
 	}
 
-	private function install_scripts( $dest ) {
+	private function install_scripts( $dest, $in_footer = true ) {
 		foreach( $this->assets['scripts'] as $script ) {
 			if ( $script['dest'] !== $dest ) {
 				continue;
@@ -114,7 +116,7 @@ class Theme extends Plugin {
 				$script['path'],
 				$script['dependencies'] ?? [],
 				$script['version'] ?? $this->get_version(),
-				$script['in_footer'] ?? true
+				$script['in_footer'] ?? $in_footer
 			);
 		}
 	}
