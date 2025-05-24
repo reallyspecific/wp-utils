@@ -53,7 +53,8 @@ class Theme extends Plugin {
 			$this->assets[ $type . 's' ][] = [
 				'name' => $name,
 				'dest' => $dest,
-				'path' => $asset_uri,
+				'url'  => $asset_uri,
+				'path' => $asset_path,
 				'version' => $resource['version'] ?? $this->get_version(),
 				'dependencies' => $resource['dependencies'] ?? [],
 			];
@@ -114,7 +115,7 @@ class Theme extends Plugin {
 			}
 			wp_enqueue_script(
 				$script['name'],
-				$script['path'],
+				$script['url'],
 				$script['dependencies'] ?? [],
 				$script['version'] ?? $this->get_version(),
 				$script['in_footer'] ?? $in_footer
@@ -129,7 +130,7 @@ class Theme extends Plugin {
 			}
 			wp_enqueue_style(
 				$stylesheet['name'],
-				$stylesheet['path'],
+				$stylesheet['url'],
 				$stylesheet['dependencies'] ?? [],
 				$stylesheet['version'] ?? $this->get_version(),
 			);
