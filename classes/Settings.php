@@ -32,7 +32,7 @@ class Settings {
 		if ( ! isset( $this->settings['option_name'] ) ) {
 			$this->settings['option_name'] = $this->slug;
 		}
-		if ( is_multisite() ) {
+		if ( is_multisite() && $this->settings['capability'] === 'manage_network_options' ) {
 			add_action( 'network_admin_menu', [ $this, 'install' ] );
 		} else {
 			add_action( 'admin_menu', [ $this, 'install' ] );
