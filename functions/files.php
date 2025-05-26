@@ -71,7 +71,7 @@ function canonical_path( $path, $separator = '/' )
 	foreach ( $path as $segment ) {
 		switch ( $segment ) {
 			case '.':
-				continue;
+				break;
 			case '..':
 				array_pop( $canonical );
 				break;
