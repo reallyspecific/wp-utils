@@ -41,14 +41,7 @@ function filter_package_body( $body, $plugin )
 	
 	$meta_file = json_decode($response, \true);
 	$contents  = base64_decode( $meta_file['content'] );
-
-	$meta_file = wp_tempnam( $plugin->basename );
-	file_put_contents( $meta_file, $contents );
 	
-	$release = get_file_data( $meta_file, [] );
-	
-	unlink( $meta_file );
-	
-	return $release;
+	return $contents;
 }
 

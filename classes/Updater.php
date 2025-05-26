@@ -85,14 +85,16 @@ class Updater {
 		return $update;
 	}
 
-	protected function get_package_info( $package_uri, $package_filename ) {
+	protected function get_package_info( $props ) {
+
+		$package_uri = $props['update_uri'];
 
 		$request_headers = [];
 		if ( ! empty( $this->update_token ) ) {
 			$request_headers['Authorization'] = 'Bearer ' . $this->update_token;
 		}
 
-		$package_retrieval_uri     = apply_filters( 'rs_util_updater_package_retrieval_uri_' . $this->update_host, $package_uri, $this );
+		$package_retrieval_uri     = apply_filters( 'rs_util_updater_package_retrieval_uri_' . $this->update_host, $props, $this );
 		$package_retrieval_params = apply_filters( 'rs_util_updater_package_retrieval_params_' . $this->update_host, [
 			'headers' => $request_headers,
 		], $this );
@@ -103,19 +105,19 @@ class Updater {
 			return false;
 		}
 
-		$headers = wp_remote_retrieve_headers( $request );
+		$headers  = wp_remote_retrieve_headers( $request );
 		$response = wp_remote_retrieve_body( $request );
 
-		$response = apply_filters( 'rs_util_updater_package_body_' . $this->update_host, $response, $this );
-
 		if ( is_string( $response ) && str_contains( $headers['Content-Type'], 'application/json' ) ) {
-			$package = json_decode( $response, \true );
+			$response = json_decode( $response, \true );
 		}
 
+		$package = apply_filters( 'rs_util_updater_package_body_' . $this->update_host, $response, $props, $this );
+
 		if ( is_string( $response ) && str_contains( $headers['Content-Type'], 'text/css' ) ) {
-			$metafile = wp_tempnam( $package_filename );
+			$metafile = wp_tempnam( $props['basename'] );
 			file_put_contents( $metafile, $response );
-			$package = get_file_data( $metafile, [] );
+			$package = get_file_data( $metafile, $props['current'] );
 			unlink( $metafile );
 		}
 
@@ -129,7 +131,11 @@ class Updater {
 		$request_uri      = apply_filters( 'rs_util_updater_theme_update_uri_' . $this->update_host, $this->update_uri, $this );
 		$package_basename = apply_filters( 'rs_util_updater_theme_package_basename_' . $this->update_host, $this->basename, $this );
 
-		$package = $this->get_package_info( $request_uri, $package_basename );
+		$package = $this->get_package_info( [
+			'update_uri' => $request_uri,
+			'basename'   => $package_basename,
+			'current'    => $item,
+		] );
 		if ( empty( $package ) ) {
 			return $update;
 		}
