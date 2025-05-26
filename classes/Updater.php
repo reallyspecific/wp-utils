@@ -20,6 +20,8 @@ class Updater {
 			$props['type'] ??= $props['object'] instanceof Theme ? 'theme' : 'plugin';
 		}
 
+		$this->type = $props['type'];
+
 		if ( ! empty( $this->update_uri ) ) {
 			$this->update_host  = parse_url( $this->update_uri, PHP_URL_HOST );
 			$update_slug = $props['slug'] ?? sanitize_title( $this->update_host );
@@ -44,6 +46,23 @@ class Updater {
 			$this->basename = basename( $props['file'] );
 		}
 
+	}
+
+	public function __get( $name ) {
+		switch( $name ) {
+			case 'uri':
+				return $this->update_uri;
+			case 'host':
+				return $this->update_host;
+			case 'token':
+				return $this->update_token;
+			case 'type':
+				return $this->type;
+			case 'basename':
+				return $this->basename;
+			default:
+				return null;
+		}
 	}
 
 	protected static function get_package_version( $release ) {
