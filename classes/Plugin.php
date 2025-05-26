@@ -110,8 +110,6 @@ class Plugin  {
 
 	public function add_new_settings( $namespace = 'default', string $menu_title = null, array $props = [] ) {
 
-		class_loader( 'Settings' );
-
 		if ( empty( $menu_title ) ) {
 			$menu_title = $this->name;
 		}

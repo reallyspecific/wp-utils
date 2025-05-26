@@ -32,7 +32,11 @@ class Settings {
 		if ( ! isset( $this->settings['option_name'] ) ) {
 			$this->settings['option_name'] = $this->slug;
 		}
-		add_action( 'admin_menu', [ $this, 'install' ] );
+		if ( is_multisite() ) {
+			add_action( 'network_admin_menu', [ $this, 'install' ] );
+		} else {
+			add_action( 'admin_menu', [ $this, 'install' ] );
+		}
 		add_filter( 'rs_util_settings_sanitize_field_value', [ static::class, 'sanitize_textarea_field' ], 9, 2 );
 	}
 
