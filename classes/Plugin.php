@@ -47,12 +47,12 @@ class Plugin {
 			$this->name = basename( $this->root_file );
 		}
 		$this->slug = $props['slug'] ?? sanitize_title( $this->name );
+		if ( ! empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
+			$this->setup_updater();
+		}
 	}
 
 	protected function setup_updater() {
-		if ( empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
-			return;
-		}
 		$this->updater = new Updater( [
 			'object'     => $this,
 			'update_uri' => $this->get_wp_data( 'UpdateURI' ),
