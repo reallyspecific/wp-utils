@@ -12,9 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function setup() {
-	autoload_directory( __DIR__ . '/classes/traits' );
-	autoload_directory( __DIR__ . '/classes' );
 	autoload_directory( __DIR__ . '/functions' );
+	spl_autoload_register( __NAMESPACE__ . '\\class_loader' );
 }
 
 /**
@@ -36,20 +35,14 @@ function autoload_directory( $abs_path ) {
  * @param string $class_name The name of the class to load.
  * @return void
  */
-function class_loader(string $class_name, $namespace = null, $loader_path = null)
+function class_loader( string $class_name )
 {
-	if ( is_null($namespace) ) {
-		$namespace = __NAMESPACE__;
-	}
-	if ( class_exists( $namespace . '\\' . $class_name ) ) {
+	if ( class_exists( $class_name ) ) {
 		return;
 	}
-	if ( is_null($loader_path) ) {
-		$loader_path = __DIR__ . '/classes';
-	} else {
-		$loader_path = untrailingslashit($loader_path);
-	}
-	require_once $loader_path . "/{$class_name}.php";
+
+	$class_name = ltrim( $class_name, __NAMESPACE__ . '\\' );
+	include_once __DIR__ . '/classes/' . str_replace( '\\', '/', $class_name ) . '.php';
 }
 
 function assets_dir() {
@@ -59,3 +52,5 @@ function assets_dir() {
 function is_debug_mode() {
 	return  ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ( defined( 'RS_UTIL_DEBUG' ) && RS_UTIL_DEBUG );
 }
+
+setup();

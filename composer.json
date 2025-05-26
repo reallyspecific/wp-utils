@@ -7,5 +7,10 @@
             "email": "reallyspecific@pm.me"
         }
     ],
-    "require": {}
+    "require": {},
+    "autoload": {
+        "files": [
+            "load.php"
+        ]
+    }
 }
