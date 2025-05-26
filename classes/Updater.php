@@ -94,10 +94,10 @@ class Updater {
 			$request_headers['Authorization'] = 'Bearer ' . $this->update_token;
 		}
 
-		$package_retrieval_uri     = apply_filters( 'rs_util_updater_package_retrieval_uri_' . $this->update_host, $props, $this );
+		$package_retrieval_uri     = apply_filters( 'rs_util_updater_package_retrieval_uri_' . $this->update_host, $package_uri, $props, $this );
 		$package_retrieval_params = apply_filters( 'rs_util_updater_package_retrieval_params_' . $this->update_host, [
 			'headers' => $request_headers,
-		], $this );
+		], $props, $this );
 
 		$request  = wp_remote_get( $package_retrieval_uri, $package_retrieval_params );
 		if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) !== 200 ) {
@@ -112,11 +112,11 @@ class Updater {
 			$response = json_decode( $response, \true );
 		}
 
-		$package = apply_filters( 'rs_util_updater_package_body_' . $this->update_host, $response, $props, $this );
+		$package = apply_filters( 'rs_util_updater_package_body_' . $this->update_host, $response, $this );
 
-		if ( is_string( $response ) && str_contains( $headers['Content-Type'], 'text/css' ) ) {
+		if ( is_string( $package ) ) {
 			$metafile = wp_tempnam( $props['basename'] );
-			file_put_contents( $metafile, $response );
+			file_put_contents( $metafile, $package );
 			$package = get_file_data( $metafile, $props['current'] );
 			unlink( $metafile );
 		}

@@ -16,12 +16,14 @@ function filter_package_retrieval_uri( $uri ) {
 	return "$uri/releases/latest";
 }
 
-function filter_package_body( $body, $plugin )
+function filter_package_body( $package, $plugin )
 {
-	$package = json_decode($body, \true);
+	if ( is_string( $package ) ) {
+		$package = json_decode($package, \true);
+	}
 
-	if (empty($package['tag_name']) || empty($package['zipball_url'])) {
-		return $body;
+	if ( empty($package['tag_name']) || empty($package['zipball_url']) ) {
+		return $package;
 	}
 
 	$meta_file_uri = filter_update_uri( $plugin->uri ) . '/contents/' . $plugin->basename;
@@ -34,7 +36,7 @@ function filter_package_body( $body, $plugin )
 	}
 	$request = wp_remote_get( $meta_file_uri, $params );
 	if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) !== 200 ) {
-		return $body;
+		return $package;
 	}
 
 	$response = wp_remote_retrieve_body( $request );
