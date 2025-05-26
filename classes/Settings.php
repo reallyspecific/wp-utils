@@ -241,6 +241,7 @@ class Settings {
 	}
 
 	public function render_field( array $field, $value = null, $echo = true ) {
+
 		$tag = match( $field['type'] ) {
 			'options'   => 'select',
 			'select'    => 'select',
