@@ -16,7 +16,7 @@ trait Service_Host {
 	}
 
 	public function load_service( $name, $callback, $callback_args = [] ) {
-		if ( class_exists( $callback ) ) {
+		if ( is_string( $callback ) && class_exists( $callback ) ) {
 			$this->services[ $name ] = new $callback( $this, ...$callback_args );
 		} else if ( is_callable( $callback ) ) {
 			$this->services[ $name ] = call_user_func_array( $callback, [ $this ] + $callback_args );
