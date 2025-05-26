@@ -37,7 +37,7 @@ function class_loader( string $class_name )
 		return;
 	}
 
-	$class_name = ltrim( $class_name, __NAMESPACE__ . '\\' );
+	$class_name = str_replace( __NAMESPACE__ . '\\', '', $class_name );
 	include_once __DIR__ . '/classes/' . str_replace( '\\', '/', $class_name ) . '.php';
 }
 
