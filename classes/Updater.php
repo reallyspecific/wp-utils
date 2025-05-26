@@ -12,6 +12,42 @@ class Updater {
 
 	protected $source_path;
 
+	protected static $default_headers = [
+		'theme' => [
+			'Name'            => 'Theme Name',
+			'ThemeURI'        => 'Theme URI',
+			'Author'          => 'Author',
+			'AuthorURI'       => 'Author URI',
+			'Version'         => 'Version',
+			'License'         => 'License',
+			'LicenseURI'      => 'License URI',
+			'TextDomain'      => 'Text Domain',
+			'DomainPath'      => 'Domain Path',
+			'Template'        => 'Template',
+			'TemplateVersion' => 'Template Version',
+			'Network'         => 'Network',
+			'RequiresWP'      => 'Requires at least',
+			'RequiresPHP'     => 'Requires PHP',
+			'UpdateURI'       => 'Update URI',
+		],
+		'plugin' => [
+			'Name'            => 'Plugin Name',
+			'PluginURI'       => 'Plugin URI',
+			'Version'         => 'Version',
+			'Description'     => 'Description',
+			'Author'          => 'Author',
+			'AuthorURI'       => 'Author URI',
+			'TextDomain'      => 'Text Domain',
+			'DomainPath'      => 'Domain Path',
+			'Network'         => 'Network',
+			'RequiresWP'      => 'Requires at least',
+			'RequiresPHP'     => 'Requires PHP',
+			'UpdateURI'       => 'Update URI',
+			'RequiresPlugins' => 'Requires Plugins',
+			'_sitewide'       => 'Site Wide Only',
+	]
+	];
+
 	public function __construct( $props = [] ) {
 
 		$this->update_uri = $props['update_uri'] ?? null;
@@ -117,7 +153,7 @@ class Updater {
 		if ( is_string( $package ) ) {
 			$metafile = wp_tempnam( $props['basename'] );
 			file_put_contents( $metafile, $package );
-			$package = get_file_data( $metafile, $props['current'] );
+			$package = get_file_data( $metafile, static::$default_headers[ $this->type ] );
 			unlink( $metafile );
 		}
 
@@ -141,7 +177,7 @@ class Updater {
 		}
 
 		$version = static::get_package_version( $package );
-		if ( version_compare( $version, $item['version'], '>' ) ) {
+		if ( version_compare( $version, $item['Version'], '>' ) ) {
 			$update = static::parse_release( $package );
 		}
 
