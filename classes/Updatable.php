@@ -63,7 +63,7 @@ trait Updatable {
 		], $this );
 
 		$request  = wp_remote_get( $package_retrieval_uri, $package_retrieval_headers );
-		if ( is_wp_error( $request ) ) {
+		if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			// todo: log this error somehow
 			return false;
 		}
