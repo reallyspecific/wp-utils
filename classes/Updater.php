@@ -74,11 +74,11 @@ class Updater {
 		}
 
 		$package_retrieval_uri     = apply_filters( 'rs_util_updater_package_retrieval_uri_' . $this->update_host, $package_uri, $this );
-		$package_retrieval_headers = apply_filters( 'rs_util_updater_package_retrieval_headers_' . $this->update_host, [
+		$package_retrieval_params = apply_filters( 'rs_util_updater_package_retrieval_params_' . $this->update_host, [
 			'headers' => $request_headers,
 		], $this );
 
-		$request  = wp_remote_get( $package_retrieval_uri, $package_retrieval_headers );
+		$request  = wp_remote_get( $package_retrieval_uri, $package_retrieval_params );
 		if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			// todo: log this error somehow
 			return false;
