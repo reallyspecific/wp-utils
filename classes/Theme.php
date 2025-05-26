@@ -2,10 +2,6 @@
 
 namespace ReallySpecific\WP_Util;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class Theme extends Plugin {
 
 	protected $assets = [

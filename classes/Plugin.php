@@ -5,10 +5,6 @@ namespace ReallySpecific\WP_Util;
 use ReallySpecific\WP_Util\Settings;
 use ReallySpecific\WP_Util\Service_Host;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 class Plugin  {
 
 	use Service_Host;
