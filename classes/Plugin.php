@@ -85,13 +85,15 @@ class Plugin  {
 		return is_debug_mode();
 	}
 
-	public function update_check( $update, $plugin_data, $plugin_file ) {
-		if ( $plugin_file == $this->root_file ) {
-			$request      = wp_remote_get( $plugin_data['UpdateURI'] );
-			$request_body = wp_remote_retrieve_body( $request );
-			$update       = json_decode( $request_body, true );
+	public function update_check( $update, $item, $plugin_file ) {
+		if ( $plugin_file !== $this->root_file ) {
+			return $update;
 		}
+		
+		// TODO: implement update check
+	
 		return $update;
+
 	}
 
 	public function &settings( $namespace = 'default' ) {
