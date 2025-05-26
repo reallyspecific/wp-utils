@@ -8,7 +8,7 @@ use ReallySpecific\WP_Util\Updatable;
 
 class Plugin {
 
-	use Service_Host, Updatable;
+	use Service_Host;
 
 	protected $root_path = null;
 
@@ -28,6 +28,8 @@ class Plugin {
 
 	protected $data = [];
 
+	protected $updater = null;
+
 	function __construct( array $props = [] ) {
 		if ( ! empty( $props['file'] ) ) {
 			$this->root_file = $props['file'];
@@ -45,9 +47,18 @@ class Plugin {
 			$this->name = basename( $this->root_file );
 		}
 		$this->slug = $props['slug'] ?? sanitize_title( $this->name );
-		if ( ! empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
-			$this->install_updater();
+	}
+
+	protected function setup_updater() {
+		if ( empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
+			return;
 		}
+		$this->updater = new Updater( [
+			'object'     => $this,
+			'update_uri' => $this->get_wp_data( 'UpdateURI' ),
+			'slug'       => $this->slug,
+			'file'       => $this->root_file,
+		] );
 	}
 
 	protected function load_wp_data() {

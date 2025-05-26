@@ -38,10 +38,6 @@ class Theme extends Plugin {
 		return $this->data->get( $key ) ?? null;
 	}
 
-	public static function instance() {
-		return static::$self;
-	}
-
 	private function attach_assets( $assets, $type, $dest = 'public' ) {
 		foreach ( $assets as $handle => $resource ) {
 			list( $name, $dest ) = explode( '|', $handle ) + [ null, $dest ];

@@ -2,24 +2,32 @@
 
 namespace ReallySpecific\WP_Util;
 
-trait Updatable {
+class Updater {
 
 	protected $update_uri;
 	protected $update_token;
 	protected $update_host;
 	protected $type;
+	protected $basename;
 
-	public function install_updater( $update_token = null ) {
-		$this->update_uri = $this->get_wp_data( 'UpdateURI' );
+	protected $source_path;
+
+	public function __construct( $props = [] ) {
+
+		$this->update_uri = $props['update_uri'] ?? null;
+
+		if ( ! empty( $props['object'] ) ) {
+			$props['type'] ??= $props['object'] instanceof Theme ? 'theme' : 'plugin';
+		}
+
 		if ( ! empty( $this->update_uri ) ) {
 			$this->update_host  = parse_url( $this->update_uri, PHP_URL_HOST );
-			$this->update_token = apply_filters( "rs_util_updater_update_token_{$this->slug}", $update_token, $this );
+			$update_slug = $props['slug'] ?? sanitize_title( $this->update_host );
+			$this->update_token = apply_filters( "rs_util_updater_update_token_{$update_slug}", $props['update_token'] ?? null, $this );
 
-			if ( $this instanceof Theme ) {
-				$this->type = 'theme';
+			if ( $props['type'] === 'theme' ) {
 				add_filter( "update_themes_{$this->update_host}", [ $this, 'check_theme' ], 10, 4);
 			} else {
-				$this->type = 'plugin';
 				add_filter( "update_plugins_{$this->update_host}", [ $this, 'check_plugin' ], 10, 3);
 			}
 			$updater_actions = __DIR__ . '/updaters/' . sanitize_title( $this->update_host ) . '.php';
@@ -28,19 +36,27 @@ trait Updatable {
 			}
 		}
 
+		$this->source_path = dirname( $props['file'] );
+
+		if ( $props['type'] === 'theme' ) {
+			$this->basename = 'style.css';
+		} else {
+			$this->basename = basename( $props['file'] );
+		}
+
 	}
 
-	protected function get_package_version( $release ) {
+	protected static function get_package_version( $release ) {
 		return $release['Version'];
 	}
 
-	protected function parse_release( $package ) {
+	protected static function parse_release( $package ) {
 		return [
 			'theme'        => $package['name'],
 			'url'          => $package['url'],
 			'tested'       => $package['published_at'],
 			'requires_php' => $package['php'],
-			'version'      => $this->get_package_version( $package ),
+			'version'      => static::get_package_version( $package ),
 			'package'      => $package['browser_download_url'],
 		];
 	}
@@ -92,16 +108,16 @@ trait Updatable {
 	public function check_theme( $update, $item, $data, $context ) {
 
 		$request_uri      = apply_filters( 'rs_util_updater_theme_update_uri_' . $this->update_host, $this->update_uri, $this );
-		$package_basename = apply_filters( 'rs_util_updater_theme_package_basename_' . $this->update_host, basename( $this->root_file ), $this );
+		$package_basename = apply_filters( 'rs_util_updater_theme_package_basename_' . $this->update_host, $this->basename, $this );
 
 		$package = $this->get_package_info( $request_uri, $package_basename );
 		if ( empty( $package ) ) {
 			return $update;
 		}
 
-		$version = $this->get_package_version( $package );
+		$version = static::get_package_version( $package );
 		if ( version_compare( $version, $item['version'], '>' ) ) {
-			$update = $this->parse_release( $package );
+			$update = static::parse_release( $package );
 		}
 
 		return $update;
