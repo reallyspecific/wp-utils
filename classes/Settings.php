@@ -12,6 +12,8 @@ class Settings {
 
 	private $slug = null;
 
+	private $multisite = false;
+
 	/**
 	 * Constructor for the class.
 	 *
@@ -34,6 +36,7 @@ class Settings {
 		}
 		if ( is_multisite() && $this->settings['capability'] === 'manage_network_options' ) {
 			add_action( 'network_admin_menu', [ $this, 'install' ] );
+			$this->multisite = true;
 		} else {
 			add_action( 'admin_menu', [ $this, 'install' ] );
 		}
@@ -157,7 +160,11 @@ class Settings {
 
 	public function render() {
 
-		$current_values = get_option( $this->slug, [] );
+		if ( $this->multisite ) {
+			$current_values = get_site_option( $this->settings['option_name'], [] );
+		} else {
+			$current_values = get_option( $this->settings['option_name'], [] );
+		}
 		
 		?>
 		<div class="wrap">
@@ -321,12 +328,20 @@ class Settings {
 			}
 		}
 
-		update_option( $this->settings['option_name'], $new_setting_values, false );
+		if ( $this->multisite ) {
+			update_site_option( $this->settings['option_name'], $new_setting_values, false );
+		} else {
+			update_option( $this->settings['option_name'], $new_setting_values, false );
+		}
 
 	}
 
 	public function get( ?string $key = null ) {
-		$options = get_option( $this->settings['option_name'], [] ) ?: [];
+		if ( $this->multisite ) {
+			$options = get_site_option( $this->settings['option_name'], [] ) ?: [];
+		} else {
+			$options = get_option( $this->settings['option_name'], [] ) ?: [];
+		}
 		return $key ? ( $options[ $key ] ?? null ) : $options;
 	}
 
