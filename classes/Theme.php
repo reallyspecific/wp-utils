@@ -26,7 +26,16 @@ class Theme extends Plugin {
 	}
 
 	protected function load_wp_data() {
-		return wp_get_theme( $this->root_path . '/' . 'style.css' );
+		$theme = wp_get_theme( basename( $this->root_path ) );
+		$this->data = $theme;
+		return $theme;
+	}
+
+	public function get_wp_data( $key = null ) {
+		if ( empty( $key ) ) {
+			return $this->data;
+		}
+		return $this->data->get( $key ) ?? null;
 	}
 
 	public static function instance() {

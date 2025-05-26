@@ -51,7 +51,9 @@ class Plugin {
 	}
 
 	protected function load_wp_data() {
-		return get_plugin_data( $this->root_file );
+		$plugin = get_plugin_data( $this->root_file );
+		$this->data = $plugin;
+		return $plugin;
 	}
 
 	public function get_wp_data( $key = null ) {
