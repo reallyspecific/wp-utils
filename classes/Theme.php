@@ -103,7 +103,7 @@ class Theme extends Plugin {
 			if ( $stylesheet['dest'] !== 'editor' ) {
 				continue;
 			}
-			add_editor_style( $stylesheet['path'] );
+			add_editor_style( $stylesheet['url'] );
 		}
 
 	}
