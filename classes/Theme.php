@@ -25,6 +25,10 @@ class Theme extends Plugin {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
 	}
 
+	protected function load_wp_data() {
+		return wp_get_theme( $this->root_path . '/' . 'style.css' );
+	}
+
 	public static function instance() {
 		return static::$self;
 	}

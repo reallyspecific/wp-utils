@@ -4,10 +4,11 @@ namespace ReallySpecific\WP_Util;
 
 use ReallySpecific\WP_Util\Settings;
 use ReallySpecific\WP_Util\Service_Host;
+use ReallySpecific\WP_Util\Updatable;
 
-class Plugin  {
+class Plugin {
 
-	use Service_Host;
+	use Service_Host, Updatable;
 
 	protected $root_path = null;
 
@@ -21,18 +22,17 @@ class Plugin  {
 
 	protected $name = null;
 
+	protected $slug = null;
+
 	protected $settings = [];
 
+	protected $data = [];
+
 	function __construct( array $props = [] ) {
-		$props = wp_parse_args( $props, [
-			'update_plugin_filter' => 'update_plugins',
-		] );
 		if ( ! empty( $props['file'] ) ) {
 			$this->root_file = $props['file'];
 			$this->root_path = dirname( $props['file'] );
-			if ( ! empty( $props['update_host'] ) ) {
-				add_filter( "{$props['update_plugin_filter']}_{$props['update_host']}", [ $this, 'update_check' ], 10, 4  );
-			}
+			$this->data      = $this->load_wp_data();
 		}
 		if ( ! empty( $props['i18n_domain'] ) ) {
 			add_action( 'init', [ $this, 'install_textdomain' ] );
@@ -44,6 +44,21 @@ class Plugin  {
 		} else {
 			$this->name = basename( $this->root_file );
 		}
+		$this->slug = $props['slug'] ?? sanitize_title( $this->name );
+		if ( ! empty( $this->data['UpdateURI'] ) ) {
+			$this->install_updater();
+		}
+	}
+
+	protected function load_wp_data() {
+		return get_plugin_data( $this->root_file );
+	}
+
+	public function get_wp_data( $key = null ) {
+		if ( empty( $key ) ) {
+			return $this->data;
+		}
+		return $this->data[ $key ] ?? null;
 	}
 
 	public function install_textdomain() {
@@ -56,6 +71,10 @@ class Plugin  {
 			case 'text_domain':
 			case 'i18n_domain':
 				return $this->i18n_domain;
+			case 'slug':
+				return $this->slug;
+			case 'name':
+				return $this->name;
 			default:
 				return null;
 		}
