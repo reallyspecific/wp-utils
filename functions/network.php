@@ -2,11 +2,7 @@
 
 namespace ReallySpecific\WP_Util\Network;
 
-use \WP_Post;
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+use WP_Post;
 
 /**
  * Sends a network request to Cloudflare to get the public facing IP of this server

@@ -4,10 +4,6 @@ namespace ReallySpecific\WP_Util;
 
 use \WP_Post;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Get WordPress post by slug
  *

@@ -4,10 +4,6 @@ namespace ReallySpecific\WP_Util\Filesystem;
 
 use ReallySpecific\WP_Util;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Creates a directory, recursively building subfolders as needed
  *
