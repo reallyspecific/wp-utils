@@ -189,9 +189,10 @@ class Settings {
 					<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
 					<table class="form-table">
 						<?php foreach( $section['fields'] as $field ) : ?>
+							<?php $field_name = sanitize_title( $field['name'] ); ?>
 							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
 							<?php do_action( 'rs_util_settings_render_fieldrow_beforestart', $field, $section, $this ); ?>
-							<?php $this->render_field_row( $field, $current_values[ $field['name'] ] ?? null ); ?>
+							<?php $this->render_field_row( $field, $current_values[ $field_name ] ?? null ); ?>
 							<?php do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
 							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
 						<?php endforeach; ?>
@@ -249,6 +250,7 @@ class Settings {
 
 	public function render_field( array $field, $value = null, $echo = true ) {
 
+		$field_name = sanitize_title( $field['name'] );
 		$tag = match( $field['type'] ) {
 			'options'   => 'select',
 			'select'    => 'select',
@@ -257,7 +259,7 @@ class Settings {
 		};
 		$attrs = wp_parse_args( $field['attrs'] ?? [], [
 			'id'       => $field['id'],
-			'name'     => $field['name'],
+			'name'     => $field_name,
 			'required' => filter_var( $field['required'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
 			'class'    => $field['class'] ?? [],
 		] );
@@ -291,7 +293,7 @@ class Settings {
 				break;
 		}
 		$rendered = sprintf( $render_template ?? '', array_to_attr_string( $attrs ) );
-		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_' . $field['name'], $rendered, $field, $value, $this );
+		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_' . $field_name, $rendered, $field, $value, $this );
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field', $rendered, $field, $value, $this );
 		$rendered = apply_filters( 'rs_util_settings_render_field', $rendered, $field, $value, $this );
 		if ( ! empty( $rendered ) && $echo ) {
@@ -318,12 +320,13 @@ class Settings {
 
 		foreach( $this->sections as $section ) {
 			foreach( $section['fields'] as $field ) {
-				if ( isset( $_POST[ $field['name'] ] ) ) {
+				$field_name = sanitize_title( $field['name'] );
+				if ( isset( $_POST[ $field_name ] ) ) {
 					$sanitization_function = apply_filters( 'rs_util_settings_sanitize_field_value', $field['sanitization_callback'] ?? null, $field );
 					if ( empty( $sanitization_function ) ) {
 						$sanitization_function = 'sanitize_text_field';
 					}
-					$new_setting_values[ $field['name'] ] = call_user_func( $sanitization_function, $_POST[ $field['name'] ] );
+					$new_setting_values[ $field_name ] = call_user_func( $sanitization_function, $_POST[ $field_name ] );
 				}
 			}
 		}
