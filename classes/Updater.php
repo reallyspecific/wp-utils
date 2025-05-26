@@ -26,9 +26,11 @@ class Updater {
 			'Template'        => 'Template',
 			'TemplateVersion' => 'Template Version',
 			'Network'         => 'Network',
+			'TestedWP'        => 'Tested up to',
 			'RequiresWP'      => 'Requires at least',
 			'RequiresPHP'     => 'Requires PHP',
 			'UpdateURI'       => 'Update URI',
+			'DownloadZipURI'  => 'Download URL',
 		],
 		'plugin' => [
 			'Name'            => 'Plugin Name',
@@ -40,10 +42,12 @@ class Updater {
 			'TextDomain'      => 'Text Domain',
 			'DomainPath'      => 'Domain Path',
 			'Network'         => 'Network',
+			'TestedWP'        => 'Tested up to',
 			'RequiresWP'      => 'Requires at least',
 			'RequiresPHP'     => 'Requires PHP',
 			'UpdateURI'       => 'Update URI',
 			'RequiresPlugins' => 'Requires Plugins',
+			'DownloadZipURI'  => 'Download URL',
 			'_sitewide'       => 'Site Wide Only',
 	]
 	];
@@ -157,7 +161,7 @@ class Updater {
 			unlink( $metafile );
 		}
 
-		$package = apply_filters( 'rs_util_updater_package_info_' . $this->update_host, $package, $this );
+		$package = apply_filters( 'rs_util_updater_package_info_' . $this->update_host, $package, $response, $this );
 
 		return $package;
 	}
@@ -172,13 +176,21 @@ class Updater {
 			'basename'   => $package_basename,
 			'current'    => $item,
 		] );
-		if ( empty( $package ) ) {
+		if ( empty( $package ) || empty( $package['Version'] ) ) {
 			return $update;
 		}
 
-		$version = static::get_package_version( $package );
-		if ( version_compare( $version, $item['Version'], '>' ) ) {
-			$update = static::parse_release( $package );
+		if ( version_compare( $package['Version'], $item['Version'], '>' ) ) {
+			return [
+				'id'           => $item['UpdateURI'],
+				'theme'        => $this->slug,
+				'version'      => $package['Version'],
+				'url'          => $item['ThemeURI'],
+				'tested'       => $package['TestedWP'],
+				'requires_php' => $package['RequiresPHP'],
+				'autoupdate'   => true,
+				'package'      => $package['DownloadZipURL'],
+			];
 		}
 
 		return $update;
