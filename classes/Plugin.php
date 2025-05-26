@@ -51,6 +51,9 @@ class Plugin {
 	}
 
 	protected function load_wp_data() {
+		if ( function_exists( 'get_plugin_data' ) ) {
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
 		$plugin = get_plugin_data( $this->root_file );
 		$this->data = $plugin;
 		return $plugin;
