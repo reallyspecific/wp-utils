@@ -7,10 +7,6 @@
 
 namespace ReallySpecific\WP_Util;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 function setup() {
 	autoload_directory( __DIR__ . '/functions' );
 	spl_autoload_register( __NAMESPACE__ . '\\class_loader' );
@@ -53,4 +49,6 @@ function is_debug_mode() {
 	return  ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ( defined( 'RS_UTIL_DEBUG' ) && RS_UTIL_DEBUG );
 }
 
-setup();
+if ( defined( 'ABSPATH' ) ) {
+	setup();
+}
