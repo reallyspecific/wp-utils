@@ -14,10 +14,6 @@ class Updater {
 
 	protected $source_path;
 
-	private $package_uri = null;
-
-	private $tmp_download = null;
-
 	public static $default_headers = [
 		'theme' => [
 			'Name'            => 'Theme Name',
@@ -94,8 +90,8 @@ class Updater {
 		}
 
 
-		add_filter( 'upgrader_pre_download', [ $this, 'pre_download_authenticated_package' ], 10, 3 );
-		add_filter( 'upgrader_install_package_result', [ $this, 'cleanup_tmp_download' ], 10, 1 );
+		add_filter( 'upgrader_pre_download', [ static::class, 'pre_download_authenticated_package' ], 10, 3 );
+		add_filter( 'upgrader_install_package_result', [ static::class, 'cleanup_tmp_download' ], 10, 1 );
 
 	}
 
@@ -206,23 +202,25 @@ class Updater {
 				'requires_php' => $package['RequiresPHP'],
 				'autoupdate'   => true,
 				'package'      => $package['DownloadZipURI'],
+				'token'        => $this->update_token,
 			], $package, $item, $data, $context );
 
-			$this->package_uri = $update['package'];
+			set_transient( 'rs_util_updater_' . $update['package'], $update, HOUR_IN_SECONDS );
 		}
 
 		return $update;
 	}
 
-	public function pre_download_authenticated_package( $reply, $package_url, $upgrader ) {
+	public static function pre_download_authenticated_package( $reply, $package_url, $upgrader ) {
 
-		if ( empty( $this->update_token ) || empty( $this->package_uri ) || $package_url !== $this->package_uri ) {
+		$package = get_transient( 'rs_util_updater_' . $package_url );
+		if ( empty( $package ) || empty( $package['token'] ) ) {
 			return $reply;
 		}
 
 		$options = [ 'http' => [
 			'method'  => 'GET',
-			'header' => 'Authorization: Bearer ' . $this->update_token,
+			'header' => 'Authorization: Bearer ' . $package['token'],
 		] ];
 
 		$options = apply_filters( 'rs_util_updater_authenticated_package_options_' . $this->update_host, $options, $package, $this );
@@ -233,17 +231,16 @@ class Updater {
 			return $reply;
 		}
 
-		$this->tmp_download = wp_tempnam( $this->slug );
-		file_put_contents( $this->tmp_download, $download );
+		$tmp_file = wp_tempnam( $package['basename'] );
+		file_put_contents( $tmp_file, $download );
 
-		return $this->tmp_download;
+		delete_transient( 'rs_util_updater_' . $package_url );
+
+		return $tmp_file;
 	}
 
-	public function cleanup_tmp_download( $result ) {
-		if ( ! empty( $this->tmp_download ) ) {
-			unlink( $this->tmp_download );
-			$this->tmp_download = null;
-		}
+	public static function cleanup_tmp_download( $result ) {
+		
 		return $result;
 	}
 
