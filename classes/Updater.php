@@ -65,7 +65,7 @@ class Updater {
 		$this->type = $props['type'];
 		$this->slug = $props['slug'] ?? basename( $this->update_uri );
 
-		$this->source_path = dirname( $props['file'] );
+		$this->source_path = untrailingslashit( dirname( $props['file'] ) );
 
 		if ( $props['type'] === 'theme' ) {
 			$this->basename = 'style.css';
@@ -88,14 +88,7 @@ class Updater {
 				include_once $updater_actions;
 			}
 		}
-
-		if ( ! has_filter( 'upgrader_pre_download', [ static::class, 'pre_download_authenticated_package' ] ) ) {
-			add_filter( 'upgrader_pre_download', [ static::class, 'pre_download_authenticated_package' ], 10, 3 );
-		}
-		if ( ! has_filter( 'upgrader_install_package_result', [ static::class, 'cleanup_tmp_download' ] ) ) {
-			add_filter( 'upgrader_install_package_result', [ static::class, 'cleanup_tmp_download' ], 10, 1 );
-		}
-
+		add_filter( 'upgrader_install_package_result', [ $this, 'move_misnamed_package'], 10, 2 );
 	}
 
 	public function __get( $name ) {
@@ -214,39 +207,17 @@ class Updater {
 		return $update;
 	}
 
-	public static function pre_download_authenticated_package( $reply, $package_url, $upgrader ) {
 
-		$package = get_transient( 'rs_util_updater_' . $package_url );
-		if ( empty( $package ) || empty( $package['token'] ) ) {
-			return $reply;
+	public function move_misnamed_package( $result, $extra_options ) {
+		if ( $extra_options['name'] !== $this->slug ) {
+			return $result;
 		}
-
-		$options = [ 'http' => [
-			'method'  => 'GET',
-			'header' => 'Authorization: Bearer ' . $package['token'],
-		] ];
-
-		$host = parse_url( $package['id'], PHP_URL_HOST );
-
-		$options = apply_filters( "rs_util_updater_authenticated_package_options_{$host}", $options, $package_url, $package );
-
-		$context  = stream_context_create($options);
-		$download = file_get_contents( $package_url, false, $context );
-		if ( ! $download || is_wp_error( $download ) ) {
-			return $reply;
-		}
-
-		$tmp_file = wp_tempnam( $package['basename'] );
-		file_put_contents( $tmp_file, $download );
-
-		delete_transient( 'rs_util_updater_' . $package_url );
-
-		return $tmp_file;
-	}
-
-	public static function cleanup_tmp_download( $result ) {
-		
-		return $result;
-	}
-
+        $destination = untrailingslashit( $result['destination'] );
+        if ( $this->source_path !== $destination ) {
+            $result['destination'] = $this->source_path;
+            $result['remote_destination'] = $this->source_path;
+            rename( $destination, $this->source_path );
+        }
+        return $result;
+    }
 }

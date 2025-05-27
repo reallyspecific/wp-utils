@@ -6,7 +6,7 @@ add_filter( 'rs_util_updater_theme_update_uri_github.com', __NAMESPACE__ . '\\fi
 add_filter( 'rs_util_updater_plugin_update_uri_github.com', __NAMESPACE__ . '\\filter_update_uri', 10, 1 );
 add_filter( 'rs_util_updater_package_retrieval_uri_github.com', __NAMESPACE__ . '\\filter_package_retrieval_uri', 10, 2 );
 add_filter( 'rs_util_updater_package_body_github.com', __NAMESPACE__ . '\\filter_package_body', 10, 2 );
-add_filter( 'rs_util_updater_package_info_github.com', __NAMESPACE__ . '\\filter_package_add_download_url', 10, 2 );
+add_filter( 'rs_util_updater_package_info_github.com', __NAMESPACE__ . '\\filter_package_add_download_url', 10, 3 );
 
 function filter_update_uri( $uri ) {
 	$path = parse_url( $uri, PHP_URL_PATH );
@@ -48,10 +48,25 @@ function filter_package_body( $package, $plugin )
 	return $contents;
 }
 
-function filter_package_add_download_url( $package, $response ) {
-	if ( empty($response['tag_name']) || empty($response['zipball_url']) ) {
+function filter_package_add_download_url( $package, $response, $updater ) {
+	if ( empty( $response['tag_name'] ) || empty( $response['zipball_url'] ) ) {
 		return $package;
 	}
-	$package['DownloadZipURI'] = $response['zipball_url'];
+	if ( $updater->uri !== $package['UpdateURI'] ) {
+		return $package;
+	}
+	$params = [ 'redirection' => 0 ];
+	if ( $updater->token ) {
+		$params['headers'] = [ 'Authorization' => 'Bearer ' . $updater->token ];
+	}
+	$request = wp_remote_get( $response['zipball_url'], $params );
+	if ( is_wp_error( $request ) ) {
+		return $package;
+	}
+	$headers = wp_remote_retrieve_headers( $request );
+	if ( empty( $headers['Location'] ) ) {
+		return $package;
+	}
+	$package['DownloadZipURI'] = $headers['Location'];
 	return $package;
 }
