@@ -125,6 +125,42 @@ class Updater {
 
 	public function check_plugin( $update, $item, $plugin_file ) {
 
+		$this_plugin = $this->slug . '/' . $this->basename;
+		if ( $this_plugin !== $plugin_file ) {
+			return $update;
+		}
+
+		$request_uri      = apply_filters( 'rs_util_updater_plugin_update_uri_' . $this->update_host, $this->update_uri, $this );
+		$package_basename = apply_filters( 'rs_util_updater_plugin_package_basename_' . $this->update_host, $this->basename, $this );
+
+		$package = $this->get_package_info( [
+			'update_uri' => $request_uri,
+			'basename'   => $package_basename,
+			'current'    => $item,
+		] );
+		if ( empty( $package ) || empty( $package['Version'] ) || empty( $package['DownloadZipURI'] ) ) {
+			return $update;
+		}
+
+		if ( version_compare( $package['Version'], $item['Version'], '>' ) ) {
+			$update = apply_filters( 'rs_util_updater_plugin_update_' . $this->update_host, [
+				'id'             => $item['UpdateURI'],
+				'slug'           => $this->slug,
+				'plugin_file'    => $this_plugin,
+				'version'        => $package['Version'],
+				'url'            => $package['PluginURI'],
+				'tested'         => $package['TestedWP'],
+				'requires_php'   => $package['RequiresPHP'],
+                'requires'       => $package['RequiresPlugins'],
+				'autoupdate'     => true,
+				'package'        => $package['DownloadZipURI'],
+				'token'          => $this->update_token,
+                'plugin_data'    => $package
+			], $package, $item, $plugin_file );
+
+		}
+
+
 		return $update;
 	}
 
