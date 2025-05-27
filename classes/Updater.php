@@ -8,11 +8,17 @@ class Updater {
 	protected $update_token;
 	protected $update_host;
 	protected $type;
+
+	protected $slug;
 	protected $basename;
 
 	protected $source_path;
 
-	protected static $default_headers = [
+	private $package_uri = null;
+
+	private $tmp_download = null;
+
+	public static $default_headers = [
 		'theme' => [
 			'Name'            => 'Theme Name',
 			'ThemeURI'        => 'Theme URI',
@@ -61,6 +67,15 @@ class Updater {
 		}
 
 		$this->type = $props['type'];
+		$this->slug = $props['slug'] ?? basename( $this->update_uri );
+
+		$this->source_path = dirname( $props['file'] );
+
+		if ( $props['type'] === 'theme' ) {
+			$this->basename = 'style.css';
+		} else {
+			$this->basename = basename( $props['file'] );
+		}
 
 		if ( ! empty( $this->update_uri ) ) {
 			$this->update_host  = parse_url( $this->update_uri, PHP_URL_HOST );
@@ -78,13 +93,9 @@ class Updater {
 			}
 		}
 
-		$this->source_path = dirname( $props['file'] );
 
-		if ( $props['type'] === 'theme' ) {
-			$this->basename = 'style.css';
-		} else {
-			$this->basename = basename( $props['file'] );
-		}
+		add_filter( 'upgrader_pre_download', [ $this, 'pre_download_authenticated_package' ], 10, 3 );
+		add_filter( 'upgrader_install_package_result', [ $this, 'cleanup_tmp_download' ], 10, 1 );
 
 	}
 
@@ -168,6 +179,10 @@ class Updater {
 
 	public function check_theme( $update, $item, $data, $context ) {
 
+		if ( $this->slug !== $data ) {
+			return $update;
+		}
+
 		$request_uri      = apply_filters( 'rs_util_updater_theme_update_uri_' . $this->update_host, $this->update_uri, $this );
 		$package_basename = apply_filters( 'rs_util_updater_theme_package_basename_' . $this->update_host, $this->basename, $this );
 
@@ -176,24 +191,60 @@ class Updater {
 			'basename'   => $package_basename,
 			'current'    => $item,
 		] );
-		if ( empty( $package ) || empty( $package['Version'] ) ) {
+		if ( empty( $package ) || empty( $package['Version'] ) || empty( $package['DownloadZipURI'] ) ) {
 			return $update;
 		}
 
 		if ( version_compare( $package['Version'], $item['Version'], '>' ) ) {
-			return [
+			$update = apply_filters( 'rs_util_updater_theme_update_' . $this->update_host, [
 				'id'           => $item['UpdateURI'],
-				'theme'        => $this->slug,
+				'slug'         => $data,
+				'theme'        => $data,
 				'version'      => $package['Version'],
-				'url'          => $item['ThemeURI'],
+				'url'          => $package['ThemeURI'],
 				'tested'       => $package['TestedWP'],
 				'requires_php' => $package['RequiresPHP'],
 				'autoupdate'   => true,
-				'package'      => $package['DownloadZipURL'],
-			];
+				'package'      => $package['DownloadZipURI'],
+			], $package, $item, $data, $context );
+
+			$this->package_uri = $update['package'];
 		}
 
 		return $update;
+	}
+
+	public function pre_download_authenticated_package( $reply, $package_url, $upgrader ) {
+
+		if ( empty( $this->update_token ) || empty( $this->package_uri ) || $package_url !== $this->package_uri ) {
+			return $reply;
+		}
+
+		$options = [ 'http' => [
+			'method'  => 'GET',
+			'header' => 'Authorization: Bearer ' . $this->update_token,
+		] ];
+
+		$options = apply_filters( 'rs_util_updater_authenticated_package_options_' . $this->update_host, $options, $package, $this );
+
+		$context  = stream_context_create($options);
+		$download = file_get_contents( $package_url, false, $context );
+		if ( ! $download || is_wp_error( $download ) ) {
+			return $reply;
+		}
+
+		$this->tmp_download = wp_tempnam( $this->slug );
+		file_put_contents( $this->tmp_download, $download );
+
+		return $this->tmp_download;
+	}
+
+	public function cleanup_tmp_download( $result ) {
+		if ( ! empty( $this->tmp_download ) ) {
+			unlink( $this->tmp_download );
+			$this->tmp_download = null;
+		}
+		return $result;
 	}
 
 }
