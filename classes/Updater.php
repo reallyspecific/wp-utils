@@ -89,9 +89,12 @@ class Updater {
 			}
 		}
 
-
-		add_filter( 'upgrader_pre_download', [ static::class, 'pre_download_authenticated_package' ], 10, 3 );
-		add_filter( 'upgrader_install_package_result', [ static::class, 'cleanup_tmp_download' ], 10, 1 );
+		if ( ! has_filter( 'upgrader_pre_download', [ static::class, 'pre_download_authenticated_package' ] ) ) {
+			add_filter( 'upgrader_pre_download', [ static::class, 'pre_download_authenticated_package' ], 10, 3 );
+		}
+		if ( ! has_filter( 'upgrader_install_package_result', [ static::class, 'cleanup_tmp_download' ] ) ) {
+			add_filter( 'upgrader_install_package_result', [ static::class, 'cleanup_tmp_download' ], 10, 1 );
+		}
 
 	}
 
@@ -223,7 +226,9 @@ class Updater {
 			'header' => 'Authorization: Bearer ' . $package['token'],
 		] ];
 
-		$options = apply_filters( 'rs_util_updater_authenticated_package_options_' . $this->update_host, $options, $package, $this );
+		$host = parse_url( $package['id'], PHP_URL_HOST );
+
+		$options = apply_filters( "rs_util_updater_authenticated_package_options_{$host}", $options, $package_url, $package );
 
 		$context  = stream_context_create($options);
 		$download = file_get_contents( $package_url, false, $context );
