@@ -38,7 +38,10 @@ function class_loader( string $class_name )
 	}
 
 	$class_name = str_replace( __NAMESPACE__ . '\\', '', $class_name );
-	include_once __DIR__ . '/classes/' . str_replace( '\\', '/', $class_name ) . '.php';
+	$class_path = __DIR__ . '/classes/' . str_replace( '\\', '/', $class_name ) . '.php';
+	if ( file_exists( $class_path ) ) {
+		include_once $class_path;
+	}
 }
 
 function assets_dir() {
