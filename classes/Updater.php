@@ -209,15 +209,15 @@ class Updater {
 
 
 	public function move_misnamed_package( $result, $extra_options ) {
-		if ( $extra_options['name'] !== $this->slug ) {
+		if ( ( $extra_options['temp_backup']['slug'] ?? '' ) !== $this->slug ) {
 			return $result;
 		}
-        $destination = untrailingslashit( $result['destination'] );
-        if ( $this->source_path !== $destination ) {
-            $result['destination'] = $this->source_path;
-            $result['remote_destination'] = $this->source_path;
-            rename( $destination, $this->source_path );
-        }
-        return $result;
-    }
+		$destination = untrailingslashit( $result['destination'] );
+		if ( $this->source_path !== $destination ) {
+			$result['destination'] = $this->source_path;
+			$result['remote_destination'] = $this->source_path;
+			rename( $destination, $this->source_path );
+		}
+		return $result;
+	}
 }

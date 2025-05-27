@@ -17,7 +17,7 @@ function filter_package_retrieval_uri( $uri ) {
 	return "$uri/releases/latest";
 }
 
-function filter_package_body( $package, $plugin )
+function filter_package_body( $package, $updater )
 {
 	if ( is_string( $package ) ) {
 		$package = json_decode($package, \true);
@@ -27,12 +27,12 @@ function filter_package_body( $package, $plugin )
 		return $package;
 	}
 
-	$meta_file_uri = filter_update_uri( $plugin->uri ) . '/contents/' . $plugin->basename;
+	$meta_file_uri = filter_update_uri( $updater->uri ) . '/contents/' . $updater->basename;
 	$meta_file_uri = add_query_arg( 'ref', $package['tag_name'], $meta_file_uri );
 	$params = [];
-	if ( $plugin->token ) {
+	if ( $updater->token ) {
 		$params['headers'] = [
-			'Authorization' => 'Bearer ' . $plugin->token,
+			'Authorization' => 'Bearer ' . $updater->token,
 		];
 	}
 	$request = wp_remote_get( $meta_file_uri, $params );
