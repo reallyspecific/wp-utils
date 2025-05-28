@@ -8,6 +8,8 @@ abstract class Service {
 
 	protected $plugin = null;
 
+	protected const SETTINGS_NAMESPACE = null;
+
 	/**
 	 * Constructor for the class.
 	 *
@@ -16,6 +18,14 @@ abstract class Service {
 	public function __construct( Plugin $plugin ) {
 		$this->plugin = $plugin;
 	}
+
+	public static function maybe_register_settings() {
+		if ( static::SETTINGS_NAMESPACE ) {
+			add_action( 'admin_init', [ static::class, 'register_settings' ] );
+		}
+	}
+
+	public static function register_settings() {}
 
 	/**
 	 * Get the plugin object.
@@ -48,4 +58,12 @@ abstract class Service {
 				return null;
 		}
 	}
+
+	public function &settings()
+    {
+		if ( static::SETTINGS_NAMESPACE ) {
+			return $this->plugin->settings( static::SETTINGS_NAMESPACE );
+		}
+        return $this->plugin->settings();
+    }
 }
