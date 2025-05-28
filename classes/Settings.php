@@ -14,6 +14,8 @@ class Settings {
 
 	private $multisite = false;
 
+	private $cache = null;
+
 	/**
 	 * Constructor for the class.
 	 *
@@ -70,7 +72,7 @@ class Settings {
 				$this->settings['position'] ?? null
 			);
 		}
-		add_action( $this->hook, [ $this, 'save' ], -1 );
+		add_action( $this->hook, [ $this, 'save_form' ], -1 );
 	}
 
 	/**
@@ -302,7 +304,7 @@ class Settings {
 		return $rendered ?? '';
 	}
 
-	public function save() {
+	public function save_form() {
 
 		if ( ! current_user_can( $this->settings['capability'] ) ) {
 			return;
@@ -316,7 +318,7 @@ class Settings {
 			return;
 		}
 
-		$new_setting_values = [];
+		$this->cache = [];
 
 		foreach( $this->sections as $section ) {
 			foreach( $section['fields'] as $field ) {
@@ -326,43 +328,53 @@ class Settings {
 					if ( empty( $sanitization_function ) ) {
 						$sanitization_function = 'sanitize_text_field';
 					}
-					$new_setting_values[ $field_name ] = call_user_func( $sanitization_function, $_POST[ $field_name ] );
+					$this->update( $field_name, call_user_func( $sanitization_function, $_POST[ $field_name ] ), false );
 				}
 			}
 		}
 
-		if ( $this->multisite ) {
-			update_site_option( $this->settings['option_name'], $new_setting_values, false );
-		} else {
-			update_option( $this->settings['option_name'], $new_setting_values, false );
-		}
+		$this->save();
 
 	}
 
-	public function get( ?string $key = null ) {
-		if ( $this->multisite ) {
-			$options = get_site_option( $this->settings['option_name'], [] ) ?: [];
-		} else {
-			$options = get_option( $this->settings['option_name'], [] ) ?: [];
+	public function get( ?string $key = null, $nocache = false ) {
+		if ( is_null( $this->cache ) || $nocache ) {
+			$this->load();
 		}
-		return $key ? ( $options[ $key ] ?? null ) : $options;
+		return $key ? ( $this->cache[ $key ] ?? null ) : $this->cache;
 	}
 
 	public function __get( $key ) {
 		return $this->get( $key );
 	}
 
-	public function update( $key, $value ) {
+	private function load() {
+		if ( $this->multisite ) {
+			$this->cache = get_site_option( $this->settings['option_name'], [] ) ?: [];
+		} else {
+			$this->cache = get_option( $this->settings['option_name'], [] ) ?: [];
+		}
+	}
+
+	public function update( $key, $value, $save = true ) {
 
 		$settings = $this->get();
 		$settings[ $key ] = $value;
 
+		if ( ! $save ) {
+			return $settings;
+		}
+
+		$this->save();
+
+	}
+
+	public function save() {
 		if ( $this->multisite ) {
 			update_site_option( $this->settings['option_name'], $settings, false );
 		} else {
 			update_option( $this->settings['option_name'], $settings, false );
 		}
-
 	}
 
 	public function add_action( $hook, $callback, $priority = 10, $args = 0 ) {
