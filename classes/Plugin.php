@@ -51,8 +51,9 @@ class Plugin {
 		}
 		$this->slug = $props['slug'] ?? sanitize_title( $this->name );
 		if ( ! empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
-			$this->setup_updater();
+			add_action( 'init', [ $this, 'setup_updater' ] );
 		}
+		add_action( 'set_current_user', [ $this, 'install_settings' ], 10 );
 	}
 
 	protected static $self = null;
@@ -80,7 +81,7 @@ class Plugin {
 		return static::$self;
 	}
 
-	protected function setup_updater() {
+	public function setup_updater() {
 		$this->updater = new Updater( [
 			'object'     => $this,
 			'update_uri' => $this->get_wp_data( 'UpdateURI' ),
@@ -108,6 +109,8 @@ class Plugin {
 	public function install_textdomain() {
 		load_plugin_textdomain( $this->i18n_domain, false, $this->i18n_path );
 	}
+
+	public function install_settings() {}
 
 	public function __get( $name ) {
 		switch( $name ) {
