@@ -32,7 +32,7 @@ class Plugin {
 
 	function __construct( array $props = [] ) {
 		if ( empty( $props['file'] ) ) {
-			$props['file'] = $this->get_path();
+			$props['file'] = $this->get_root_file();
 		}
 
 		$this->root_file = $props['file'];
@@ -119,6 +119,10 @@ class Plugin {
 				return $this->slug;
 			case 'name':
 				return $this->name;
+			case 'file':
+				return $this->get_root_file();
+			case 'path':
+				return $this->get_root_path();
 			default:
 				return null;
 		}

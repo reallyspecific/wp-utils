@@ -229,9 +229,9 @@ class Settings {
 			<td>
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
-				<label for="<?php echo esc_attr( $field['id'] ); ?>" class="description">
+				<p class="description">
 					<?php echo $description; ?>
-				</label>
+				</p>
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -350,6 +350,19 @@ class Settings {
 
 	public function __get( $key ) {
 		return $this->get( $key );
+	}
+
+	public function update( $key, $value ) {
+
+		$settings = $this->get();
+		$settings[ $key ] = $value;
+
+		if ( $this->multisite ) {
+			update_site_option( $this->settings['option_name'], $settings, false );
+		} else {
+			update_option( $this->settings['option_name'], $settings, false );
+		}
+
 	}
 
 	public function add_action( $hook, $callback, $priority = 10, $args = 0 ) {
