@@ -21,6 +21,13 @@ class Theme extends Plugin {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
 	}
 
+	public function get_root_file() {
+		if ( is_null( $this->root_file ) ) {
+			return get_stylesheet_directory() . '/style.css';
+		}
+		return $this->root_file;
+	}
+
 	protected function load_wp_data() {
 		$theme = wp_get_theme( basename( $this->root_path ) );
 		$this->data = $theme;

@@ -31,11 +31,14 @@ class Plugin {
 	protected $updater = null;
 
 	function __construct( array $props = [] ) {
-		if ( ! empty( $props['file'] ) ) {
-			$this->root_file = $props['file'];
-			$this->root_path = dirname( $props['file'] );
-			$this->data      = $this->load_wp_data();
+		if ( empty( $props['file'] ) ) {
+			$props['file'] = $this->get_path();
 		}
+
+		$this->root_file = $props['file'];
+		$this->root_path = dirname( $props['file'] );
+		$this->data      = $this->load_wp_data();
+
 		if ( ! empty( $props['i18n_domain'] ) ) {
 			add_action( 'init', [ $this, 'install_textdomain' ] );
 			$this->i18n_domain = $props['i18n_domain'];
@@ -54,12 +57,24 @@ class Plugin {
 
 	protected static $self = null;
 
+	/**
+	 * Returns a statically stored instance of the plugin. Generally
+	 * it should only be used by classes that extend the Plugin class,
+	 * as otherwise all Plugins will end up referencing the same object.
+	 * @return Plugin
+	 */
 	public static function instance() {
 		if ( static::$self ) {
 			return static::$self;
 		}
 		return static::setup();
 	}
+
+	/**
+	 * Sets up the static instance of the plugin. Basically useless 
+	 * unless overloaded.
+	 * @return Plugin
+	 */
 	protected static function setup() {
 		static::$self = new static();
 		return static::$self;
@@ -114,6 +129,9 @@ class Plugin {
 	}
 
 	public function get_root_file() {
+		if ( is_null( $this->root_file ) ) {
+			return trailingslashit( \WP_PLUGIN_DIR ) . plugin_basename( __FILE__ );
+		}
 		return $this->root_file;
 	}
 
