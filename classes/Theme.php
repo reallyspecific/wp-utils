@@ -9,11 +9,7 @@ class Theme extends Plugin {
 		'scripts' => [],
 	];
 
-	protected static $self = null;
-
 	function __construct( array $props = [] ) {
-
-		static::$self = $this;
 
 		parent::__construct( [ 'update_plugin_filter' => 'update_themes', ...$props ] );
 	

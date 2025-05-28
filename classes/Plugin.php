@@ -52,6 +52,19 @@ class Plugin {
 		}
 	}
 
+	protected static $self = null;
+
+	public static function instance() {
+		if ( static::$self ) {
+			return static::$self;
+		}
+		return static::setup();
+	}
+	protected static function setup() {
+		static::$self = new static();
+		return static::$self;
+	}
+
 	protected function setup_updater() {
 		$this->updater = new Updater( [
 			'object'     => $this,
