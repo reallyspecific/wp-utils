@@ -82,7 +82,7 @@ class Settings {
 	 * @param array $props The properties of the section. Default is an empty array.
 	 * @return void
 	 */
-	public function add_section( string $id, array $props = [] ) {
+	public function add_section( string $id = 'default', array $props = [] ) {
 		if ( ! empty( $props['fields'] ) ) {
 			$fields = $props['fields'];
 			unset( $props['fields'] );

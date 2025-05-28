@@ -15,8 +15,8 @@ abstract class Service {
 	 *
 	 * @param Plugin $plugin The plugin object.
 	 */
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
+	public function __construct( Plugin &$plugin ) {
+		$this->plugin = &$plugin;
 	}
 
 	public static function maybe_register_settings() {
@@ -66,4 +66,8 @@ abstract class Service {
 		}
         return $this->plugin->settings();
     }
+
+	public function get_setting( $key ) {
+		return $this->settings()->get( $key );
+	}
 }
