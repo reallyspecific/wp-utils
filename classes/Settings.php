@@ -2,7 +2,7 @@
 
 namespace ReallySpecific\Utils;
 
-use function ReallySpecific\SamplePlugin\Utils\Text\array_to_attr_string;
+use function ReallySpecific\Utils\Text\array_to_attr_string;
 
 
 class Settings {
