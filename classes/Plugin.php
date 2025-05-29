@@ -30,6 +30,12 @@ abstract class Plugin {
 
 	protected $updater = null;
 
+	/**
+	 * Plugin constructor.
+	 *
+	 * @param array $props
+	 * @throws \Exception
+	 */
 	function __construct( array $props = [] ) {
 
 		if ( empty( $props['name'] ) ) {
@@ -38,7 +44,6 @@ abstract class Plugin {
 
 		$this->root_file = $props['file'] ?? $this->get_root_file();
 		$this->root_path = dirname( $this->root_file );
-		$this->data      = $this->load_wp_data();
 
 		$this->i18n_domain = $props['i18n_domain'] ?? null;
 		$this->i18n_path   = $props['i18n_path'] ?? $this->root_path . '/languages';
@@ -46,8 +51,9 @@ abstract class Plugin {
 		$this->name = $props['name'];
 		$this->slug = $props['slug'] ?? sanitize_title( basename( $this->root_path ) );
 
+		add_action( 'init', [ $this, 'load_wp_data' ] );
 		add_action( 'init', [ $this, 'setup_updater' ] );
-		add_action( 'init', [ $this, 'install_settings' ], 10 );
+		add_action( 'init', [ $this, 'install_settings' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
 	}
 
@@ -98,6 +104,9 @@ abstract class Plugin {
 	}
 
 	public function get_wp_data( $key = null ) {
+		if ( empty( $this->data ) && did_action( 'init' ) ) {
+			$this->load_wp_data();
+		}
 		if ( empty( $key ) ) {
 			return $this->data;
 		}
@@ -105,11 +114,8 @@ abstract class Plugin {
 	}
 
 	public function install_textdomain() {
-		if ( empty( $this->i18n_domain ) ) {
-			$this->i18n_domain = $this->get_wp_data('TextDomain');
-		}
-		if ( ! empty( $this->i18n_domain ) ) {
-			load_plugin_textdomain( $this->i18n_domain, false, $this->i18n_path );
+		if ( ! empty( $this->domain ) ) {
+			load_plugin_textdomain( $this->domain, false, $this->i18n_path );
 		}
 	}
 
@@ -120,22 +126,29 @@ abstract class Plugin {
 			case 'domain':
 			case 'text_domain':
 			case 'i18n_domain':
-				return $this->i18n_domain;
+				return $this->get_domain();
 			case 'slug':
 				return $this->slug;
-			case 'name':
-				return $this->name;
 			case 'file':
 				return $this->get_root_file();
 			case 'path':
 				return $this->get_root_path();
+			case 'update_uri':
+				return $this->get_wp_data( 'UpdateURI' );
 			default:
 				return null;
 		}
 	}
 
-	public function get_name() {
+	public function get_domain() {
+		if ( empty( $this->i18n_domain ) && did_action('init') ) {
+			$this->i18n_domain = $this->get_wp_data('TextDomain');
+		}
+		return $this->i18n_domain ?? null;
+	}
 
+	public function get_name() {
+		return $this->name;
 	}
 
 	public function get_root_path() {

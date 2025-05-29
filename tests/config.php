@@ -1,0 +1,66 @@
+<?php
+
+namespace ReallySpecific\Utils\Tests;
+
+use function ReallySpecific\Utils\Filesystem\make_zip_from_folder;
+use Symfony\Component\Finder\Finder;
+
+function config( $key ) {
+	switch( $key ) {
+		case 'root_dir':
+			return dirname( __DIR__ );
+		case 'tests_dir':
+			return __DIR__;
+		case 'cache_dir':
+			return __DIR__ . '/.cache';
+		case 'plugins_dir':
+			return __DIR__ . '/bootstrap/plugins';
+		case 'sample_plugin_dir':
+			return config( 'plugins_dir' ) . '/sample-plugin';
+		default:
+			return null;
+	}
+}
+
+function build_sample_plugin( $hash_cache_file = null ) {
+
+	if ( is_null( $hash_cache_file ) ) {
+		$hash_cache_file = config( 'cache_dir' ) . '/util-source-hash.php';
+	}
+
+	if ( ! file_exists( $hash_cache_file ) ) {
+		echo 'Scoper hash not found, please run `composer scope-sample-plugin` first.';
+		exit;
+	}
+
+	$old_hash = include $hash_cache_file;
+
+	$current_hash = make_hash_from_finders( [
+		Finder::create()->files()->in( config( 'root_dir' ) . '/assets' ),
+		Finder::create()->files()->in( config( 'root_dir' ) )->exclude(['tests','vendor','vendor-bin'])->name( [ '*.php' ] ),
+	] );
+
+	if ( $old_hash !== $current_hash ) {
+		echo 'Sample plugin does not have up-to-date files, please run `composer scope-sample-plugin`';
+		exit;
+	}
+
+	if ( ! make_zip_from_folder( config( 'sample_plugin_dir' ), config( 'cache_dir' ) . '/sample-plugin.zip' ) ) {
+		echo 'Failed to build sample plugin zip';
+		exit;
+	}
+
+	file_put_contents( $hash_cache_file, $current_hash );
+
+}
+
+function make_hash_from_finders( array $finders ) {
+	$hashed = '';
+	foreach( $finders as $finder ) {
+		foreach( $finder as $file ) {
+			// hash file contents
+			$hashed .= md5_file( $file );
+		}
+	}
+	return $hashed;
+}

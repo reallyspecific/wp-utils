@@ -1,6 +1,7 @@
 {
     "name": "reallyspecific/wp-utils",
     "type": "library",
+    "version": "1.0.0-dev",
     "authors": [
         {
             "name": "Really Specific",
@@ -15,8 +16,9 @@
         "sniccowp/php-scoper-wordpress-excludes": "^6.8"
     },
     "scripts": {
-        "scope-sample-plugin": "php-scoper add-prefix -f --config=tests/bootstrap/scope-sample.inc.php",
+        "scope-sample-plugin": "php-scoper add-prefix -f --config=tests/inc/sample-plugin.scoper.inc.php",
         "test": "./vendor/bin/phpunit",
+        "retest": "composer scope-sample-plugin && ./vendor/bin/phpunit",
         "no-dev": "composer update --prefer-dist --no-dev"
     },
     "config": {

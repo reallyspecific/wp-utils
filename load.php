@@ -40,7 +40,7 @@ function class_loader( string $class_name, string $class_folder = null, string $
 	}
 
 	if ( is_null( $class_folder ) ) {
-		$class_folder = __DIR__;
+		$class_folder = __DIR__ . '/classes/';
 	}
 
 	if ( is_null( $root_namespace ) ) {

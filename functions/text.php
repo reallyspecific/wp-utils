@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\Utils;
+namespace ReallySpecific\Utils\Text;
 function array_to_attr_string( $attributes = [] ) {
 
 	$attr_string = '';

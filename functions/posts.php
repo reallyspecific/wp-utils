@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\Utils;
+namespace ReallySpecific\Utils\Posts;
 
 use \WP_Post;
 

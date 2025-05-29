@@ -13,15 +13,12 @@ use WP_Post;
  * @throws \Exception
  */
 function get_server_remote_ip() {
-	$response = wp_remote_get( 'https://www.cloudflare.com/cdn-cgi/trace', [ 'sslverify' => false ] );
-	if ( is_wp_error( $response ) ) {
+	
+	$response = file_get_contents( 'https://www.cloudflare.com/cdn-cgi/trace' );
+	if ( false === $response ) {
 		return false;
 	}
-	$body = wp_remote_retrieve_body( $response );
-	if ( empty( $body ) ) {
-		return false;
-	}
-	$parts = explode( "\n", $body );
+	$parts = explode( "\n", $response );
 	if ( empty( $parts ) ) {
 		return false;
 	}

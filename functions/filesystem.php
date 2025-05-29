@@ -26,7 +26,7 @@ function recursive_mk_dir( $path ): bool {
 	return true;
 }
 
-function recursive_rm_dir( $src ) {
+function recursive_rm_dir( string $src ) : void {
 	$dir = opendir( $src );
 	while ( false !== ( $file = readdir( $dir ) ) ) {
 		if ( ( $file != '.' ) && ( $file != '..' ) ) {
@@ -44,13 +44,12 @@ function recursive_rm_dir( $src ) {
 }
 
 /**
- * Takes a relative URL and returns an absolute URL based
- * on the base URL passed to the constructor.
+ * Takes multiple URLs or file paths and combines them into a single string.
  *
- * @param string $path The relative URL.
- * @return string The absolute URL.
+ * @param string ...$paths paths to join, only the first can be absolute.
+ * @return string The combined paths
  */
-function join_path( ...$paths ) {
+function join_path( ...$paths ) : string {
 	if ( empty( $paths ) ) {
 		return '';
 	}
@@ -61,8 +60,15 @@ function join_path( ...$paths ) {
 	return canonical_path( $combined );
 }
 
-function canonical_path( $path, $separator = '/' )
-{
+/**
+ * Reduces a path to its canonical form by removing
+ * relative segments and normalizing the path.
+ *
+ * @param string $path
+ * @param string $separator
+ * @return string
+ */
+function canonical_path( string $path, string $separator = '/' ) : string {
 	$canonical = [];
 	$path = explode( $separator, $path );
 
@@ -71,7 +77,9 @@ function canonical_path( $path, $separator = '/' )
 			case '.':
 				break;
 			case '..':
-				array_pop( $canonical );
+				if ( count( $canonical ) ) {
+					array_pop( $canonical );
+				}
 				break;
 			default:
 				$canonical[] = $segment;
@@ -79,10 +87,10 @@ function canonical_path( $path, $separator = '/' )
 		}
 	}
 
-	return join( $separator, $canonical );
+	return rtrim( join( $separator, $canonical ), $separator );
 }
 
-function get_extension_from_mime_type( $mime_type ) {
+function get_extension_from_mime_type( string $mime_type ) : ?string {
 
 	// wordpress's mime list is too limited, we gonna use our own
 
@@ -103,18 +111,7 @@ function get_extension_from_mime_type( $mime_type ) {
 	return $mime_list[ $mime_type ] ?? null;
 }
 
-function make_hash_from_finders( array $finders ) {
-	$hashed = '';
-	foreach( $finders as $finder ) {
-		foreach( $finder as $file ) {
-			// hash file contents
-			$hashed .= md5_file( $file );
-		}
-	}
-	return $hashed;
-}
-
-function make_zip_from_folder( $source_folder, $destination_zip_file ) {
+function make_zip_from_folder( string $source_folder, string $destination_zip_file ) : bool {
 
 	$zip_archive = new ZipArchive();
 
@@ -126,7 +123,7 @@ function make_zip_from_folder( $source_folder, $destination_zip_file ) {
 		return debug( false, 'Failed to create zip archive' );
 	}
 	
-	$zip_archive->addGlob( rtrim( $source_folder, '/' ) . "/*");
+	recursive_add_dir_to_zip( $zip_archive, $source_folder );
 	if ( $zip_archive->status != ZIPARCHIVE::ER_OK ) {
 		return debug( false, 'Failed to write files to zip' );
 	}
@@ -135,4 +132,22 @@ function make_zip_from_folder( $source_folder, $destination_zip_file ) {
 
 	return true;
 
+}
+
+function recursive_add_dir_to_zip( &$zip_archive, string $source_folder, string $rel = '/' ): void {
+	$dir = opendir( $source_folder );
+	if ( ! $dir ) {
+		return;
+	}
+	while ( false !== ( $file = readdir( $dir ) ) ) {
+		if ( ( $file !== '.' ) && ( $file !== '..' ) ) {
+			$full = $source_folder . '/' . $file;
+			if ( is_dir( $full ) ) {
+				recursive_add_dir_to_zip( $zip_archive, $full, $rel . $file . '/' );
+			} else {
+				$zip_archive->addFile( $full, $rel . $file );
+			}
+		}
+	}
+	closedir( $dir );
 }
