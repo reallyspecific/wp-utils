@@ -13,9 +13,6 @@ trait Service_Host {
 		add_action( $load_action, function() use ( $service_name, $callback, $callback_args ) {
 			$this->load_service( $service_name, $callback, $callback_args );
 		}, $load_priority );
-		if ( is_string( $callback ) && class_exists( $callback ) && is_subclass_of( $callback, Service::class ) ) {
-			static::maybe_register_settings();
-		}
 	}
 
 	public function load_service( $name, $callback, $callback_args = [] ) {
