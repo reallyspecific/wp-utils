@@ -1,12 +1,12 @@
 <?php
 
-namespace ReallySpecific\WP_Util;
+namespace ReallySpecific\Utils;
 
-use ReallySpecific\WP_Util\Settings;
-use ReallySpecific\WP_Util\Service_Host;
-use ReallySpecific\WP_Util\Updatable;
+use ReallySpecific\Utils\Settings;
+use ReallySpecific\Utils\Service_Host;
+use ReallySpecific\Utils\Updatable;
 
-class Plugin {
+abstract class Plugin {
 
 	use Service_Host;
 
@@ -31,29 +31,24 @@ class Plugin {
 	protected $updater = null;
 
 	function __construct( array $props = [] ) {
-		if ( empty( $props['file'] ) ) {
-			$props['file'] = $this->get_root_file();
+
+		if ( empty( $props['name'] ) ) {
+			throw new \Exception( 'Plugin was constructed without a `name` property.' );
 		}
 
-		$this->root_file = $props['file'];
-		$this->root_path = dirname( $props['file'] );
+		$this->root_file = $props['file'] ?? $this->get_root_file();
+		$this->root_path = dirname( $this->root_file );
 		$this->data      = $this->load_wp_data();
 
-		if ( ! empty( $props['i18n_domain'] ) ) {
-			add_action( 'init', [ $this, 'install_textdomain' ] );
-			$this->i18n_domain = $props['i18n_domain'];
-			$this->i18n_path   = $props['i18n_path'] ?? $this->root_path . '/languages';
-		}
-		if ( ! empty( $props['name'] ) ) {
-			$this->name = $props['name'];
-		} else {
-			$this->name = basename( $this->root_file );
-		}
-		$this->slug = $props['slug'] ?? sanitize_title( $this->name );
-		if ( ! empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
-			add_action( 'init', [ $this, 'setup_updater' ] );
-		}
-		add_action( 'set_current_user', [ $this, 'install_settings' ], 10 );
+		$this->i18n_domain = $props['i18n_domain'] ?? null;
+		$this->i18n_path   = $props['i18n_path'] ?? $this->root_path . '/languages';
+
+		$this->name = $props['name'];
+		$this->slug = $props['slug'] ?? sanitize_title( basename( $this->root_path ) );
+
+		add_action( 'init', [ $this, 'setup_updater' ] );
+		add_action( 'init', [ $this, 'install_settings' ], 10 );
+		add_action( 'init', [ $this, 'install_textdomain' ] );
 	}
 
 	protected static $self = null;
@@ -82,6 +77,9 @@ class Plugin {
 	}
 
 	public function setup_updater() {
+		if ( empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
+			return;
+		}
 		$this->updater = new Updater( [
 			'object'     => $this,
 			'update_uri' => $this->get_wp_data( 'UpdateURI' ),
@@ -107,13 +105,18 @@ class Plugin {
 	}
 
 	public function install_textdomain() {
-		load_plugin_textdomain( $this->i18n_domain, false, $this->i18n_path );
+		if ( empty( $this->i18n_domain ) ) {
+			$this->i18n_domain = $this->get_wp_data('TextDomain');
+		}
+		if ( ! empty( $this->i18n_domain ) ) {
+			load_plugin_textdomain( $this->i18n_domain, false, $this->i18n_path );
+		}
 	}
 
-	public function install_settings() {}
-
-	public function __get( $name ) {
-		switch( $name ) {
+	public function __get( $key ) {
+		switch( $key ) {
+			case 'name':
+				return $this->get_name();
 			case 'domain':
 			case 'text_domain':
 			case 'i18n_domain':
@@ -129,6 +132,10 @@ class Plugin {
 			default:
 				return null;
 		}
+	}
+
+	public function get_name() {
+
 	}
 
 	public function get_root_path() {

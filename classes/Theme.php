@@ -1,8 +1,8 @@
 <?php
 
-namespace ReallySpecific\WP_Util;
+namespace ReallySpecific\Utils;
 
-class Theme extends Plugin {
+abstract class Theme extends Plugin {
 
 	protected $assets = [
 		'stylesheets' => [],

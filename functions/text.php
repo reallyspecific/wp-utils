@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\WP_Util;
+namespace ReallySpecific\Utils;
 function array_to_attr_string( $attributes = [] ) {
 
 	$attr_string = '';

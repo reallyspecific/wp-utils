@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\WP_Util\Network;
+namespace ReallySpecific\Utils\Network;
 
 use WP_Post;
 

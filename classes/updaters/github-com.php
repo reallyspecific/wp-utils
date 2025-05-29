@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\WP_Util\Updaters\GitHub;
+namespace ReallySpecific\Utils\Updaters\GitHub;
 
 add_filter( 'rs_util_updater_theme_update_uri_github.com', __NAMESPACE__ . '\\filter_update_uri', 10, 1 );
 add_filter( 'rs_util_updater_plugin_update_uri_github.com', __NAMESPACE__ . '\\filter_update_uri', 10, 1 );

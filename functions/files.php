@@ -1,8 +1,10 @@
 <?php
 
-namespace ReallySpecific\WP_Util\Filesystem;
+namespace ReallySpecific\Utils\Filesystem;
 
-use ReallySpecific\WP_Util;
+use function ReallySpecific\Utils\debug;
+use function ReallySpecific\Utils\assets_dir as utils_assets_dir;
+use ZipArchive;
 
 /**
  * Creates a directory, recursively building subfolders as needed
@@ -86,7 +88,7 @@ function get_extension_from_mime_type( $mime_type ) {
 
 	$mime_list = wp_cache_get( 'mime_types', 'rs_wp_util' );
 	if ( ! $mime_list ) {
-		$csv_list = fopen( WP_Util\assets_dir() . '/mime-types.csv', 'r' );
+		$csv_list = fopen( utils_assets_dir() . '/mime-types.csv', 'r' );
 		$mime_list = [];
 		while ( ( $line = fgetcsv( $csv_list ) ) !== false ) {
 			if ( isset( $mime_list[ $line[1] ] ) ) {
@@ -99,4 +101,38 @@ function get_extension_from_mime_type( $mime_type ) {
 	}
 
 	return $mime_list[ $mime_type ] ?? null;
+}
+
+function make_hash_from_finders( array $finders ) {
+	$hashed = '';
+	foreach( $finders as $finder ) {
+		foreach( $finder as $file ) {
+			// hash file contents
+			$hashed .= md5_file( $file );
+		}
+	}
+	return $hashed;
+}
+
+function make_zip_from_folder( $source_folder, $destination_zip_file ) {
+
+	$zip_archive = new ZipArchive();
+
+	if ( file_exists( $destination_zip_file ) ) {
+		unlink( $destination_zip_file );
+	}
+
+	if ( $zip_archive->open( $destination_zip_file, ( ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) !== true ) {
+		return debug( false, 'Failed to create zip archive' );
+	}
+	
+	$zip_archive->addGlob( rtrim( $source_folder, '/' ) . "/*");
+	if ( $zip_archive->status != ZIPARCHIVE::ER_OK ) {
+		return debug( false, 'Failed to write files to zip' );
+	}
+
+	$zip_archive->close();
+
+	return true;
+
 }

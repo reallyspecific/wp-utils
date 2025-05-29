@@ -7,10 +7,21 @@
             "email": "reallyspecific@pm.me"
         }
     ],
-    "require": {},
-    "autoload": {
-        "files": [
-            "load.php"
-        ]
+    "require-dev": {
+        "10up/wp_mock": "^1.1",
+        "humbug/php-scoper": "^0.18",
+        "bamarni/composer-bin-plugin": "^1.8",
+        "php-stubs/wp-cli-stubs": "^2.11",
+        "sniccowp/php-scoper-wordpress-excludes": "^6.8"
+    },
+    "scripts": {
+        "scope-sample-plugin": "php-scoper add-prefix -f --config=tests/bootstrap/scope-sample.inc.php",
+        "test": "./vendor/bin/phpunit",
+        "no-dev": "composer update --prefer-dist --no-dev"
+    },
+    "config": {
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        }
     }
 }

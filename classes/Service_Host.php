@@ -1,6 +1,6 @@
 <?php
 
-namespace ReallySpecific\WP_Util;
+namespace ReallySpecific\Utils;
 
 trait Service_Host {
 
