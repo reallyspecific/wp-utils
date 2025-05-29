@@ -51,7 +51,7 @@ abstract class Plugin {
 		$this->name = $props['name'];
 		$this->slug = $props['slug'] ?? sanitize_title( basename( $this->root_path ) );
 
-		add_action( 'init', [ $this, 'load_wp_data' ] );
+		add_action( 'init', [ $this, 'get_wp_data' ] );
 		add_action( 'init', [ $this, 'setup_updater' ] );
 		add_action( 'init', [ $this, 'install_settings' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
