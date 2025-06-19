@@ -2,20 +2,12 @@
 	margin-bottom: 1rem;
 }
 
-.rs-util-settings-field-value--options {
+.rs-util-settings-field--multicheck {
 	display: flex;
 	flex-direction: column;
 	justify-content: start;
-	align-items: stretch;
-	gap: 1rem;
-
-	.rs-util-settings-field {
-		display: flex;
-		flex-direction: column;
-		justify-content: start;
-		align-items: start;
-		gap: 0.5rem;
-	}
+	align-items: start;
+	gap: 0.5rem;
 
 	.rs-util-settings-field__option {
 		margin: 0;
@@ -23,7 +15,24 @@
 		flex-wrap: wrap;
 		align-items: baseline;
 		gap: 0.5rem;
+
+		input {
+			display: block;
+		}
+		label {
+			display: block;
+		}
 	}
+}
+
+.rs-util-settings-field-value--options {
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+	align-items: stretch;
+	gap: 1rem;
+
+
 
 	.rs-util-settings-field-row__description {
 		order: -1;
