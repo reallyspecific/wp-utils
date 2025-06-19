@@ -159,7 +159,15 @@ abstract class Plugin {
 
 	public function get_root_file() {
 		if ( is_null( $this->root_file ) ) {
-			return trailingslashit( \WP_PLUGIN_DIR ) . plugin_basename( __FILE__ );
+			$plugin_basename = plugin_basename( __FILE__ );
+			$plugin_path = explode( '/', __DIR__ );
+			while( ! empty( $plugin_path ) && ! file_exists( implode( '/', $plugin_path ) . '/' . $plugin_basename ) ) {
+				array_pop( $plugin_path );
+			}
+			if ( empty( $plugin_path ) ) {
+				return null;
+			}
+			return trailingslashit( implode( '/', $plugin_path ) ) . $plugin_basename;
 		}
 		return $this->root_file;
 	}
