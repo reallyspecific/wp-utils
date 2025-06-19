@@ -310,6 +310,9 @@ class Settings {
 					$attrs['value'] = $value ?? $field['default'] ?? null;
 				}
 				$render_template = '<input %1$s>';
+				if ( isset( $field['value_label'] ) ) {
+					$render_template .= '<label for="' . $attrs['id'] . '">' . $field['value'] . '</label>';
+				}
 				break;
 			case 'textarea':
 				$attrs['rows'] = $field['rows'] ?? null;
