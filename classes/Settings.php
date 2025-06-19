@@ -179,11 +179,7 @@ class Settings {
 
 		wp_enqueue_style( 'rs-util-admin-fields' );
 
-		if ( $this->multisite ) {
-			$current_values = get_site_option( $this->settings['option_name'], [] );
-		} else {
-			$current_values = get_option( $this->settings['option_name'], [] );
-		}
+		$current_values = $this->get();
 		
 		?>
 		<div class="wrap">
@@ -311,7 +307,7 @@ class Settings {
 				}
 				$render_template = '<input %1$s>';
 				if ( isset( $field['value_label'] ) ) {
-					$render_template .= '<label for="' . $attrs['id'] . '">' . $field['value'] . '</label>';
+					$render_template .= '<label for="' . $attrs['id'] . '">' . $field['value_label'] . '</label>';
 				}
 				break;
 			case 'textarea':
@@ -459,7 +455,15 @@ class Settings {
 					if ( empty( $sanitization_function ) ) {
 						$sanitization_function = 'sanitize_text_field';
 					}
-					$this->update( $field_name, call_user_func( $sanitization_function, $_POST[ $field_name ] ), false );
+					if ( is_array( $_POST[ $field_name ] ) ) {
+						$new_value = [];
+						foreach( $_POST[ $field_name ] as $value ) {
+							$new_value[] = call_user_func( $sanitization_function, $value, $field );
+						}
+					} else {
+						$new_value = call_user_func( $sanitization_function, $_POST[ $field_name ], $field );
+					}
+					$this->update( $field_name, $new_value, false );
 				}
 			}
 		}
