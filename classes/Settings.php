@@ -151,7 +151,7 @@ class Settings {
 	 * @throws \Exception If the field does not have a name.
 	 * @return void
 	 */
-	public function add_field( array $props, string $section_id = null ) {
+	public function add_field( array $props, ?string $section_id = null ) {
 		if ( $section_id === null ) {
 			$section_id = 'default';
 			if ( ! isset( $this->sections['default'] ) ) {
@@ -263,9 +263,22 @@ class Settings {
 
 	}
 
+	private function parse_field_name( string $name, bool $multiple = false ) {
+
+		$name_parts = explode( '.', $name );
+		$new_name   = sanitize_title( array_unshift( $name_parts ) );
+		while ( count( $name_parts ) > 1 ) {
+			$new_name .= sanitize_title( array_shift( $name_parts ) );
+		}
+		if ( ! empty( $multiple ) ) {
+			$new_name .= '[]';
+		}
+		return $new_name;
+	}
+
 	public function render_field( array $field, $value = null, $echo = true ) {
 
-		$field_name = sanitize_title( $field['name'] );
+		$field_name = $field['name'];
 		$tag = match( $field['type'] ) {
 			'options'   => 'multicheck',
 			'select'    => 'select',
@@ -274,24 +287,24 @@ class Settings {
 		};
 		$attrs = wp_parse_args( $field['attrs'] ?? [], [
 			'id'       => $field['id'],
-			'name'     => $field_name,
+			'name'     => null,
 			'required' => filter_var( $field['required'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
 			'class'    => $field['class'] ?? [],
 			'multiple' => filter_var( $field['multiple'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'multiple' : null,
 		] );
+		$attrs['name'] = $attrs['name'] ?? $this->parse_field_name( $field_name, ! empty( $attrs['multiple'] ) );
+
 		$attrs['class']       = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
 		$attrs['class'][]     = match( $field['type'] ) {
 			'input'    => 'regular-text',
 			'textarea' => 'large-text',
 			default    => '',
 		};
+
 		$attrs['class'][] = 'rs-util-settings-field';
 		$attrs['class'][] = 'rs-util-settings-field--' . $field['type'];
 		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
-		$attrs['name']  = $field_name;
-		if ( ! empty( $attrs['multiple'] ) ) {
-			$attrs['name'] .= '[]';
-		}
+		
 		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
 		switch( $tag ) {
 			case 'input':
@@ -431,6 +444,17 @@ class Settings {
 		return $buffer;
 	}
 
+	private function get_request_value( string $key, array $request ) {
+		$keys = explode( '.', $key );
+		foreach( $keys as $key ) {
+			if ( ! isset( $request[ $key ] ) ) {
+				return null;
+			}
+			$request = $request[ $key ];
+		}
+		return $request;
+	}
+
 	public function save_form() {
 
 		if ( ! current_user_can( $this->settings['capability'] ) ) {
@@ -449,22 +473,24 @@ class Settings {
 
 		foreach( $this->sections as $section ) {
 			foreach( $section['fields'] as $field ) {
-				$field_name = sanitize_title( $field['name'] );
-				if ( isset( $_POST[ $field_name ] ) ) {
-					$sanitization_function = apply_filters( 'rs_util_settings_sanitize_field_value', $field['sanitization_callback'] ?? null, $field );
-					if ( empty( $sanitization_function ) ) {
-						$sanitization_function = 'sanitize_text_field';
-					}
-					if ( is_array( $_POST[ $field_name ] ) ) {
-						$new_value = [];
-						foreach( $_POST[ $field_name ] as $value ) {
-							$new_value[] = call_user_func( $sanitization_function, $value, $field );
-						}
-					} else {
-						$new_value = call_user_func( $sanitization_function, $_POST[ $field_name ], $field );
-					}
-					$this->update( $field_name, $new_value, false );
+				$field_name  = $field['attrs']['name'] ?? $field['name'];
+				$field_value = $this->get_request_value( $field_name, $_POST );
+
+				$sanitization_function = apply_filters( 'rs_util_settings_sanitize_field_value', $field['sanitization_callback'] ?? null, $field );
+				if ( empty( $sanitization_function ) ) {
+					$sanitization_function = 'sanitize_text_field';
 				}
+				if ( is_array( $field_value ) ) {
+					$new_value = [];
+					foreach( $field_value as $value ) {
+						$new_value[] = call_user_func( $sanitization_function, $value, $field );
+					}
+				} else {
+					$new_value = call_user_func( $sanitization_function, $_POST[ $field_name ], $field );
+				}
+
+				$this->update( $field_name, $new_value, false );
+
 			}
 		}
 
