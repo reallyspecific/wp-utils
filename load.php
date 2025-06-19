@@ -33,7 +33,7 @@ function autoload_directory( $abs_path ) {
  * @param string $class_name The name of the class to load.
  * @return void
  */
-function class_loader( string $class_name, string $class_folder = null, string $root_namespace = null )
+function class_loader( string $class_name, ?string $class_folder = null, ?string $root_namespace = null )
 {
 	if ( class_exists( $class_name ) ) {
 		return;

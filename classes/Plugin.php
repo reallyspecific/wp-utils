@@ -135,6 +135,8 @@ abstract class Plugin {
 				return $this->get_root_path();
 			case 'update_uri':
 				return $this->get_wp_data( 'UpdateURI' );
+			case 'data':
+				return $this->data;
 			default:
 				return null;
 		}

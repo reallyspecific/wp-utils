@@ -51,7 +51,7 @@ class Updater {
 			'RequiresPlugins' => 'Requires Plugins',
 			'DownloadZipURI'  => 'Download URL',
 			'_sitewide'       => 'Site Wide Only',
-	]
+		]
 	];
 
 	public function __construct( $props = [] ) {
