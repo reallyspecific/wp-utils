@@ -260,7 +260,7 @@ class Settings {
 
 		$field_name = sanitize_title( $field['name'] );
 		$tag = match( $field['type'] ) {
-			'options'   => 'select',
+			'options'   => 'multicheck',
 			'select'    => 'select',
 			'textarea'  => 'textarea',
 			default     => 'input',
@@ -270,37 +270,53 @@ class Settings {
 			'name'     => $field_name,
 			'required' => filter_var( $field['required'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
 			'class'    => $field['class'] ?? [],
+			'multiple' => filter_var( $field['multiple'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'multiple' : null,
 		] );
 		$attrs['class']       = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
 		$attrs['class'][]     = match( $field['type'] ) {
-			'checkbox' => '',
+			'input'    => 'regular-text',
 			'textarea' => 'large-text',
-			default    => 'regular-text',
+			default    => '',
 		};
+		$attrs['class'][] = 'rs-util-settings-field';
+		$attrs['class'][] = 'rs-util-settings-field--' . $field['type'];
 		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
+		$attrs['name']  = $field_name;
+		if ( ! empty( $attrs['multiple'] ) ) {
+			$attrs['name'] .= '[]';
+		}
+		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
 		switch( $tag ) {
 			case 'input':
 				$attrs['size']        = $field['size'] ?? null;
 				$attrs['type']        = $field['type'] ?? 'text';
 				$attrs['placeholder'] = $field['placeholder'] ?? null;
-				if ( $field['type'] === 'checkbox' || $field['type'] === 'radio' ) {
+				if ( $field['type'] === 'checkbox' ) {
 					$checked = filter_var( $value ?? $field['default'] ?? null, FILTER_VALIDATE_BOOLEAN );
 					$attrs['checked'] = $checked ? 'checked' : null;
 					$value = null;
-				}
-				if ( $field['type'] !== 'checked' ) {
+				} else {
 					$attrs['value'] = $value ?? $field['default'] ?? null;
 				}
 				$render_template = '<input %1$s>';
 				break;
 			case 'textarea':
-				$value = $value ?? $field['default'] ?? '';
 				$attrs['rows'] = $field['rows'] ?? null;
 				$attrs['cols'] = $field['cols'] ?? null;
 				$render_template = '<textarea %1$s>' . esc_html( $value ) . '</textarea>';
 				break;
+			case 'select':
+				$render_template = [ $this, 'render_select' ];
+				break;
+			case 'multicheck':
+				$render_template = [ $this, 'render_multicheck' ];
+				break;
 		}
-		$rendered = sprintf( $render_template ?? '', array_to_attr_string( $attrs ) );
+		if ( is_callable( $render_template ) ) {
+			$rendered = call_user_func( $render_template, $field, $value, $attrs );
+		} else {
+			$rendered = sprintf( $render_template ?? '', array_to_attr_string( $attrs ) );
+		}
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_' . $field_name, $rendered, $field, $value, $this );
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field', $rendered, $field, $value, $this );
 		$rendered = apply_filters( 'rs_util_settings_render_field', $rendered, $field, $value, $this );
@@ -308,6 +324,97 @@ class Settings {
 			echo $rendered;
 		}
 		return $rendered ?? '';
+	}
+
+	public function render_select( array $field, $value, array $attrs ) {
+		$buffer = '';
+		
+		$buffer .= '<select ' . array_to_attr_string( $attrs ) . '>';
+		foreach( $field['options'] as $key => $option ) {
+			if ( isset( $option['group'] ) ) {
+				$buffer .= sprintf( '<optgroup label="%s">', esc_attr( $option['group'] ) );
+				$suboptions = $option['options'] ?? [];
+			} else {
+				$suboptions = [ $key => $option ];
+			}
+			foreach( $suboptions as $subkey => $suboption ) {
+				$subattrs = [];
+				$label = '';
+				if ( is_string( $suboption ) ) {
+					$label = $suboption;
+				} else {
+					$label = $suboption['label'] ?? $subkey;
+					if ( isset( $suboption['data'] ) ) {
+						foreach( $suboption['data'] as $data_key => $data_value ) {
+							$subattrs[ "data-{$data_key}" ] = $data_value;
+						}
+					}
+				}
+				if ( $subkey === $value || ( is_array( $value ) && in_array( $subkey, $value ) ) ) {
+					$subattrs['selected'] = 'selected';
+				}
+				$buffer .= sprintf( '<option value="%s" %s>%s</option>',
+					esc_attr( $subkey ),
+					array_to_attr_string( $subattrs ),
+					esc_html( $label )
+				);
+			}
+			if ( isset( $option['group'] ) ) {
+				$buffer .= '</optgroup>';
+			}
+		}
+		$buffer .= '</select>';
+
+		return $buffer;
+	}
+
+	public function render_multicheck( array $field, $value, array $attrs ) {
+		
+		$buffer = '';
+		$buffer .= '<div class="rs-util-settings-field rs-util-settings-field--multicheck">';
+
+		foreach( $field['options'] as $key => $option ) {
+			if ( isset( $option['group'] ) ) {
+				$buffer .= sprintf( '<fieldset class="rs-util-settings-field__group"><legend><strong>%s</strong></legend>', esc_attr( $option['group'] ) );
+				$suboptions = $option['options'] ?? [];
+			} else {
+				$suboptions = [ $key => $option ];
+			}
+			foreach( $suboptions as $subkey => $suboption ) {
+				$subattrs = [];
+				$label = '';
+				if ( is_string( $suboption ) ) {
+					$label = $suboption;
+				} else {
+					$label = $suboption['label'] ?? $subkey;
+					if ( isset( $suboption['data'] ) ) {
+						foreach( $suboption['data'] as $data_key => $data_value ) {
+							$subattrs[ "data-{$data_key}" ] = $data_value;
+						}
+					}
+					$class = $attrs['class'] ?? [];
+					$class = str_replace( 'rs-util-settings-field--multicheck', 'rs-util-settings-field--input', $class );
+					$subattrs['class'] = $class;
+					$subattrs['name'] = empty( $attrs['multiple'] ) ? $attrs['name'] : str_replace( '[]', "[{$subkey}]", $attrs['name'] );
+				}
+				if ( $subkey === $value || ( is_array( $value ) && in_array( $subkey, $value ) ) ) {
+					$subattrs['checked'] = 'checked';
+				}
+				$buffer .= sprintf( '<p class="rs-util-settings-field__option"><input type="%1$s" value="%2$s" %3$s><label for="%2$s">%4$s</label></p>',
+					empty( $attrs['multiple'] ) ? 'radio' : 'checkbox',
+					esc_attr( $subkey ),
+					array_to_attr_string( $subattrs ),
+					esc_html( $label )
+				);
+			}
+			if ( isset( $option['group'] ) ) {
+				$buffer .= '</fieldset>';
+			}
+		}
+
+		$buffer .= '</div>';
+
+		return $buffer;
 	}
 
 	public function save_form() {
