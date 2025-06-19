@@ -17,6 +17,8 @@ class Settings {
 
 	private $multisite = false;
 
+	private $post_id = null;
+
 	private $cache = null;
 
 	/**
@@ -34,6 +36,7 @@ class Settings {
 			'page_title' => $menu_title . ' ' . __( 'Settings', $plugin->i18n_domain ),
 			'form_title' => $menu_title . ' ' . __( 'Settings', $plugin->i18n_domain ),
 			'menu_title' => $menu_title,
+			'post_id'    => null,
 		] );
 		$this->slug = $this->settings['slug'];
 		if ( ! isset( $this->settings['option_name'] ) ) {
@@ -357,12 +360,22 @@ class Settings {
 		} else {
 			$this->cache = get_option( $this->settings['option_name'], [] ) ?: [];
 		}
+		foreach( $this->sections as $section ) {
+			foreach( $section['fields'] as $field ) {
+				$field_name = sanitize_title( $field['name'] );
+				if ( ! isset( $this->cache[ $field_name ] ) ) {
+					$this->cache[ $field_name ] = $field['default'] ?? null;
+				}
+			}
+		}
 	}
 
 	public function update( $key, $value, $save = true ) {
 
 		$settings = $this->get();
 		$settings[ $key ] = $value;
+
+		$this->cache = $settings;
 
 		if ( ! $save ) {
 			return $settings;
@@ -373,10 +386,12 @@ class Settings {
 	}
 
 	public function save() {
-		if ( $this->multisite ) {
-			update_site_option( $this->settings['option_name'], $settings, false );
+		if ( $this->post_id ) {
+			update_post_meta( $this->post_id, $this->settings['option_name'], $this->cache );
+		} elseif ( $this->multisite ) {
+			update_site_option( $this->settings['option_name'], $this->cache );
 		} else {
-			update_option( $this->settings['option_name'], $settings, false );
+			update_option( $this->settings['option_name'], $this->cache );
 		}
 	}
 
