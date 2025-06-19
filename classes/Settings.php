@@ -392,7 +392,7 @@ class Settings {
 				$suboptions = [ $key => $option ];
 			}
 			foreach( $suboptions as $subkey => $suboption ) {
-				$subattrs = [];
+				$subattrs = [ 'class' => '' ];
 				$label = '';
 				if ( is_string( $suboption ) ) {
 					$label = $suboption;
@@ -403,11 +403,15 @@ class Settings {
 							$subattrs[ "data-{$data_key}" ] = $data_value;
 						}
 					}
-					$class = $attrs['class'] ?? [];
-					$class = str_replace( 'rs-util-settings-field--multicheck', 'rs-util-settings-field--input', $class );
-					$subattrs['class'] = $class;
-					$subattrs['name'] = empty( $attrs['multiple'] ) ? $attrs['name'] : str_replace( '[]', "[{$subkey}]", $attrs['name'] );
+					if ( isset( $suboption['classes'] ) ) {
+						$subattrs['class'] = implode( ' ', $suboption['classes'] );
+					}
 				}
+				$class = trim( $attrs['class'] . ' ' . $subattrs['class'] );
+				$class = str_replace( 'rs-util-settings-field--multicheck', 'rs-util-settings-field--input', $class );
+				$subattrs['class'] = $class;
+				$subattrs['name'] = empty( $attrs['multiple'] ) ? $attrs['name'] : str_replace( '[]', "[{$subkey}]", $attrs['name'] );
+				
 				if ( $subkey === $value || ( is_array( $value ) && in_array( $subkey, $value ) ) ) {
 					$subattrs['checked'] = 'checked';
 				}
