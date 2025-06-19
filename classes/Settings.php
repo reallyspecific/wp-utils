@@ -21,6 +21,8 @@ class Settings {
 
 	private $cache = null;
 
+	private $plugin = null;
+
 	/**
 	 * Constructor for the class.
 	 *
@@ -49,6 +51,13 @@ class Settings {
 			add_action( 'admin_menu', [ $this, 'install' ] );
 		}
 		add_filter( 'rs_util_settings_sanitize_field_value', [ static::class, 'sanitize_textarea_field' ], 9, 2 );
+
+		$this->plugin = $plugin;
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+	}
+
+	public function enqueue_admin_scripts() {
+		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 	}
 
 	/**
@@ -168,6 +177,8 @@ class Settings {
 
 	public function render() {
 
+		wp_enqueue_style( 'rs-util-admin-fields' );
+
 		if ( $this->multisite ) {
 			$current_values = get_site_option( $this->settings['option_name'], [] );
 		} else {
@@ -230,14 +241,14 @@ class Settings {
 
 		ob_start();
 		?>
-		<tr>
-			<th scope="row">
+		<tr class="rs-util-settings-field-row">
+			<th scope="row" class="rs-util-settings-field-row__label">
 				<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
 			</th>
-			<td>
+			<td class="rs-util-settings-field-value rs-util-settings-field-value--<?php echo $field['type']; ?>">
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
-				<p class="description">
+				<p class="rs-util-settings-field-row__description">
 					<?php echo $description; ?>
 				</p>
 				<?php endif; ?>

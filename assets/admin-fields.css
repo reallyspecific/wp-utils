@@ -1,0 +1,27 @@
+.rs-util-settings-field {
+	margin-bottom: 1rem;
+}
+
+.rs-util-settings-field-value--options {
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+	align-items: stretch;
+	gap: 1rem;
+
+	.rs-util-settings-field {
+		display: flex;
+		flex-direction: column;
+		justify-content: start;
+		align-items: start;
+		gap: 0.5rem;
+	}
+
+	.rs-util-settings-field__option {
+		margin: 0;
+	}
+
+	.rs-util-settings-field-row__description {
+		order: -1;
+	}
+}
