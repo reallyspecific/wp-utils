@@ -37,7 +37,7 @@
 	align-items: stretch;
 	gap: 1rem;
 
-	.rs-util-settings-field-row__description {
+	.rs-util-settings-field__description {
 		order: -1;
 	}
 }

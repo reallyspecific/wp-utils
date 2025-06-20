@@ -206,10 +206,10 @@ class Settings {
 					<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
 					<table class="form-table">
 						<?php foreach( $section['fields'] as $field ) : ?>
-							<?php $field_name = sanitize_title( $field['name'] ); ?>
+							<?php $field_name = $field['attrs']['name'] ?? $field['name'] ?? ''; ?>
 							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
-							<?php do_action( 'rs_util_settings_render_fieldrow_beforestart', $field, $section, $this ); ?>
-							<?php $this->render_field_row( $field, $current_values[ $field_name ] ?? null ); ?>
+							<?php do_action( 'rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
+							<?php $this->render_field_row( $field, $this->get( $field_name ) ?? null ); ?>
 							<?php do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
 							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
 						<?php endforeach; ?>
