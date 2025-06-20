@@ -169,7 +169,7 @@ class Settings {
 			'type'        => 'text',
 			'order'       => ( count( $this->sections[ $section_id ]['fields'] ) + 1 ) * 10,
 			'label'       => $props['name'],
-			'id'          => $section_id . '__' . $props['name'],
+			'id'          => $section_id . '__' . sanitize_title( $props['name'] ),
 			'default'     => null,
 			'placeholder' => null,
 			'description' => null,
@@ -293,6 +293,7 @@ class Settings {
 			'class'    => $field['class'] ?? [],
 			'multiple' => filter_var( $field['multiple'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'multiple' : null,
 		] );
+		
 		$attrs['name'] = $attrs['name'] ?? $this->parse_field_name( $field_name, ! empty( $attrs['multiple'] ) );
 
 		$attrs['class']       = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
