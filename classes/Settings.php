@@ -30,6 +30,13 @@ class Settings {
 	 */
 	public function __construct( array $props = [] ) {
 		
+		$props = wp_parse_args( $props, [
+			'slug'        => null,
+			'capability'  => 'manage_options',
+			'option_name' => null,
+			'post_id'     => null,
+		] );
+
 		$this->slug = sanitize_title( $props['slug'] );
 		if ( ! isset( $props['option_name'] ) ) {
 			$this->settings['option_name'] = $this->slug;
