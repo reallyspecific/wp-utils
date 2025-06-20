@@ -61,15 +61,15 @@ class Settings {
 			...$this->settings,
 			...$settings,
 		];
-		if ( ! has_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] ) ) {
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+		if ( ! has_action( 'admin_enqueue_scripts', [ $this::class, 'enqueue_admin_scripts' ] ) ) {
+			add_action( 'admin_enqueue_scripts', [ $this::class, 'enqueue_admin_scripts' ] );
 		}
-		if ( ! has_action( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_textarea_field' ], 10, 2 ) ) {
-			add_filter( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_textarea_field' ], 10, 2 );
+		if ( ! has_action( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ], 10, 2 ) ) {
+			add_filter( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ], 10, 2 );
 		}
 	}
 
-	public function enqueue_admin_scripts() {
+	public static function enqueue_admin_scripts() {
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 	}
 
