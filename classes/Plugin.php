@@ -85,8 +85,8 @@ abstract class Plugin {
 	 * @return void
 	 */
 	public function register_settings( $namespaces = [] ): void {
-		foreach( $namespaces as $namespace ) {
-			$this->settings[ $namespace ] = new Settings( $this );
+		foreach( $namespaces as $namespace => $props ) {
+			$this->settings[ $namespace ] = new Settings( $props );
 		}
 		add_action( 'init', [ $this, 'install_settings' ] );
 	}
