@@ -77,12 +77,12 @@ abstract class Plugin {
 	}
 
 	/**
-	 * Sets up the static instance of the plugin. Basically useless 
+	 * Sets up the static instance of the plugin. Basically useless
 	 * unless overloaded.
 	 * @return Plugin
 	 */
-	protected static function setup() {
-		static::$self = new static();
+	protected static function &setup( $props = [] ): Plugin {
+		static::$self = new static( $props );
 		return static::$self;
 	}
 
