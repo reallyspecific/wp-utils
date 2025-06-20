@@ -19,7 +19,7 @@ class Settings {
 
 	private ?int $post_id = null;
 
-	private array $cache = [];
+	private ?array $cache = null;
 
 	/**
 	 * Constructor for the class.

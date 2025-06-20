@@ -75,8 +75,9 @@ abstract class Plugin {
 		add_action( 'init', [ $this, 'install_textdomain' ] );
 		add_action( 'init', [ $this, 'install_settings' ] );
 
+		add_action( 'plugins_loaded', [ $this, 'setup' ] );
+
 		$this->register_settings();
-		$this->setup();
 	}
 
 	/**
