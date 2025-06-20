@@ -30,30 +30,45 @@ class Settings {
 	 * @param string $menu_title The title of the menu.
 	 * @param array $props Additional properties for the settings.
 	 */
-	public function __construct( Plugin $plugin, string $menu_title, array $props = [] ) {
-		$this->settings = wp_parse_args( $props, [
-			'parent'     => false,
-			'slug'       => sanitize_title( $menu_title ) . '-settings',
-			'capability' => 'manage_options',
-			'page_title' => $menu_title . ' ' . __( 'Settings', $plugin->i18n_domain ),
-			'form_title' => $menu_title . ' ' . __( 'Settings', $plugin->i18n_domain ),
-			'menu_title' => $menu_title,
-			'post_id'    => null,
-		] );
-		$this->slug = $this->settings['slug'];
-		if ( ! isset( $this->settings['option_name'] ) ) {
+	public function __construct( array $props = [] ) {
+		
+		$this->slug = sanitize_title( $props['slug'] );
+		if ( ! isset( $props['option_name'] ) ) {
 			$this->settings['option_name'] = $this->slug;
 		}
-		if ( is_multisite() && $this->settings['capability'] === 'manage_network_options' ) {
+
+		if ( is_multisite() && $props['capability'] === 'manage_network_options' ) {
 			add_action( 'network_admin_menu', [ $this, 'install' ] );
 			$this->multisite = true;
 		} else {
 			add_action( 'admin_menu', [ $this, 'install' ] );
-		}
-		add_filter( 'rs_util_settings_sanitize_field_value', [ static::class, 'sanitize_textarea_field' ], 9, 2 );
+		} // todo: need another option for Post IDs.
 
-		$this->plugin = $plugin;
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+		//add_filter( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_textarea_field' ], 9, 2 );
+	}
+
+	/**
+	 * This is called during init to prevent i18n doing_it_wrong issues with translated strings on the labels.
+	 * @param mixed $props
+	 * @return void
+	 */
+	public function setup( $props ) {
+		$settings = wp_parse_args( $props, [
+			'parent'     => false,
+			'slug'       => $this->slug,
+			'capability' => 'manage_options',
+			'post_id'    => null,
+		] );
+		$this->settings = [
+			...$this->settings,
+			...$settings,
+		];
+		if ( ! has_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] ) ) {
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+		}
+		if ( ! has_action( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_textarea_field' ], 10, 2 ) ) {
+			add_filter( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_textarea_field' ], 10, 2 );
+		}
 	}
 
 	public function enqueue_admin_scripts() {

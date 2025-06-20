@@ -73,10 +73,9 @@ abstract class Plugin {
 		add_action( 'init', [ $this, 'get_wp_data' ] );
 		add_action( 'init', [ $this, 'setup_updater' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
+		add_action( 'init', [ $this, 'install_settings' ] );
 
-		if ( method_exists( $this, 'install_settings' ) ) {
-			$this->install_settings();
-		}
+		$this->register_settings();
 		$this->setup();
 	}
 
@@ -85,7 +84,23 @@ abstract class Plugin {
 	 *
 	 * @return void
 	 */
-	public function install_settings(): void {}
+	public function register_settings( $namespaces = [] ): void {
+		foreach( $namespaces as $namespace ) {
+			$this->settings[ $namespace ] = new Settings( $this );
+		}
+		add_action( 'init', [ $this, 'install_settings' ] );
+	}
+
+	/**
+	 * Not necessary to be implemented, executed at the end of the constructor method.
+	 *
+	 * @return void
+	 */
+	public function install_settings( array $settings ): void {
+		foreach( $settings as $namespace => $props ) {
+			$this->settings[ $namespace ]->setup( $props );
+		}
+	}
 
 	public function setup_updater() {
 		if ( empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
@@ -199,14 +214,6 @@ abstract class Plugin {
 			return null;
 		}
 		return $settings->get( $key );
-	}
-
-	public function add_new_settings( $namespace = 'default', string $menu_title = null, array $props = [] ) {
-
-		if ( empty( $menu_title ) ) {
-			$menu_title = $this->name;
-		}
-		$this->settings[ $namespace ] = new Settings( $this, $menu_title, $props );
 	}
 
 	public function get_template_part( string $slug, ?string $name = null, array $args = [] ) {
