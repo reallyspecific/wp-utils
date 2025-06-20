@@ -31,6 +31,14 @@ abstract class Plugin {
 	protected $updater = null;
 
 	/**
+	 * Creates a new instance of the plugin.
+	 * @return Plugin
+	 */
+	public static function new( array $props = [] ): Plugin {
+		return new static( $props );
+	}
+
+	/**
 	 * Plugin constructor.
 	 *
 	 * @param array $props
@@ -59,31 +67,6 @@ abstract class Plugin {
 		add_action( 'init', [ $this, 'setup_updater' ] );
 		add_action( 'init', [ $this, 'install_settings' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
-	}
-
-	protected static $self = null;
-
-	/**
-	 * Returns a statically stored instance of the plugin. Generally
-	 * it should only be used by classes that extend the Plugin class,
-	 * as otherwise all Plugins will end up referencing the same object.
-	 * @return Plugin
-	 */
-	public static function instance() {
-		if ( static::$self ) {
-			return static::$self;
-		}
-		return static::setup();
-	}
-
-	/**
-	 * Sets up the static instance of the plugin. Basically useless
-	 * unless overloaded.
-	 * @return Plugin
-	 */
-	protected static function &setup( $props = [] ): Plugin {
-		static::$self = new static( $props );
-		return static::$self;
 	}
 
 	public function setup_updater() {
