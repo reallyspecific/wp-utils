@@ -88,7 +88,7 @@ abstract class Plugin {
 		foreach( $namespaces as $namespace => $props ) {
 			$this->settings[ $namespace ] = new Settings( $props );
 		}
-		add_action( 'init', [ $this, 'install_settings' ] );
+		add_action( 'init', [ $this, 'install_settings' ], 10, 0 );
 	}
 
 	/**
