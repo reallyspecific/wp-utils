@@ -35,9 +35,14 @@ class Settings {
 			'capability'  => 'manage_options',
 			'option_name' => null,
 			'post_id'     => null,
+			'parent'      => false,
 		] );
 
 		$this->slug = sanitize_title( $props['slug'] );
+		unset( $props['slug'] );
+
+		$this->settings = $props;
+
 		if ( ! isset( $props['option_name'] ) ) {
 			$this->settings['option_name'] = $this->slug;
 		}
