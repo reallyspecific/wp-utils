@@ -57,6 +57,10 @@ class Settings {
 			'capability' => 'manage_options',
 			'post_id'    => null,
 		] );
+		$settings = wp_parse_args( $settings, [
+			'menu_title' => $this->settings['page_title'] ?? ucwords( $this->slug ),
+			'page_title' => $this->settings['menu_title'] ?? ucwords( $this->slug ),
+		] );
 		$this->settings = [
 			...$this->settings,
 			...$settings,

@@ -97,8 +97,8 @@ abstract class Plugin {
 	 * @return void
 	 */
 	public function install_settings( array $settings = [] ): void {
-		foreach( $settings as $namespace => $props ) {
-			$this->settings[ $namespace ]->setup( $props );
+		foreach( $this->settings as $namespace => $props ) {
+			$this->settings[ $namespace ]->setup( $settings[$namespace] ?? [] );
 		}
 	}
 
