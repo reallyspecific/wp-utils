@@ -34,7 +34,7 @@ abstract class Plugin {
 	 * Creates a new instance of the plugin.
 	 * @return Plugin
 	 */
-	public static function new( array $props = [] ): Plugin {
+	public static function &new( array $props = [] ): Plugin {
 		return new static( $props );
 	}
 
