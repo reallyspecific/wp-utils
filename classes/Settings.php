@@ -535,7 +535,7 @@ class Settings {
 
 		$settings = $this->get();
 
-		$name = explode( '.', $key, 2 );
+		$name = explode( '.', $key );
 
 		$setting = &$settings;
 		while ( count( $name ) > 1 ) {
