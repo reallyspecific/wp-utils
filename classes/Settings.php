@@ -194,10 +194,12 @@ class Settings {
 				<?php foreach( $this->sections as $section ) : ?>
 					
 					<?php if ( isset( $section['title'] ) ) : ?>
-					<h3><?php echo $section['title']; ?></h3>
+					<h3 class="rs-util-settings-field-section__title"><?php echo $section['title']; ?></h3>
 					<?php endif; ?>
 					<?php if ( isset( $section['description'] ) ) : ?>
-					<p class="description"><?php echo parsedown( $section['description'], 'description', 'rs-util-settings' ); ?></p>
+					<p class="rs-util-settings-field-section__description">
+					<?php echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); ?>
+					</p>
 					<?php endif; ?>
 
 					<?php if ( isset( $section['fields'] ) ) : ?>
@@ -246,7 +248,7 @@ class Settings {
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
 				<p class="rs-util-settings-field-row__description">
-					<?php echo parsedown( $description, 'description', 'rs-util-settings' ); ?>
+					<?php echo parsedown_line( $description, 'description', 'rs-util-settings' ); ?>
 				</p>
 				<?php endif; ?>
 			</td>
