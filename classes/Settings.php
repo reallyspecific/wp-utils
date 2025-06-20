@@ -458,9 +458,9 @@ class Settings {
 		return $request;
 	}
 
-	public function save_form() {
-
-		if ( ! current_user_can( $this->settings['capability'] ) ) {
+	public function save_form()
+    {
+        if ( ! current_user_can( $this->settings['capability'] ) ) {
 			return;
 		}
 
@@ -489,7 +489,7 @@ class Settings {
 						$new_value[] = call_user_func( $sanitization_function, $value, $field );
 					}
 				} else {
-					$new_value = call_user_func( $sanitization_function, $_POST[ $field_name ], $field );
+					$new_value = call_user_func( $sanitization_function, $field_value, $field );
 				}
 
 				$this->update( $field_name, $new_value, false );
@@ -498,7 +498,6 @@ class Settings {
 		}
 
 		$this->save();
-
 	}
 
 	public function get( ?string $key = null, $nocache = false ) {
@@ -531,7 +530,18 @@ class Settings {
 	public function update( $key, $value, $save = true ) {
 
 		$settings = $this->get();
-		$settings[ $key ] = $value;
+
+		$name = explode( '.', $key, 2 );
+
+		$setting = &$settings;
+		while ( count( $name ) > 1 ) {
+			$index = array_shift( $name );
+			if ( ! isset( $setting[ $index ] ) ) {
+				$setting[ $index ] = [];
+			}
+			$setting = &$setting[ $index ];
+		}
+		$setting[ current( $name ) ] = $value;
 
 		$this->cache = $settings;
 
