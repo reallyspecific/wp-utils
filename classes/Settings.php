@@ -7,21 +7,19 @@ use function ReallySpecific\Utils\Text\parsedown_line;
 
 class Settings {
 
-	private $settings = null;
+	private array $settings = [];
 
-	private $hook = null;
+	private ?string $hook = null;
 
-	private $sections = [];
+	private array $sections = [];
 
-	private $slug = null;
+	private ?string $slug = null;
 
-	private $multisite = false;
+	private bool $multisite = false;
 
-	private $post_id = null;
+	private ?int $post_id = null;
 
-	private $cache = null;
-
-	private $plugin = null;
+	private array $cache = [];
 
 	/**
 	 * Constructor for the class.
