@@ -33,9 +33,15 @@
 	align-items: stretch;
 	gap: 1rem;
 
-
-
 	.rs-util-settings-field-row__description {
 		order: -1;
 	}
+}
+
+.is-style-code-text {
+	font-family: var(--font-family-mono,monospace);
+	font-size: var(--font-size-code,1rem);
+	line-height: var(--font-size-code,1.2);
+	width: var(--code-textarea-width,100%);
+	height: var(--code-textarea-height,auto);
 }

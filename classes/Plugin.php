@@ -62,10 +62,10 @@ abstract class Plugin {
 		}
 
 		$this->root_file = $props['file'];
-		$this->root_path = dirname( $this->root_file );
+		$this->root_path = trailingslashit( dirname( $this->root_file ) );
 
 		$this->i18n_domain = $props['i18n_domain'] ?? null;
-		$this->i18n_path   = $props['i18n_path'] ?? $this->root_path . '/languages';
+		$this->i18n_path   = $props['i18n_path'] ?? $this->get_root_path() . 'languages';
 
 		$this->name = $props['name'];
 		$this->slug = $props['slug'] ?? sanitize_title( basename( $this->root_path ) );
@@ -162,7 +162,7 @@ abstract class Plugin {
 	}
 
 	public function get_path( $relative_path = '' ) {
-		return untrailingslashit( $this->get_root_path() . '/' . $relative_path );
+		return untrailingslashit( $this->get_root_path() . $relative_path );
 	}
 
 	public function debug_mode() {
@@ -198,6 +198,48 @@ abstract class Plugin {
 			$menu_title = $this->name;
 		}
 		$this->settings[ $namespace ] = new Settings( $this, $menu_title, $props );
+	}
+
+	public function get_template_part( string $slug, ?string $name = null, array $args = [] ) {
+
+		$args = wp_parse_args( $args, [
+			'extension_type' => '.php',
+			'theme_folder'   => null,
+		] );
+
+		if ( ! empty( $args['theme_folder'] ) ) {
+			$path = $args['theme_folder'] . '/' . $slug;
+		}
+
+		ob_start();
+		$found = get_template_part( $path ?? $slug, $name, $args );
+		$output = ob_get_clean();
+
+		if ( $found ) {
+			return $output;
+		}
+
+		$file_path = $this->get_root_path() . 'templates/' . $slug;
+		if ( $name && file_exists( $file_path . '-' . $name . '.php' ) ) {
+			$template = $file_path . '-' . $name . '.php';
+		} elseif ( file_exists( $file_path . '.php' ) ) {
+			$template = $file_path . '.php';
+		} else {
+			return false;
+		}
+
+		$encapsulator = function( $template_file_path ) use ( $slug, $name, $args ) {
+			ob_start();
+			if ( pathinfo( $template_file_path, PATHINFO_EXTENSION ) === '.php' ) {
+				include $template_file_path;
+			} else {
+				return file_get_contents( $template_file_path );
+			}
+			return ob_get_clean();
+		};
+
+		return $encapsulator( $template );
+
 	}
 
 }
