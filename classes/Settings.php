@@ -3,8 +3,7 @@
 namespace ReallySpecific\Utils;
 
 use function ReallySpecific\Utils\Text\array_to_attr_string;
-use function ReallySpecific\Utils\Text\parsedown;
-
+use function ReallySpecific\Utils\Text\parsedown_line;
 
 class Settings {
 
