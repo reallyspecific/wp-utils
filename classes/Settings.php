@@ -529,14 +529,6 @@ class Settings {
 		} else {
 			$this->cache = get_option( $this->settings['option_name'], [] ) ?: [];
 		}
-		foreach( $this->sections as $section ) {
-			foreach( $section['fields'] as $field ) {
-				$field_name = sanitize_title( $field['name'] );
-				if ( ! isset( $this->cache[ $field_name ] ) ) {
-					$this->cache[ $field_name ] = $field['default'] ?? null;
-				}
-			}
-		}
 	}
 
 	public function update( $key, $value, $save = true ) {
