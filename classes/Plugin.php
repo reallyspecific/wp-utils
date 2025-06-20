@@ -42,7 +42,11 @@ abstract class Plugin {
 			throw new \Exception( 'Plugin was constructed without a `name` property.' );
 		}
 
-		$this->root_file = $props['file'] ?? $this->get_root_file();
+		if ( empty( $props['file'] ) ) {
+			throw new \Exception( 'Plugin was constructed without a `file` property.' );
+		}
+
+		$this->root_file = $props['file'];
 		$this->root_path = dirname( $this->root_file );
 
 		$this->i18n_domain = $props['i18n_domain'] ?? null;
@@ -158,17 +162,6 @@ abstract class Plugin {
 	}
 
 	public function get_root_file() {
-		if ( is_null( $this->root_file ) ) {
-			$plugin_basename = plugin_basename( __FILE__ );
-			$plugin_path = explode( '/', __DIR__ );
-			while( ! empty( $plugin_path ) && ! file_exists( implode( '/', $plugin_path ) . '/' . $plugin_basename ) ) {
-				array_pop( $plugin_path );
-			}
-			if ( empty( $plugin_path ) ) {
-				return null;
-			}
-			return trailingslashit( implode( '/', $plugin_path ) ) . $plugin_basename;
-		}
 		return $this->root_file;
 	}
 
