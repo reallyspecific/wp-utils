@@ -354,6 +354,10 @@ class Settings {
 
 	public function render_select( array $field, $value, array $attrs ) {
 		$buffer = '';
+
+		if ( is_callable( $field['options'] ) ) {
+			$field['options'] = call_user_func( $field['options'] );
+		}
 		
 		$buffer .= '<select ' . array_to_attr_string( $attrs ) . '>';
 		foreach( $field['options'] as $key => $option ) {
@@ -398,6 +402,10 @@ class Settings {
 		
 		$buffer = '';
 		$buffer .= '<div class="rs-util-settings-field rs-util-settings-field--multicheck">';
+
+		if ( is_callable( $field['options'] ) ) {
+			$field['options'] = call_user_func( $field['options'] );
+		}
 
 		foreach( $field['options'] as $key => $option ) {
 			if ( isset( $option['group'] ) ) {
