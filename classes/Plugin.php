@@ -72,11 +72,20 @@ abstract class Plugin {
 
 		add_action( 'init', [ $this, 'get_wp_data' ] );
 		add_action( 'init', [ $this, 'setup_updater' ] );
-		add_action( 'init', [ $this, 'install_settings' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
 
+		if ( method_exists( $this, 'install_settings' ) ) {
+			$this->install_settings();
+		}
 		$this->setup();
 	}
+
+	/**
+	 * Not necessary to be implemented, executed at the end of the constructor method.
+	 *
+	 * @return void
+	 */
+	public function install_settings(): void {}
 
 	public function setup_updater() {
 		if ( empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
