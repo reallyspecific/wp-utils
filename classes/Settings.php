@@ -504,7 +504,19 @@ class Settings {
 		if ( is_null( $this->cache ) || $nocache ) {
 			$this->load();
 		}
-		return $key ? ( $this->cache[ $key ] ?? null ) : $this->cache;
+		if ( ! empty( $key ) ) {
+			$parts = explode( '.', $key );
+			$value = &$this->cache;
+			while( ! empty( $parts ) ) {
+				$index = array_shift( $parts );
+				if ( ! isset( $value[ $index ] ) ) {
+					return null;
+				}
+				$value = &$value[ $index ] ?? null;
+			}
+			return $value;
+		}
+		return $this->cache;
 	}
 
 	public function __get( $key ) {
