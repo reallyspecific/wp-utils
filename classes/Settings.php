@@ -266,9 +266,9 @@ class Settings {
 	private function parse_field_name( string $name, bool $multiple = false ) {
 
 		$name_parts = explode( '.', $name );
-		$new_name   = sanitize_title( array_unshift( $name_parts ) );
+		$new_name   = sanitize_title( array_shift( $name_parts ) );
 		while ( count( $name_parts ) > 1 ) {
-			$new_name .= sanitize_title( array_shift( $name_parts ) );
+			$new_name .= '[' . sanitize_title( array_shift( $name_parts ) ) . ']';
 		}
 		if ( ! empty( $multiple ) ) {
 			$new_name .= '[]';
