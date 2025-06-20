@@ -52,7 +52,7 @@ return [
     ],
 
     'exclude-namespaces' => [
-        '~^$~', // The root namespace only
+        '~^((?!Parsedown).)$~', // The root namespace only
     ],
     'exclude-classes' => $wp_classes,
     'exclude-constants' => $wp_constants,
@@ -61,7 +61,7 @@ return [
     'expose-global-classes' => true,
     'expose-global-functions' => true,
     'expose-namespaces' => [
-        '~^$~',
+        '~^((?!Parsedown).)$~',
     ],
     'expose-classes' => [],
     'expose-functions' => [],
