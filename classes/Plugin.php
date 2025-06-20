@@ -34,9 +34,16 @@ abstract class Plugin {
 	 * Creates a new instance of the plugin.
 	 * @return Plugin
 	 */
-	public static function &new( array $props = [] ): Plugin {
+	public static function new( array $props = [] ): Plugin {
 		return new static( $props );
 	}
+
+	/**
+	 * Not necessary to be implemented, executed at the end of the constructor method.
+	 *
+	 * @return void
+	 */
+	public function setup(): void {}
 
 	/**
 	 * Plugin constructor.
@@ -67,6 +74,8 @@ abstract class Plugin {
 		add_action( 'init', [ $this, 'setup_updater' ] );
 		add_action( 'init', [ $this, 'install_settings' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
+
+		$this->setup();
 	}
 
 	public function setup_updater() {
