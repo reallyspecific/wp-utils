@@ -267,7 +267,7 @@ class Settings {
 
 		$name_parts = explode( '.', $name );
 		$new_name   = sanitize_title( array_shift( $name_parts ) );
-		while ( count( $name_parts ) > 1 ) {
+		while ( count( $name_parts ) > 0 ) {
 			$new_name .= '[' . sanitize_title( array_shift( $name_parts ) ) . ']';
 		}
 		if ( ! empty( $multiple ) ) {
