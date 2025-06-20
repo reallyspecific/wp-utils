@@ -3,6 +3,7 @@
 namespace ReallySpecific\Utils;
 
 use function ReallySpecific\Utils\Text\array_to_attr_string;
+use function ReallySpecific\Utils\Text\parsedown;
 
 
 class Settings {
@@ -196,7 +197,7 @@ class Settings {
 					<h3><?php echo $section['title']; ?></h3>
 					<?php endif; ?>
 					<?php if ( isset( $section['description'] ) ) : ?>
-					<p class="description"><?php echo $section['description']; ?></p>
+					<p class="description"><?php echo parsedown( $section['description'], 'description', 'rs-util-settings' ); ?></p>
 					<?php endif; ?>
 
 					<?php if ( isset( $section['fields'] ) ) : ?>
@@ -245,7 +246,7 @@ class Settings {
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
 				<p class="rs-util-settings-field-row__description">
-					<?php echo $description; ?>
+					<?php echo parsedown( $description, 'description', 'rs-util-settings' ); ?>
 				</p>
 				<?php endif; ?>
 			</td>
