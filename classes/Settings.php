@@ -246,7 +246,7 @@ class Settings {
 			<td class="rs-util-settings-field-value rs-util-settings-field-value--<?php echo $field['type']; ?>">
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
-				<p class="rs-util-settings-field-row__description">
+				<p class="rs-util-settings-field__description">
 					<?php echo parsedown_line( $description, 'description', 'rs-util-settings' ); ?>
 				</p>
 				<?php endif; ?>

@@ -1,5 +1,9 @@
 .rs-util-settings-field {
 	margin-bottom: 1rem;
+
+	+ .rs-util-settings-field__description {
+		margin-top: -0.5rem;
+	}
 }
 
 .rs-util-settings-field--multicheck {
