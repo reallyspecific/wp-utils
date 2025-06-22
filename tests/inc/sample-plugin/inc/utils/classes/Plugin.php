@@ -19,6 +19,22 @@ abstract class Plugin
     protected $data = [];
     protected $updater = null;
     /**
+     * Creates a new instance of the plugin.
+     * @return Plugin
+     */
+    public static function new(array $props = []): Plugin
+    {
+        return new static($props);
+    }
+    /**
+     * Not necessary to be implemented, executed at the end of the constructor method.
+     *
+     * @return void
+     */
+    public function setup(): void
+    {
+    }
+    /**
      * Plugin constructor.
      *
      * @param array $props
@@ -29,40 +45,43 @@ abstract class Plugin
         if (empty($props['name'])) {
             throw new \Exception('Plugin was constructed without a `name` property.');
         }
-        $this->root_file = $props['file'] ?? $this->get_root_file();
-        $this->root_path = dirname($this->root_file);
+        if (empty($props['file'])) {
+            throw new \Exception('Plugin was constructed without a `file` property.');
+        }
+        $this->root_file = $props['file'];
+        $this->root_path = trailingslashit(dirname($this->root_file));
         $this->i18n_domain = $props['i18n_domain'] ?? null;
-        $this->i18n_path = $props['i18n_path'] ?? $this->root_path . '/languages';
+        $this->i18n_path = $props['i18n_path'] ?? $this->get_root_path() . 'languages';
         $this->name = $props['name'];
         $this->slug = $props['slug'] ?? sanitize_title(basename($this->root_path));
         add_action('init', [$this, 'get_wp_data']);
         add_action('init', [$this, 'setup_updater']);
-        add_action('init', [$this, 'install_settings']);
         add_action('init', [$this, 'install_textdomain']);
+        add_action('plugins_loaded', [$this, 'setup']);
+        $this->register_settings();
     }
-    protected static $self = null;
     /**
-     * Returns a statically stored instance of the plugin. Generally
-     * it should only be used by classes that extend the Plugin class,
-     * as otherwise all Plugins will end up referencing the same object.
-     * @return Plugin
+     * Not necessary to be implemented, executed at the end of the constructor method.
+     *
+     * @return void
      */
-    public static function instance()
+    public function register_settings($namespaces = []): void
     {
-        if (static::$self) {
-            return static::$self;
+        foreach ($namespaces as $namespace => $props) {
+            $this->settings[$namespace] = new Settings($props);
         }
-        return static::setup();
+        add_action('wp_loaded', [$this, 'install_settings'], 10, 0);
     }
     /**
-     * Sets up the static instance of the plugin. Basically useless 
-     * unless overloaded.
-     * @return Plugin
+     * Not necessary to be implemented, executed at the end of the constructor method.
+     *
+     * @return void
      */
-    protected static function setup()
+    public function install_settings(array $settings = []): void
     {
-        static::$self = new static();
-        return static::$self;
+        foreach ($this->settings as $namespace => $props) {
+            $this->settings[$namespace]->setup($settings[$namespace] ?? []);
+        }
     }
     public function setup_updater()
     {
@@ -113,6 +132,8 @@ abstract class Plugin
                 return $this->get_root_path();
             case 'update_uri':
                 return $this->get_wp_data('UpdateURI');
+            case 'data':
+                return $this->data;
             default:
                 return null;
         }
@@ -134,9 +155,6 @@ abstract class Plugin
     }
     public function get_root_file()
     {
-        if (is_null($this->root_file)) {
-            return trailingslashit(\WP_PLUGIN_DIR) . plugin_basename(__FILE__);
-        }
         return $this->root_file;
     }
     public function get_url($relative_path = null)
@@ -145,7 +163,7 @@ abstract class Plugin
     }
     public function get_path($relative_path = '')
     {
-        return untrailingslashit($this->get_root_path() . '/' . $relative_path);
+        return untrailingslashit($this->get_root_path() . $relative_path);
     }
     public function debug_mode()
     {
@@ -171,11 +189,35 @@ abstract class Plugin
         }
         return $settings->get($key);
     }
-    public function add_new_settings($namespace = 'default', string $menu_title = null, array $props = [])
+    public function get_template_part(string $slug, ?string $name = null, array $args = [])
     {
-        if (empty($menu_title)) {
-            $menu_title = $this->name;
+        $args = wp_parse_args($args, ['extension_type' => '.php', 'theme_folder' => null]);
+        if (!empty($args['theme_folder'])) {
+            $path = $args['theme_folder'] . '/' . $slug;
         }
-        $this->settings[$namespace] = new Settings($this, $menu_title, $props);
+        ob_start();
+        $found = get_template_part($path ?? $slug, $name, $args);
+        $output = ob_get_clean();
+        if ($found) {
+            return $output;
+        }
+        $file_path = $this->get_root_path() . 'templates/' . $slug;
+        if ($name && file_exists($file_path . '-' . $name . '.php')) {
+            $template = $file_path . '-' . $name . '.php';
+        } elseif (file_exists($file_path . '.php')) {
+            $template = $file_path . '.php';
+        } else {
+            return \false;
+        }
+        $encapsulator = function ($template_file_path) use ($slug, $name, $args) {
+            ob_start();
+            if (pathinfo($template_file_path, \PATHINFO_EXTENSION) === '.php') {
+                include $template_file_path;
+            } else {
+                return file_get_contents($template_file_path);
+            }
+            return ob_get_clean();
+        };
+        return $encapsulator($template);
     }
 }

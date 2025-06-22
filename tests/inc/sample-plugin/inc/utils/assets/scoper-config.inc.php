@@ -24,4 +24,4 @@ return ['output-dir' => __DIR__ . '/inc/utils', 'finders' => [$finder::create()-
         return str_replace("{$prefix}\\ReallySpecific\\Utils", "{$prefix}\\Utils", $contents);
     }
     return $contents;
-}], 'exclude-namespaces' => ['~^$~'], 'exclude-classes' => $wp_classes, 'exclude-constants' => $wp_constants, 'exclude-functions' => $wp_functions, 'expose-global-constants' => \true, 'expose-global-classes' => \true, 'expose-global-functions' => \true, 'expose-namespaces' => ['~^$~'], 'expose-classes' => [], 'expose-functions' => [], 'expose-constants' => []];
+}], 'exclude-namespaces' => ['~^((?!Parsedown).)$~'], 'exclude-classes' => $wp_classes, 'exclude-constants' => $wp_constants, 'exclude-functions' => $wp_functions, 'expose-global-constants' => \true, 'expose-global-classes' => \true, 'expose-global-functions' => \true, 'expose-namespaces' => ['~^((?!Parsedown).)$~'], 'expose-classes' => [], 'expose-functions' => [], 'expose-constants' => []];

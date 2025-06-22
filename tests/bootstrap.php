@@ -11,6 +11,8 @@ require_once __DIR__ . '/config.php';
 require_once config( 'root_dir' ) . '/vendor/autoload.php';
 require_once config( 'root_dir' ) . '/load.php';
 
+autoload_directory( __DIR__ . '/traits' );
+
 setup_utils();
 
 WP_Mock::bootstrap();

@@ -3,6 +3,8 @@
 namespace ReallySpecific\Utils\Tests\Classes;
 
 use function ReallySpecific\Utils\Tests\config;
+
+use ReallySpecific\Utils\Tests\Traits\MockFunctions;
 use ReallySpecific\Utils\Plugin;
 use WP_Mock;
 
@@ -11,12 +13,12 @@ use WP_Mock;
  */
 final class PluginClassTest extends WP_Mock\Tools\TestCase
 {
+	use MockFunctions;
+
 	public function test_constructor_failure() : void
 	{
 
-		WP_Mock::userFunction( 'trailingslashit', $this->mock_trailingslashit() );
-		WP_Mock::userFunction( 'sanitize_title', $this->mock_sanitize_title() );
-		WP_Mock::userFunction( 'did_action', $this->mock_did_action() );
+		$this->mock_functions();
 
 		$this->expectException( \Exception::class );
 
@@ -32,32 +34,28 @@ final class PluginClassTest extends WP_Mock\Tools\TestCase
 		WP_Mock::userFunction( 'plugin_basename', [
 			'return' => 'basic-plugin/basic-plugin.php',
 		] );
-		WP_Mock::userFunction( 'trailingslashit', $this->mock_trailingslashit() );
-		WP_Mock::userFunction( 'sanitize_title', $this->mock_sanitize_title() );
-		WP_Mock::userFunction( 'did_action', $this->mock_did_action() );
+		$this->mock_functions();
 
 		$plugin = new BasicPlugin();
 
 		$this->assertInstanceOf( Plugin::class, $plugin );
 		$this->assertEquals( 'Basic Plugin', $plugin->name );
 		$this->assertEquals( WP_PLUGIN_DIR . '/basic-plugin/basic-plugin.php', $plugin->file );
-		$this->assertEquals( WP_PLUGIN_DIR . '/basic-plugin', $plugin->path );
+		$this->assertEquals( WP_PLUGIN_DIR . '/basic-plugin/', $plugin->path );
 		$this->assertEquals( 'basic-plugin', $plugin->slug );
 
 	}
 
 	public function test_complex_construtor() : void {
 
-		WP_Mock::userFunction( 'trailingslashit', $this->mock_trailingslashit() );
-		WP_Mock::userFunction( 'sanitize_title', $this->mock_sanitize_title() );
-		WP_Mock::userFunction( 'did_action', $this->mock_did_action() );
+		$this->mock_functions();
 
 		$plugin = new ComplexPlugin();
 
 		$this->assertInstanceOf( Plugin::class, $plugin );
 		$this->assertEquals( 'Complex Plugin', $plugin->name );
 		$this->assertEquals( WP_PLUGIN_DIR . '/complex-plugin/complex-plugin.php', $plugin->file );
-		$this->assertEquals( WP_PLUGIN_DIR . '/complex-plugin', $plugin->path );
+		$this->assertEquals( WP_PLUGIN_DIR . '/complex-plugin/', $plugin->path );
 		$this->assertEquals( 'complex-plugin', $plugin->slug );
 
 		$this->assertEmpty( $plugin->domain );
@@ -68,53 +66,19 @@ final class PluginClassTest extends WP_Mock\Tools\TestCase
 
 	public function test_init_actions() : void {
 
-		WP_Mock::userFunction( 'trailingslashit', $this->mock_trailingslashit() );
-		WP_Mock::userFunction( 'sanitize_title', $this->mock_sanitize_title() );
-		WP_Mock::userFunction( 'did_action', $this->mock_did_action( true ) );
-		WP_Mock::userFunction( 'get_plugin_data', $this->mock_get_plugin_data( DataLoadedPlugin::mock_plugin_data() ) );
+		$this->mock_functions( [
+			'did_action' => true,
+			'plugin_data' => DataLoadedPlugin::mock_plugin_data(),
+		] );
 
 		$plugin = new DataLoadedPlugin();
+
+		$this->do_action('init');
 
 		$this->assertEquals( 'data-loaded', $plugin->domain );
 		$this->assertEquals( 'https://example.com/data-loaded/releases', $plugin->update_uri );
 		
 
-	}
-
-	private function mock_trailingslashit() {
-		return [
-			'return' => function( $path ) {
-				return rtrim( $path, '/' ) . '/';
-			}
-		];
-	}
-
-	private function mock_sanitize_title() {
-		return [
-			'return' => function( $name ) {
-				$slug = preg_replace( '/[^a-z0-9]/', '-', strtolower( $name ) );
-				while( str_contains( $slug, '--' ) ) {
-					$slug = str_replace( '--', '-', $slug );
-				}
-				return $slug;
-			}
-		];
-	}
-
-	private function mock_did_action( $did_it = false ) {
-		return [
-			'return' => function() use ( $did_it ){
-				return $did_it;
-			}
-		];
-	}
-
-	private function mock_get_plugin_data( $data ) {
-		return [
-			'return' => function() use ( $data ) {
-				return $data;
-			}
-		];
 	}
 
 }
@@ -125,6 +89,7 @@ class BasicPlugin extends Plugin {
 	function __construct() {
 		parent::__construct([
 			'name' => 'Basic Plugin',
+			'file' => config( 'plugins_dir' ) . '/basic-plugin/basic-plugin.php',
 		]);
 	}
 }

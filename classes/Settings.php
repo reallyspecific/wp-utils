@@ -19,7 +19,7 @@ class Settings {
 
 	private ?int $post_id = null;
 
-	private ?array $cache = null;
+	private ?MultiArray $cache = null;
 
 	/**
 	 * Constructor for the class.
@@ -299,9 +299,15 @@ class Settings {
 		$description = apply_filters( $this->slug . '_rs_util_settings_render_field_row_description', $field['description'] ?? null, $field, $value, $this );
 		$description = apply_filters( 'rs_util_settings_render_field_row_description', $description, $field, $value, $this );
 
+		$attrs = [];
+		if ( isset( $field['toggled_by'] ) ) {
+			$attrs['data-toggled-by'] = sanitize_title( $field['toggled_by'] );
+			$attrs['aria-hidden']     = 'true';
+		}
+
 		ob_start();
 		?>
-		<div class="rs-util-settings-field-row">
+		<div class="rs-util-settings-field-row" <?php echo array_to_attr_string( $attrs ); ?>>
 			<div class="rs-util-settings-field-row__label">
 				<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
 			</div>
@@ -359,8 +365,8 @@ class Settings {
 		
 		$attrs['name'] = $attrs['name'] ?? $this->parse_field_name( $field_name, ! empty( $attrs['multiple'] ) );
 
-		$attrs['class']       = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
-		$attrs['class'][]     = match( $field['type'] ) {
+		$attrs['class']   = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
+		$attrs['class'][] = match( $field['type'] ) {
 			'input'    => 'regular-text',
 			'textarea' => 'large-text',
 			default    => '',
@@ -369,7 +375,9 @@ class Settings {
 		$attrs['class'][] = 'rs-util-settings-field';
 		$attrs['class'][] = 'rs-util-settings-field--' . $field['type'];
 		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
+
 		
+
 		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
 		switch( $tag ) {
 			case 'input':
@@ -542,7 +550,7 @@ class Settings {
 			return;
 		}
 
-		$this->cache = [];
+		$this->cache = new MultiArray( [] );
 
 		foreach( $this->sections as $section ) {
 			foreach( $section['fields'] as $field ) {
@@ -574,19 +582,10 @@ class Settings {
 		if ( is_null( $this->cache ) || $nocache ) {
 			$this->load();
 		}
-		if ( ! empty( $key ) ) {
-			$parts = explode( '.', $key );
-			$value = &$this->cache;
-			while( ! empty( $parts ) ) {
-				$index = array_shift( $parts );
-				if ( ! isset( $value[ $index ] ) ) {
-					return null;
-				}
-				$value = &$value[ $index ] ?? null;
-			}
-			return $value;
+		if ( empty( $key ) ) {
+			return $this->cache->to_array();
 		}
-		return $this->cache;
+		return $this->cache[ $key ];
 	}
 
 	public function __get( $key ) {
@@ -595,45 +594,34 @@ class Settings {
 
 	private function load() {
 		if ( $this->multisite ) {
-			$this->cache = get_site_option( $this->settings['option_name'], [] ) ?: [];
+			$cache = get_site_option( $this->settings['option_name'], [] ) ?: [];
 		} else {
-			$this->cache = get_option( $this->settings['option_name'], [] ) ?: [];
+			$cache = get_option( $this->settings['option_name'], [] ) ?: [];
 		}
+		$this->cache = new MultiArray( $cache );
 	}
 
 	public function update( $key, $value, $save = true ) {
 
-		$settings = $this->get();
+		$this->load();
 
-		$name = explode( '.', $key );
+		$this->cache[ $key ] = $value;
 
-		$setting = &$settings;
-		while ( count( $name ) > 1 ) {
-			$index = array_shift( $name );
-			if ( ! isset( $setting[ $index ] ) ) {
-				$setting[ $index ] = [];
-			}
-			$setting = &$setting[ $index ];
-		}
-		$setting[ current( $name ) ] = $value;
-
-		$this->cache = $settings;
-
-		if ( ! $save ) {
-			return $settings;
+		if ( $save ) {
+			$this->save();
 		}
 
-		$this->save();
+		return $this->cache->to_array();
 
 	}
 
 	public function save() {
 		if ( $this->post_id ) {
-			update_post_meta( $this->post_id, $this->settings['option_name'], $this->cache );
+			update_post_meta( $this->post_id, $this->settings['option_name'], $this->cache->to_array() );
 		} elseif ( $this->multisite ) {
-			update_site_option( $this->settings['option_name'], $this->cache );
+			update_site_option( $this->settings['option_name'], $this->cache->to_array() );
 		} else {
-			update_option( $this->settings['option_name'], $this->cache );
+			update_option( $this->settings['option_name'], $this->cache->to_array() );
 		}
 	}
 
