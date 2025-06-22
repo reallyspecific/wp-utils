@@ -238,7 +238,7 @@ class Settings {
 				<?php do_action( 'rs_util_settings_render_form_afterstart', $this ); ?>
 				<?php wp_nonce_field( $this->slug ); ?>
 				<?php $i = 0; foreach( $this->sections as $section ) : ?>
-					<div aria-hidden="<?php echo ( ! $i ) ? 'false' : 'true'; ?>" class="rs-util-settings-field-section" data-section="<?php echo $section['id']; ?>">
+					<div aria-hidden="<?php echo ( ! $i ) ? 'false' : 'true'; ?>" class="rs-util-settings-section" data-section="<?php echo $section['id']; ?>">
 						<?php if ( isset( $section['title'] ) ) : ?>
 						<h2 class="rs-util-settings-field-section__title"><?php echo $section['title']; ?></h2>
 						<?php endif; ?>
