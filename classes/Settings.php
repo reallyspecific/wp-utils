@@ -86,7 +86,7 @@ class Settings {
 
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
-		add_action( 'wp_footer', [ __CLASS__, 'render_global_settings' ] );
+		add_action( 'admin_footer', [ __CLASS__, 'render_global_settings' ] );
 	}
 
 	public static function render_global_settings() {
