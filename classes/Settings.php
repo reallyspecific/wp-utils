@@ -83,6 +83,14 @@ class Settings {
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 	}
 
+	function hide_notices_to_all_but_super_admin(){
+		$screen = get_current_screen();
+		if ( $screen->id === $this->hook ) {
+			remove_all_actions( 'user_admin_notices' );
+			remove_all_actions( 'admin_notices' );
+		}
+	}
+
 	/**
 	 * Installs the menu page or submenu page based on the settings.
 	 *
@@ -111,6 +119,7 @@ class Settings {
 			);
 		}
 		add_action( $this->hook, [ $this, 'save_form' ], -1 );
+		add_action( 'in_admin_header', [ $this, 'hide_notices_from_other_plugins' ], 99 );
 	}
 
 	/**
@@ -205,11 +214,11 @@ class Settings {
 		$current_values = $this->get();
 		
 		?>
-		<div class="wrap">
-			<h2><?php echo $this->settings['form_title']; ?></h2>
+		<div class="wrap rs-util-settings-page">
+			<h1 class="wp-heading-inline rs-util-settings-page__title"><?php echo $this->settings['page_title']; ?></h1>
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_beforestart', $this ); ?>
 			<?php do_action( 'rs_util_settings_render_form_beforestart', $this ); ?>
-			<form method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
+			<form class="rs-util-settings-form" method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_afterstart', $this ); ?>
 				<?php do_action( 'rs_util_settings_render_form_afterstart', $this ); ?>
 				<?php wp_nonce_field( $this->slug ); ?>
