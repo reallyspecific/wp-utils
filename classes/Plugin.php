@@ -73,7 +73,6 @@ abstract class Plugin {
 		add_action( 'init', [ $this, 'get_wp_data' ] );
 		add_action( 'init', [ $this, 'setup_updater' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
-		add_action( 'wp',   [ $this, 'install_settings' ], 10, 0 );
 
 		add_action( 'plugins_loaded', [ $this, 'setup' ] );
 
@@ -89,7 +88,7 @@ abstract class Plugin {
 		foreach( $namespaces as $namespace => $props ) {
 			$this->settings[ $namespace ] = new Settings( $props );
 		}
-		add_action( 'init', [ $this, 'install_settings' ], 10, 0 );
+		add_action( 'wp_loaded', [ $this, 'install_settings' ], 10, 0 );
 	}
 
 	/**
