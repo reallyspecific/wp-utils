@@ -165,9 +165,41 @@ html {
 
 .rs-util-settings-field {
 	margin-bottom: 1rem;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 1rem 0.5rem;
 
 	+ .rs-util-settings-field__description {
 		margin-top: -0.5rem;
+	}
+}
+
+.rs-util-settings-field-value--checkbox {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 0.5rem;
+	
+	input {
+		opacity: 0;
+		appearance: none;
+		width: 2rem;
+		height: 1.5rem;
+		position: relative;
+		z-index: 1;
+		+ .rs-util-settings-field-icon {
+			width: 2rem;
+			height: 1.5rem;
+			margin-left: -2.5rem;
+			z-index: 0;
+			--rs-util-svg-iconset--toggle__dot-color: color-mix( in srgb, transparent, currentColor 50% );
+			--rs-util-svg-iconset--toggle__outline-color: color-mix( in srgb, transparent, currentColor 50% );
+		}
+		&:checked + .rs-util-settings-field-icon {
+			--rs-util-svg-iconset--toggle__dot-color: currentColor;
+			--rs-util-svg-iconset--toggle__outline-color: var(--rs-util-settings-focus-outline-color);
+		}
 	}
 }
 

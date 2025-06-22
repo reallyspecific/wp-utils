@@ -1,6 +1,6 @@
-( function() {
+( async function() {
 
-	const onReady = () => {
+	const onReady = async () => {
 
 		const settings = rsUtil_settingsPageENV();
 
@@ -11,7 +11,13 @@
 
 		if ( settings.svg_iconset && ! document.querySelector( '#rs-util-svg-iconset' ) ) {
 			const svgIcons = document.createElement( 'div' );
-			svgIcons.innerHTML = settings.svg_iconset;
+			try {
+				const svg = await fetch( settings.svg_iconset );
+				const svgText = await svg.text();
+				svgIcons.innerHTML = svgText;
+			} catch ( e ) {
+				console.error( e );
+			}
 			document.body.appendChild( svgIcons.firstElementChild );
 		}
 
