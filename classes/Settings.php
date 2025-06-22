@@ -251,7 +251,7 @@ class Settings {
 						<?php if ( isset( $section['fields'] ) ) : ?>
 						<?php do_action( $this->slug . '_rs_util_settings_render_section_beforestart', $section, $this ); ?>
 						<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
-						<div class="form-table">
+						<div class="rs-util-settings-form-table">
 							<?php
 							$current_group = null;
 							foreach( $section['fields'] as $field ) {
