@@ -81,6 +81,7 @@ class Settings {
 
 	public static function enqueue_admin_scripts() {
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
+		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
 	}
 
 	public function hide_notices_from_other_plugins(){
@@ -210,6 +211,7 @@ class Settings {
 	public function render() {
 
 		wp_enqueue_style( 'rs-util-admin-fields' );
+		wp_enqueue_script( 'rs-util-admin-fields' );
 
 		$current_values = $this->get();
 		
@@ -218,43 +220,51 @@ class Settings {
 			<div class="rs-util-settings-page__title">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
 				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
+				<button disabled type="submit" class="button primary-button rs-util-settings-page__submit">Save Changes</button>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
 			</div>
+			<?php if ( count( $this->sections ) > 1 ) : ?>
+			<div class="rs-util-settings-page__tabs">
+				<?php $i = 0; foreach( $this->sections as $section ) : ?>
+					<button type="button" aria-expanded="<?php echo ( ! $i ) ? 'true' : 'false'; ?>" class="rs-util-settings-page__tab-toggle" data-section="<?php echo $section['id']; ?>"><?php echo $section['title'] ?? 'General'; ?></button>
+				<?php $i++; endforeach; ?>
+			</div>
+			<?php endif; ?>
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_beforestart', $this ); ?>
 			<?php do_action( 'rs_util_settings_render_form_beforestart', $this ); ?>
 			<form class="rs-util-settings-form" method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_afterstart', $this ); ?>
 				<?php do_action( 'rs_util_settings_render_form_afterstart', $this ); ?>
 				<?php wp_nonce_field( $this->slug ); ?>
-				<?php foreach( $this->sections as $section ) : ?>
-					
-					<?php if ( isset( $section['title'] ) ) : ?>
-					<h3 class="rs-util-settings-field-section__title"><?php echo $section['title']; ?></h3>
-					<?php endif; ?>
-					<?php if ( isset( $section['description'] ) ) : ?>
-					<p class="rs-util-settings-field-section__description">
-					<?php echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); ?>
-					</p>
-					<?php endif; ?>
+				<?php $i = 0; foreach( $this->sections as $section ) : ?>
+					<div aria-hidden="<?php echo ( ! $i ) ? 'false' : 'true'; ?>" class="rs-util-settings-field-section" data-section="<?php echo $section['id']; ?>">
+						<?php if ( isset( $section['title'] ) ) : ?>
+						<h2 class="rs-util-settings-field-section__title"><?php echo $section['title']; ?></h2>
+						<?php endif; ?>
+						<?php if ( isset( $section['description'] ) ) : ?>
+						<p class="rs-util-settings-field-section__description">
+						<?php echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); ?>
+						</p>
+						<?php endif; ?>
 
-					<?php if ( isset( $section['fields'] ) ) : ?>
-					<?php do_action( $this->slug . '_rs_util_settings_render_section_beforestart', $section, $this ); ?>
-					<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
-					<table class="form-table">
-						<?php foreach( $section['fields'] as $field ) : ?>
-							<?php $field_name = $field['attrs']['name'] ?? $field['name'] ?? ''; ?>
-							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
-							<?php do_action( 'rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
-							<?php $this->render_field_row( $field, $this->get( $field_name ) ?? null ); ?>
-							<?php do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
-							<?php do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
-						<?php endforeach; ?>
-					</table>
-					<?php do_action( $this->slug . '_rs_util_settings_render_section_afterend', $section, $this ); ?>
-					<?php do_action( 'rs_util_settings_render_section_afterend', $section, $this ); ?>
-					<?php endif; ?>
-				<?php endforeach; ?>
-				<?php submit_button(); ?>
+						<?php if ( isset( $section['fields'] ) ) : ?>
+						<?php do_action( $this->slug . '_rs_util_settings_render_section_beforestart', $section, $this ); ?>
+						<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
+						<table class="form-table">
+							<?php foreach( $section['fields'] as $field ) : ?>
+								<?php $field_name = $field['attrs']['name'] ?? $field['name'] ?? ''; ?>
+								<?php do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
+								<?php do_action( 'rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
+								<?php $this->render_field_row( $field, $this->get( $field_name ) ?? null ); ?>
+								<?php do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
+								<?php do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
+							<?php endforeach; ?>
+						</table>
+						<?php do_action( $this->slug . '_rs_util_settings_render_section_afterend', $section, $this ); ?>
+						<?php do_action( 'rs_util_settings_render_section_afterend', $section, $this ); ?>
+						<?php endif; ?>
+					</div>
+				<?php $i++; endforeach; ?>
 				<?php do_action( 'rs_util_settings_render_form_beforeend', $this ); ?>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_beforeend', $this ); ?>
 			</form>
