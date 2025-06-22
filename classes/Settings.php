@@ -323,7 +323,7 @@ class Settings {
 		ob_start();
 		?>
 		<div class="rs-util-settings-field-row" <?php echo array_to_attr_string( $attrs ); ?>>
-			<?php if ( ! isset( $field['label'] ) ) : ?>
+			<?php if ( ! empty( $label ) ) : ?>
 				<div class="rs-util-settings-field-row__label">
 					<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
 				</div>
