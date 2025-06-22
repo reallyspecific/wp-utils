@@ -15,7 +15,33 @@ function add_global_var( $key, $value = null ) {
 	return $global;
 }
 
-function get_global_var( $key ) : mixed {
+function get_global_var( $key = null ) : mixed {
 	$global = _global();
+	if ( is_null( $key ) ) {
+		return $global;
+	}
 	return $global[ $key ];
+}
+
+function get_global_var_inline_script( $key = null, $func_name = null ) : string {
+	$var = get_global_var( $key );
+	if ( is_null( $func_name ) ) {
+		$func_name = 'rsUtil_getGlobalVar';
+		if ( $key ) {
+			$func_name .= '_' . sanitize_title( $key );
+		}
+	}
+	ob_start(); ?>
+	<script type="text/javascript" class="rs-util-global-vars" data-key="<?php echo esc_attr( $key ); ?>" data-func="<?php echo esc_attr( $func_name ); ?>">
+		( function() {
+			if ( typeof <?php echo $func_name; ?> === 'undefined' ) {
+				const thisGlobalVar = <?php echo wp_json_encode( $var ); ?>;
+				window[<?php echo $func_name; ?>] = function() {
+					return thisGlobalVar;
+				}
+			}
+		} )();
+	</script>
+	<?php
+	return ob_get_clean();
 }

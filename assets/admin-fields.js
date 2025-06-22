@@ -1,6 +1,6 @@
 ( function() {
 
-	const settings = JSON.parse( document.querySelector( '#rs-util-settings-global-vars' )?.innerText || '{}' ) || {};
+	const settings = rsUtil_getGlobalVar__settingsPage();
 
 	const form = document.querySelector( '.rs-util-settings-form' );
 	if ( ! form ) {

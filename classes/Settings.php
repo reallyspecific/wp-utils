@@ -6,6 +6,7 @@ use function ReallySpecific\Utils\Text\array_to_attr_string;
 use function ReallySpecific\Utils\Text\parsedown_line;
 use function ReallySpecific\Utils\Environment\add_global_var;
 use function ReallySpecific\Utils\Environment\get_global_var;
+use function ReallySpecific\Utils\Environment\get_global_var_inline_script;
 
 class Settings {
 
@@ -82,19 +83,21 @@ class Settings {
 	}
 
 	public static function enqueue_admin_scripts() {
+		add_global_var( 'rs_util_settings.svg_iconset', plugins_url( 'assets/svg-iconset.svg', __DIR__ ) );
+
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
-		add_action( 'wp_foot', [ __CLASS__, 'render_global_settings' ] );
-
-		add_global_var( 'rs_util_settings.svg_iconset', plugins_url( 'assets/svg-iconset.svg', __DIR__ ) );
+		wp_add_inline_script(
+			'rs-util-admin-fields',
+			get_global_var_inline_script( 'rs_util_settings', 'rsUtil_getGlobalVar__settingsPage' ),
+			'before'
+		);
 	}
 
 	public static function render_global_settings() {
-		?>
-		<script type="application/json" id="rs-util-settings-global-vars">
-			<?php echo wp_json_encode( get_global_var('rs_util_settings') ); ?>
-		</script>
-		<?php
+		?><script type="application/json" id="rs-util-settings-global-vars"><?php 
+			echo wp_json_encode(get_global_var('rs_util_settings'));
+		?></script><?php
 	}
 
 	public function hide_notices_from_other_plugins(){
@@ -561,8 +564,8 @@ class Settings {
 	}
 
 	public function save_form()
-    {
-        if ( ! current_user_can( $this->settings['capability'] ) ) {
+	{
+		if ( ! current_user_can( $this->settings['capability'] ) ) {
 			return;
 		}
 
