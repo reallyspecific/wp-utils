@@ -215,7 +215,11 @@ class Settings {
 		
 		?>
 		<div class="wrap rs-util-settings-page">
-			<h1 class="wp-heading-inline rs-util-settings-page__title"><?php echo $this->settings['page_title']; ?></h1>
+			<div class="rs-util-settings-page__title">
+				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
+				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
+				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
+			</div>
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_beforestart', $this ); ?>
 			<?php do_action( 'rs_util_settings_render_form_beforestart', $this ); ?>
 			<form class="rs-util-settings-form" method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
