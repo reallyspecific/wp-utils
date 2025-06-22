@@ -251,16 +251,31 @@ class Settings {
 						<?php if ( isset( $section['fields'] ) ) : ?>
 						<?php do_action( $this->slug . '_rs_util_settings_render_section_beforestart', $section, $this ); ?>
 						<?php do_action( 'rs_util_settings_render_section_beforestart', $section, $this ); ?>
-						<table class="form-table">
-							<?php foreach( $section['fields'] as $field ) : ?>
-								<?php $field_name = $field['attrs']['name'] ?? $field['name'] ?? ''; ?>
-								<?php do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
-								<?php do_action( 'rs_util_settings_render_field_row_beforestart', $field, $section, $this ); ?>
-								<?php $this->render_field_row( $field, $this->get( $field_name ) ?? null ); ?>
-								<?php do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
-								<?php do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this ); ?>
-							<?php endforeach; ?>
-						</table>
+						<div class="form-table">
+							<?php
+							$current_group = null;
+							foreach( $section['fields'] as $field ) {
+								if ( ( $field['group'] ?? null ) !== $current_group ) {
+									if ( $current_group ) {
+										printf( '</fieldset>' );
+									}
+									if ( $field['group'] ?? null ) {
+										$current_group = $field['group'];
+										printf( '<fieldset class="rs-util-settings-field-group"><legend>%s</legend>', $current_group );
+									}
+								}
+								$field_name = $field['attrs']['name'] ?? $field['name'] ?? '';
+								
+								do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this );
+								do_action( 'rs_util_settings_render_field_row_beforestart', $field, $section, $this );
+
+								$this->render_field_row( $field, $this->get( $field_name ) ?? null );
+
+								do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this );
+								do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this );
+							}
+							?>
+						</div>
 						<?php do_action( $this->slug . '_rs_util_settings_render_section_afterend', $section, $this ); ?>
 						<?php do_action( 'rs_util_settings_render_section_afterend', $section, $this ); ?>
 						<?php endif; ?>
@@ -286,19 +301,19 @@ class Settings {
 
 		ob_start();
 		?>
-		<tr class="rs-util-settings-field-row">
-			<th scope="row" class="rs-util-settings-field-row__label">
+		<div class="rs-util-settings-field-row">
+			<div class="rs-util-settings-field-row__label">
 				<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
-			</th>
-			<td class="rs-util-settings-field-value rs-util-settings-field-value--<?php echo $field['type']; ?>">
+			</div>
+			<div class="rs-util-settings-field-value rs-util-settings-field-value--<?php echo $field['type']; ?>">
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
 				<p class="rs-util-settings-field__description">
 					<?php echo parsedown_line( $description, 'description', 'rs-util-settings' ); ?>
 				</p>
 				<?php endif; ?>
-			</td>
-		</tr>
+			</div>
+		</div>
 		<?php
 		
 		$rendered = ob_get_clean();
