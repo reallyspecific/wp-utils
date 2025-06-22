@@ -34,10 +34,16 @@ function get_global_var_inline_script( $key = null, $func_name = null ) : string
 	ob_start(); ?>( function() {
 		if ( typeof <?php echo $func_name; ?> === 'undefined' ) {
 			const thisGlobalVar = <?php echo wp_json_encode( $var ); ?>;
-			window[<?php echo $func_name; ?>] = function() {
-				return thisGlobalVar;
-			}
+			window[<?php echo $func_name; ?>] = function( key ) {
+				return key ? ( thisGlobalVar?.[key] ?? null ) : thisGlobalVar;
+			};
+			document.dispatchEvent( new CustomEvent( '<?php echo $func_name; ?>|ready', { detail: thisGlobalVar } ) );
 		}
 	} )();<?php
 	return ob_get_clean();
+}
+
+function get_global_var_footer_script( $key = null, $func_name = null ) : string {
+	$script = get_global_var_inline_script( $key, $func_name );
+	return "<script type='text/javascript'>" . $script . "</script>";
 }

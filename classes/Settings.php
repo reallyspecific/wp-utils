@@ -5,8 +5,7 @@ namespace ReallySpecific\Utils;
 use function ReallySpecific\Utils\Text\array_to_attr_string;
 use function ReallySpecific\Utils\Text\parsedown_line;
 use function ReallySpecific\Utils\Environment\add_global_var;
-use function ReallySpecific\Utils\Environment\get_global_var;
-use function ReallySpecific\Utils\Environment\get_global_var_inline_script;
+use function ReallySpecific\Utils\Environment\get_global_var_footer_script;
 
 class Settings {
 
@@ -87,17 +86,11 @@ class Settings {
 
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
-		wp_add_inline_script(
-			'rs-util-admin-fields',
-			get_global_var_inline_script( 'rs_util_settings', 'rsUtil_settingsPage' ),
-			'before'
-		);
+		add_action( 'wp_footer', [ __CLASS__, 'render_global_settings' ] );
 	}
 
 	public static function render_global_settings() {
-		?><script type="application/json" id="rs-util-settings-global-vars"><?php 
-			echo wp_json_encode(get_global_var('rs_util_settings'));
-		?></script><?php
+		echo get_global_var_footer_script( 'rs_util_settings', 'rsUtil_settingsPageENV' );
 	}
 
 	public function hide_notices_from_other_plugins(){

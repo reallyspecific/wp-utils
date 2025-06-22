@@ -1,21 +1,23 @@
 ( function() {
 
-	const settings = rsUtil_getGlobalVar__settingsPage();
+	document.addEventListener( 'rsUtil_settingsPageENV|ready', e => {
+		const settings = rsUtil_settingsPageENV();
 
-	const form = document.querySelector( '.rs-util-settings-form' );
-	if ( ! form ) {
-		return;
-	}
+		const form = document.querySelector( '.rs-util-settings-form' );
+		if ( ! form ) {
+			return;
+		}
 
-	if ( settings.svg_iconset && ! document.querySelector( '#rs-util-svg-iconset' ) ) {
-		const svgIcons = document.createElement( 'div' );
-		svgIcons.innerHTML = settings.svg_iconset;
-		document.body.appendChild( svgIcons.firstElementChild );
-	}
+		if ( settings.svg_iconset && ! document.querySelector( '#rs-util-svg-iconset' ) ) {
+			const svgIcons = document.createElement( 'div' );
+			svgIcons.innerHTML = settings.svg_iconset;
+			document.body.appendChild( svgIcons.firstElementChild );
+		}
 
-	function enableSaveButton() {
-		document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
-	}
+		function enableSaveButton() {
+			document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
+		}
+	} );
 
 	document.addEventListener( 'change', e => {
 		if ( e.target.closest( '.rs-util-settings-form' ) ) {
