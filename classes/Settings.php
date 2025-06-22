@@ -257,11 +257,11 @@ class Settings {
 							foreach( $section['fields'] as $field ) {
 								if ( ( $field['group'] ?? null ) !== $current_group ) {
 									if ( $current_group ) {
-										printf( '</fieldset>' );
+										printf( '</div>' );
 									}
 									if ( $field['group'] ?? null ) {
 										$current_group = $field['group'];
-										printf( '<fieldset class="rs-util-settings-field-group"><legend>%s</legend>', $current_group );
+										printf( '<div class="rs-util-settings-field-group"><div class="rs-util-settings-field-group__label">%s</div>', $current_group );
 									}
 								}
 								$field_name = $field['attrs']['name'] ?? $field['name'] ?? '';
@@ -308,9 +308,11 @@ class Settings {
 		ob_start();
 		?>
 		<div class="rs-util-settings-field-row" <?php echo array_to_attr_string( $attrs ); ?>>
-			<div class="rs-util-settings-field-row__label">
-				<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
-			</div>
+			<?php if ( ! isset( $field['label'] ) ) : ?>
+				<div class="rs-util-settings-field-row__label">
+					<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
+				</div>
+			<?php endif; ?>
 			<div class="rs-util-settings-field-value rs-util-settings-field-value--<?php echo $field['type']; ?>">
 				<?php $this->render_field( $field, $value ); ?>
 				<?php if ( ! empty( $description ) ) : ?>
@@ -479,7 +481,7 @@ class Settings {
 
 		foreach( $field['options'] as $key => $option ) {
 			if ( isset( $option['group'] ) ) {
-				$buffer .= sprintf( '<fieldset class="rs-util-settings-field__group"><legend><strong>%s</strong></legend>', esc_attr( $option['group'] ) );
+				$buffer .= sprintf( '<fieldset class="rs-util-settings-field__fieldset"><legend><strong>%s</strong></legend>', esc_attr( $option['group'] ) );
 				$suboptions = $option['options'] ?? [];
 			} else {
 				$suboptions = [ $key => $option ];
