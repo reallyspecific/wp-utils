@@ -1,6 +1,7 @@
 ( function() {
 
-	document.addEventListener( 'rsUtil_settingsPageENV|ready', e => {
+	const onReady = () => {
+
 		const settings = rsUtil_settingsPageENV();
 
 		const form = document.querySelector( '.rs-util-settings-form' );
@@ -17,7 +18,13 @@
 		function enableSaveButton() {
 			document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
 		}
-	} );
+	}
+
+	if ( typeof rsUtil_settingsPageENV === 'function' ) {
+		onReady();
+	} else {
+		document.addEventListener( 'rsUtil_settingsPageENV|ready', onReady );
+	}
 
 	document.addEventListener( 'change', e => {
 		if ( e.target.closest( '.rs-util-settings-form' ) ) {
