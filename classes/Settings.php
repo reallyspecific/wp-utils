@@ -4,6 +4,8 @@ namespace ReallySpecific\Utils;
 
 use function ReallySpecific\Utils\Text\array_to_attr_string;
 use function ReallySpecific\Utils\Text\parsedown_line;
+use function ReallySpecific\Utils\Environment\add_global_var;
+use function ReallySpecific\Utils\Environment\get_global_var;
 
 class Settings {
 
@@ -82,6 +84,17 @@ class Settings {
 	public static function enqueue_admin_scripts() {
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
+		add_action( 'wp_foot', [ __CLASS__, 'render_global_settings' ] );
+
+		add_global_var( 'rs_util_settings.svg_iconset', plugins_url( 'assets/svg-iconset.svg', __DIR__ ) );
+	}
+
+	public static function render_global_settings() {
+		?>
+		<script type="application/json" id="rs-util-settings-global-vars">
+			<?php echo wp_json_encode( get_global_var('rs_util_settings') ); ?>
+		</script>
+		<?php
 	}
 
 	public function hide_notices_from_other_plugins(){
@@ -227,7 +240,9 @@ class Settings {
 			<?php if ( count( $this->sections ) > 1 ) : ?>
 			<div class="rs-util-settings-page__tabs">
 				<?php $i = 0; foreach( $this->sections as $section ) : ?>
-					<button type="button" aria-expanded="<?php echo ( ! $i ) ? 'true' : 'false'; ?>" class="rs-util-settings-page__tab-toggle" data-section="<?php echo $section['id']; ?>"><?php echo $section['title'] ?? 'General'; ?></button>
+					<button type="button" aria-expanded="<?php echo ( ! $i ) ? 'true' : 'false'; ?>" class="rs-util-settings-page__tab-toggle" data-section="<?php echo $section['id']; ?>"><?php 
+						echo $section['tab_label'] ?? $section['title'] ?? 'General'; 
+					?></button>
 				<?php $i++; endforeach; ?>
 			</div>
 			<?php endif; ?>
@@ -510,7 +525,7 @@ class Settings {
 				if ( $subkey === $value || ( is_array( $value ) && in_array( $subkey, $value ) ) ) {
 					$subattrs['checked'] = 'checked';
 				}
-				$buffer .= sprintf( '<p class="rs-util-settings-field__option"><input type="%1$s" value="%2$s" %3$s><label for="%2$s">%4$s</label></p>',
+				$buffer .= sprintf( '<p class="rs-util-settings-field__option"><svg xmlns="http://www.w3.org/2000/svg" class="rs-util-settings-field-icon"><use href="#rs-util-svg-iconset--boxicons--toggle" /></svg><input type="%1$s" value="%2$s" %3$s><label for="%2$s">%4$s</label></p>',
 					empty( $attrs['multiple'] ) ? 'radio' : 'checkbox',
 					esc_attr( $subkey ),
 					array_to_attr_string( $subattrs ),

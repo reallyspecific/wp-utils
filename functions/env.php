@@ -15,7 +15,7 @@ function add_global_var( $key, $value = null ) {
 	return $global;
 }
 
-function get_global_var( $key ) {
+function get_global_var( $key ) : mixed {
 	$global = _global();
 	return $global[ $key ];
 }
