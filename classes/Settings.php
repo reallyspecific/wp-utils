@@ -136,6 +136,7 @@ class Settings {
 			unset( $props['fields'] );
 		}
 		$this->sections[ $id ] = wp_parse_args( $props, [
+			'id'          => $id,
 			'title'       => null,
 			'description' => null,
 			'order'       => ( count( $this->sections ) + 1 ) * 10,
