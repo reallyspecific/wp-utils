@@ -268,11 +268,15 @@ class Settings {
 							foreach( $section['fields'] as $field ) {
 								if ( ( $field['group'] ?? null ) !== $current_group ) {
 									if ( $current_group ) {
-										printf( '</div>' );
+										printf( '</div></div>' );
 									}
 									if ( $field['group'] ?? null ) {
 										$current_group = $field['group'];
-										printf( '<div class="rs-util-settings-field-group"><div class="rs-util-settings-field-group__label">%s</div>', $current_group );
+										printf( 
+											'<div class="rs-util-settings-field-group">'
+											. '<div class="rs-util-settings-field-group__label">%s</div>'
+											. '<div class="rs-util-settings-field-group__content">', 
+										$current_group );
 									}
 								}
 								$field_name = $field['attrs']['name'] ?? $field['name'] ?? '';

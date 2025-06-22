@@ -6,8 +6,10 @@ html {
 	--rs-util-settings-page-title-color: #202020;
 	--rs-util-settings-page-light-stripe: #9DB5E0;
 	--rs-util-settings-page-heavy-stripe: #B09DE0;
-	--rs-util-settings-tab-background: var(--rs-util-settings-page-light-stripe);
-	--rs-util-settings-tab-active: var(--rs-util-settings-page-heavy-stripe);
+	--rs-util-settings-tab-background: #d0d0e0;
+	--rs-util-settings-tab-color: var(--rs-util-settings-page-dark);
+	--rs-util-settings-tab-active-bg: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-heavy-stripe) 80% );
+	--rs-util-settings-tab-active-color: var(--rs-util-settings-page-dark);
 	--rs-util-settings-focus-outline-color: color-mix( in srgb, var(--rs-util-settings-page-text-color), var(--rs-util-settings-page-heavy-stripe) 50% );
 
 	--rs-util-settings-button-padding: 0.75rem 2rem;
@@ -38,7 +40,7 @@ html {
 	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
-	background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-heavy-stripe) 80% );
+	background: var(--rs-util-settings-page-heavy-stripe);
 	color: var(--rs-util-settings-page-title-color);
 	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
 	position: sticky;
@@ -76,13 +78,13 @@ html {
 	align-items: center;
 	gap: 0 1rem;
 	border-bottom: 1px solid var(--rs-util-settings-tab-active);
-	margin: var(--rs-util-settings-stripe-padding);
+	margin: 1rem 2rem 0
 }
 
 .rs-util-settings-page__tab-toggle {
 	appearance: none;
 	background: var(--rs-util-settings-tab-background);
-	border: 1px solid var(--rs-util-settings-tab-background);
+	border: 1px solid var(--rs-util-settings-tab-active-bg);
 	color: var(--rs-util-settings-page-text-color);
 	cursor: pointer;
 	padding: var(--rs-util-settings-button-padding, 0.75rem 2rem);
@@ -90,8 +92,9 @@ html {
 	outline: none;
 
 	&:hover, &:active {
-		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active) 80% );
-		border-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active) 80% );
+		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active-bg) 60% );
+		border-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active-bg) 60% );
+		color: var(--rs-util-settings-tab-active-color);
 	}
 	&:focus, &:active {
 		outline: 1px solid var(--rs-util-settings-focus-outline-color);
@@ -99,7 +102,9 @@ html {
 	}
 
 	&[aria-expanded="true"] {
-		background: var(--rs-util-settings-tab-active);
+		background: var(--rs-util-settings-tab-active-bg);
+		border-color: var(--rs-util-settings-tab-active-bg);
+		color: var(--rs-util-settings-tab-active-color);
 	}
 }
 
@@ -113,12 +118,23 @@ html {
 	flex-direction: column;
 	justify-content: start;
 	align-items: stretch;
-	gap: 1rem;
-	padding: var(--rs-util-settings-section-padding, 0.75rem 1.5rem);
+	gap: 0;
+	padding: 0 2rem;
+
+	.rs-util-settings-field-section__title {
+		margin: 0;
+		padding:  2rem 1.5rem;
+		border-bottom: 1px solid var(--rs-util-settings-tab-active-bg);
+		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active-bg) 60% );
+		color: var(--rs-util-settings-tab-active-color);
+	}
 }
 
 .rs-util-settings-form {
-	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem 2rem;
 }
 
 .rs-util-settings-form-table {
@@ -126,7 +142,7 @@ html {
 	grid-template-columns: auto 1fr;
 	grid-auto-rows: auto;
 	grid-template-areas: "label value";
-	gap: 1rem 2rem;
+	gap: 0;
 	align-items: start;
 	justify-items: start;
 
@@ -141,21 +157,37 @@ html {
 		margin: 0;
 		padding: 0;
 		.rs-util-settings-field-group__label {
-			grid-column: 1 / span 1;
 			font-size: 1rem;
 			font-weight: bold;
+			align-self: stretch;
 		}
 		.rs-util-settings-field-row {
 			grid-column: 2 / span 1;
+			padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+			padding-left: 0;
 		}
-	}
-	.rs-util-settings-field-row__label {
-		grid-column: 1 / span 1;
 	}
 	.rs-util-settings-field-row__value {
 		grid-column: 2 / span 1;
+		padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+	}
+
+	& > .rs-util-settings-field-row,
+	& > .rs-util-settings-field-group {
+		background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 20% );
+		&:nth-child( 2n ) {
+			background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 40% );
+		}
+	}
+	.rs-util-settings-field-row__label,
+	.rs-util-settings-field-group__label {
+		padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+		grid-column: 1 / span 1;
+		margin: 0;
+		background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 20% );
 	}
 }
+
 
 .rs-util-settings-field-row {
 	&[aria-hidden="true"] {
@@ -193,12 +225,14 @@ html {
 			height: 1.5rem;
 			margin-left: -2.5rem;
 			z-index: 0;
-			--rs-util-svg-iconset--toggle__dot-color: color-mix( in srgb, transparent, currentColor 50% );
-			--rs-util-svg-iconset--toggle__outline-color: color-mix( in srgb, transparent, currentColor 50% );
+			transition: all 0.2s ease-in-out;
+			--rs-util-svg-iconset--toggle__dot-fill: color-mix( in srgb, transparent, currentColor 50% );
+			--rs-util-svg-iconset--toggle__outline-fill: color-mix( in srgb, transparent, currentColor 50% );
 		}
 		&:checked + .rs-util-settings-field-icon {
-			--rs-util-svg-iconset--toggle__dot-color: currentColor;
-			--rs-util-svg-iconset--toggle__outline-color: var(--rs-util-settings-focus-outline-color);
+			--rs-util-svg-iconset--toggle__dot-fill: currentColor;
+			--rs-util-svg-iconset--toggle__dot-translate: 8px;
+			--rs-util-svg-iconset--toggle__outline-fill: var(--rs-util-settings-focus-outline-color);
 		}
 	}
 }

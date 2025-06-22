@@ -21,15 +21,16 @@
 			document.body.appendChild( svgIcons.firstElementChild );
 		}
 
-		function enableSaveButton() {
-			document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
-		}
 	}
 
 	if ( typeof rsUtil_settingsPageENV === 'function' ) {
 		onReady();
 	} else {
 		document.addEventListener( 'rsUtil_settingsPageENV|ready', onReady );
+	}
+
+	function enableSaveButton() {
+		document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
 	}
 
 	document.addEventListener( 'change', e => {
@@ -63,10 +64,23 @@
 		}
 		e.preventDefault();
 
+		showTogglableControls( toggle );
+	} );
+
+	const showTogglableControls = ( toggle ) => {
 		const toggled = document.querySelectorAll( `.rs-util-settings-field-row[data-toggled-by="${toggle.id}"]` );
 		toggled.forEach( fieldRow => {
 			fieldRow.setAttribute( 'aria-hidden', toggle.checked ? 'false' : 'true' );
 		} );
+		if ( toggled.length ) {
+			toggle.setAttribute( 'aria-expanded', toggle.checked ? 'true' : 'false' );
+			toggle.setAttribute( 'aria-controls', `[data-toggled-by="${toggle.id}"]` );
+		}
+	}
+
+	const allToggles = document.querySelectorAll( '.rs-util-settings-field--checkbox' );
+	allToggles.forEach( toggle => {
+		showTogglableControls( toggle );
 	} );
 
 } )();
