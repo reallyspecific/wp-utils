@@ -83,7 +83,7 @@ class Settings {
 		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
 	}
 
-	function hide_notices_to_all_but_super_admin(){
+	public function hide_notices_from_other_plugins(){
 		$screen = get_current_screen();
 		if ( $screen->id === $this->hook ) {
 			remove_all_actions( 'user_admin_notices' );
