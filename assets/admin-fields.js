@@ -1,9 +1,20 @@
 ( function() {
 
+	const settings = JSON.parse( document.querySelector( '#rs-util-settings-global-vars' )?.innerText || '{}' ) || {};
+
 	const form = document.querySelector( '.rs-util-settings-form' );
+	if ( ! form ) {
+		return;
+	}
+
+	if ( settings.svg_iconset && ! document.querySelector( '#rs-util-svg-iconset' ) ) {
+		const svgIcons = document.createElement( 'div' );
+		svgIcons.innerHTML = settings.svg_iconset;
+		document.body.appendChild( svgIcons.firstElementChild );
+	}
 
 	function enableSaveButton() {
-		form.querySelector( '.rs-util-settings-page__submit' ).disabled = false;
+		document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
 	}
 
 	document.addEventListener( 'change', e => {
