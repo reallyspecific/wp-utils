@@ -31,17 +31,13 @@ function get_global_var_inline_script( $key = null, $func_name = null ) : string
 			$func_name .= '_' . sanitize_title( $key );
 		}
 	}
-	ob_start(); ?>
-	<script type="text/javascript" class="rs-util-global-vars" data-key="<?php echo esc_attr( $key ); ?>" data-func="<?php echo esc_attr( $func_name ); ?>">
-		( function() {
-			if ( typeof <?php echo $func_name; ?> === 'undefined' ) {
-				const thisGlobalVar = <?php echo wp_json_encode( $var ); ?>;
-				window[<?php echo $func_name; ?>] = function() {
-					return thisGlobalVar;
-				}
+	ob_start(); ?>( function() {
+		if ( typeof <?php echo $func_name; ?> === 'undefined' ) {
+			const thisGlobalVar = <?php echo wp_json_encode( $var ); ?>;
+			window[<?php echo $func_name; ?>] = function() {
+				return thisGlobalVar;
 			}
-		} )();
-	</script>
-	<?php
+		}
+	} )();<?php
 	return ob_get_clean();
 }

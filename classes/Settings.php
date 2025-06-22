@@ -89,7 +89,7 @@ class Settings {
 		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
 		wp_add_inline_script(
 			'rs-util-admin-fields',
-			get_global_var_inline_script( 'rs_util_settings', 'rsUtil_getGlobalVar__settingsPage' ),
+			get_global_var_inline_script( 'rs_util_settings', 'rsUtil_settingsPage' ),
 			'before'
 		);
 	}
