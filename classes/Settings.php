@@ -352,6 +352,9 @@ class Settings {
 		if ( $field['subgroup'] ?? null ) {
 			$row_class = 'rs-util-settings-field-subgroup';
 		}
+		if ( $field['type'] ?? null ) {
+			$row_class .= " {$row_class}--{$field['type']}";
+		}
 		if ( $field['style'] ?? null ) {
 			$row_class .= ' is-style-' . $field['style'];
 		}

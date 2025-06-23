@@ -275,6 +275,19 @@ html {
 	}
 }
 
+.rs-util-settings-field-row--checkbox {
+	padding: var(--rs-util-settings-stripe-padding, 0.5rem 1.5rem);
+	align-items: center;
+	.rs-util-settings-field-row__label {
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+	.rs-util-settings-field-value {
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+}
+
 .rs-util-settings-field-value--checkbox:has(.rs-util-settings-field-icon) {
 	display: grid;
 	grid-template-columns: auto auto 1fr;
