@@ -82,7 +82,7 @@
 	}
 
 	document.addEventListener( 'change', e => {
-		const toggle = e.target.closest( '.rs-util-settings-field--checkbox' );
+		const toggle = e.target.closest( '[data-controls]' );
 		if ( ! toggle ) {
 			return;
 		}
@@ -99,11 +99,16 @@
 		if ( toggled.length ) {
 			toggle.setAttribute( 'aria-expanded', toggle.checked ? 'true' : 'false' );
 			toggle.setAttribute( 'aria-controls', `[data-toggled-by="${toggle.id}"]` );
+			toggle.setAttribute( 'data-controls', `[data-toggled-by="${toggle.id}"]` );
 		}
 	}
 
-	const allToggles = document.querySelectorAll( '.rs-util-settings-field--checkbox' );
-	allToggles.forEach( toggle => {
+	const allToggledBy = form.querySelectorAll( '[data-toggled-by]' );
+	allToggledBy.forEach( toggleTarget => {
+		const toggle = form.querySelector( `#${toggleTarget.dataset.toggledBy}` );
+		if ( ! toggle ) {
+			return;
+		}
 		showTogglableControls( toggle );
 	} );
 
