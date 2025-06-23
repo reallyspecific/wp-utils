@@ -346,9 +346,11 @@ class Settings {
 
 		ob_start();
 		?>
-		<?php if ( $row_style !== 'inline' ) : ?>
+
+		<?php if ( empty( $field['subgroup'] ?? null ) ) : ?>
 		<div class="rs-util-settings-field-row is-style-<?php echo esc_attr( $row_style ); ?>" <?php echo array_to_attr_string( $attrs ); ?>>
 		<?php endif; ?>
+
 			<?php if ( ! empty( $label ) ) : ?>
 				<div class="rs-util-settings-field-row__label">
 					<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
@@ -362,9 +364,11 @@ class Settings {
 				</p>
 				<?php endif; ?>
 			</div>
-		<?php if ( $row_style !== 'inline' ) : ?>
+			
+		<?php if ( empty( $field['subgroup'] ?? null ) ) : ?>
 		</div>
 		<?php endif; ?>
+
 		<?php
 		
 		$rendered = ob_get_clean();
