@@ -198,9 +198,6 @@ html {
 				grid-column: start / end;
 				width: 100%;
 				grid-template-columns: subgrid [label] [value];
-				&[aria-hidden="false"] {
-					display: grid;
-				}
 				.rs-util-settings-field-row__label {
 					grid-column: label;
 					padding-right: 0;
@@ -235,38 +232,6 @@ html {
 					}
 				}
 			}
-			/*.rs-util-settings-field-value:first-child {
-				grid-column: 1 / span 2;
-			}
-			&:has(.rs-util-settings-field-row:first-child .rs-util-settings-field--checkbox[aria-controls]) {
-				grid-template-rows: auto;
-				grid-auto-rows: 0fr;
-				.rs-util-settings-field-row {
-					overflow: hidden;
-					min-height: 0;
-					visibility: visible;
-				}
-				.rs-util-settings-field-row[aria-hidden="true"] {
-					display: grid;
-					visibility: hidden;
-					height: auto;
-				}
-				.rs-util-settings-field-row:first-child {
-					height: 4rem;
-					label {
-						font-size: 0.9rem;
-						font-weight: bold;
-					}
-					.rs-util-settings-field-value:not(:has(.rs-util-settings-field__label)) {
-						padding-top: 0;
-						padding-bottom: 0;
-					}
-				}
-			}
-			&:has(.rs-util-settings-field-row:first-child .rs-util-settings-field--checkbox[aria-controls]:checked) {
-				grid-auto-rows: auto;
-			}*/
-			
 		}
 	}
 
@@ -291,7 +256,14 @@ html {
 	}
 }
 
+.rs-util-settings-field-subgroup {
+	display: inline-flex;
+	width: min-content;
+	align-items: start;
+	gap: inherit;
+}
 
+.rs-util-settings-field-subgroup,
 .rs-util-settings-field-row {
 	&[aria-hidden="true"] {
 		display: none;
