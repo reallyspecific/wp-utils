@@ -203,23 +203,6 @@ html {
 				&:nth-child( 2n+1 ) {
 					background: color-mix( in srgb, transparent, var(--rs-util-settings-field-odd-background), 20% );
 				}
-				&.is-style-inline {
-					display: flex;
-					flex-direction: row;
-					align-items: start;
-					justify-content: start;
-					flex-wrap: wrap;
-					gap: 0.5rem 1rem;
-					padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
-					.rs-util-settings-field-row__label {
-						flex: 0 0 auto;
-						padding: 0.25rem 0 0;
-					}
-					.rs-util-settings-field-value {
-						flex: 0 0 auto;
-						padding: 0;
-					}
-				}
 			}
 		}
 	}
@@ -262,12 +245,31 @@ html {
 	gap: inherit;
 }
 
+.rs-util-settings-field-row.is-style-inline {
+	display: flex;
+	flex-direction: row;
+	align-items: start;
+	justify-content: start;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+	.rs-util-settings-field-row__label {
+		flex: 0 0 auto;
+		padding: 0.25rem 0 0;
+	}
+	.rs-util-settings-field-value {
+		flex: 0 0 auto;
+		padding: 0;
+	}
+}
+
 .rs-util-settings-field-subgroup,
 .rs-util-settings-field-row {
 	&[aria-hidden="true"] {
 		display: none;
 	}
 }
+
 
 .rs-util-settings-field-value {
 	grid-column: 2 / span 2;
