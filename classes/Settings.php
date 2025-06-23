@@ -271,6 +271,9 @@ class Settings {
 							foreach( $section['fields'] as $field ) {
 								if ( ( $field['group'] ?? null ) !== $current_group ) {
 									if ( $current_group ) {
+										if ( $current_subgroup ) {
+											printf( '</div>' );
+										}
 										printf( '</div></div>' );
 									}
 									if ( $field['group'] ?? null ) {
