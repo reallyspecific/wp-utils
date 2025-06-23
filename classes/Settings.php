@@ -299,7 +299,7 @@ class Settings {
 									if ( $field['subgroup'] ) {
 										$current_subgroup = $field['subgroup'];
 										printf( '<div class="rs-util-settings-field-row is-style-inline"%s>',
-											isset( $field['subgroup_toggled_by'] ) ? ' data-toggled-by="' . $field['subgroup_toggled_by'] . '"' : '' 
+											isset( $field['subgroup_toggled_by'] ) ? ' data-toggled-by="' . sanitize_title( $field['subgroup_toggled_by'] ) . '"' : '' 
 										);
 									}
 									$current_subgroup = $field['subgroup'] ?? null;
