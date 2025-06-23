@@ -195,7 +195,6 @@ html {
 				}
 				.rs-util-settings-field-value {
 					grid-column: value;
-					padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
 					&:first-child {
 						grid-column: 1 / -1;
 					}
@@ -245,6 +244,19 @@ html {
 	gap: inherit;
 }
 
+.rs-util-settings-field-value {
+	grid-column: 2 / span 2;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+	padding: var(--rs-util-settings-field-padding);
+	.rs-util-settings-field__description {
+		margin: 0;
+		width: 100%;
+		flex: 1 1 auto;
+	}
+}
+
 .rs-util-settings-field-row.is-style-inline {
 	display: flex;
 	flex-direction: row;
@@ -260,27 +272,6 @@ html {
 	.rs-util-settings-field-value {
 		flex: 0 0 auto;
 		padding: 0;
-	}
-}
-
-.rs-util-settings-field-subgroup,
-.rs-util-settings-field-row {
-	&[aria-hidden="true"] {
-		display: none;
-	}
-}
-
-
-.rs-util-settings-field-value {
-	grid-column: 2 / span 2;
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem 1rem;
-	padding: var(--rs-util-settings-field-padding);
-	.rs-util-settings-field__description {
-		margin: 0;
-		width: 100%;
-		flex: 1 1 auto;
 	}
 }
 
@@ -393,3 +384,11 @@ html {
 	width: var(--code-textarea-width,100%);
 	height: var(--code-textarea-height,auto);
 }
+
+.rs-util-settings-field-subgroup,
+.rs-util-settings-field-row {
+	&[aria-hidden="true"] {
+		display: none;
+	}
+}
+
