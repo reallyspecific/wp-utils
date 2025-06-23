@@ -267,6 +267,7 @@ class Settings {
 						<div class="rs-util-settings-form-table">
 							<?php
 							$current_group = null;
+							$current_subgroup = null;
 							foreach( $section['fields'] as $field ) {
 								if ( ( $field['group'] ?? null ) !== $current_group ) {
 									if ( $current_group ) {
@@ -286,10 +287,23 @@ class Settings {
 								do_action( $this->slug . '_rs_util_settings_render_field_row_beforestart', $field, $section, $this );
 								do_action( 'rs_util_settings_render_field_row_beforestart', $field, $section, $this );
 
+								if ( ( $field['subgroup'] ?? null ) !== $current_subgroup ) {
+									if ( $current_subgroup ) {
+										printf( '</div>' );
+									}
+									if ( $field['subgroup'] ) {
+										$current_subgroup = $field['subgroup'];
+										printf( '<div class="rs-util-settings-field-row is-style-inline">' );
+									}
+									$current_subgroup = $field['subgroup'] ?? null;
+								}
 								$this->render_field_row( $field, $this->get( $field_name ) ?? null );
 
 								do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this );
 								do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this );
+							}
+							if ( $current_subgroup ) {
+								printf( '</div>' );
 							}
 							if ( $current_group ) {
 								printf( '</div></div>' );
@@ -325,9 +339,16 @@ class Settings {
 			$attrs['aria-hidden']     = 'true';
 		}
 
+		$row_style = 'table';
+		if ( $field['style'] ?? null ) {
+			$row_style = $field['style'];
+		}
+
 		ob_start();
 		?>
-		<div class="rs-util-settings-field-row" <?php echo array_to_attr_string( $attrs ); ?>>
+		<?php if ( $row_style !== 'inline' ) : ?>
+		<div class="rs-util-settings-field-row is-style-<?php echo esc_attr( $row_style ); ?>" <?php echo array_to_attr_string( $attrs ); ?>>
+		<?php endif; ?>
 			<?php if ( ! empty( $label ) ) : ?>
 				<div class="rs-util-settings-field-row__label">
 					<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
@@ -341,7 +362,9 @@ class Settings {
 				</p>
 				<?php endif; ?>
 			</div>
+		<?php if ( $row_style !== 'inline' ) : ?>
 		</div>
+		<?php endif; ?>
 		<?php
 		
 		$rendered = ob_get_clean();
