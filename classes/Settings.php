@@ -281,6 +281,8 @@ class Settings {
 											. '<div class="rs-util-settings-field-group__content">',
 										$current_group );
 									}
+									$current_group = $field['group'] ?? null;
+									$current_subgroup = null;
 								}
 								$field_name = $field['attrs']['name'] ?? $field['name'] ?? '';
 								
@@ -364,7 +366,7 @@ class Settings {
 				</p>
 				<?php endif; ?>
 			</div>
-			
+
 		<?php if ( empty( $field['subgroup'] ?? null ) ) : ?>
 		</div>
 		<?php endif; ?>
