@@ -230,7 +230,7 @@ class Settings {
 			<div class="rs-util-settings-page__title">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
 				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
-				<button disabled type="submit" class="button primary-button rs-util-settings-page__submit">Save Changes</button>
+				<button disabled type="button" data-action="save-rs-util-page" class="button primary-button rs-util-settings-page__submit">Save Changes</button>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
 			</div>
 			<?php if ( count( $this->sections ) > 1 ) : ?>

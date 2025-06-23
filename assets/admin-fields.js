@@ -1,13 +1,13 @@
 ( async function() {
 
+	const form = document.querySelector( '.rs-util-settings-form' );
+	if ( ! form ) {
+		return;
+	}
+
 	const onReady = async () => {
 
 		const settings = rsUtil_settingsPageENV();
-
-		const form = document.querySelector( '.rs-util-settings-form' );
-		if ( ! form ) {
-			return;
-		}
 
 		if ( settings.svg_iconset && ! document.querySelector( '#rs-util-svg-iconset' ) ) {
 			const svgIcons = document.createElement( 'div' );
@@ -37,6 +37,16 @@
 		if ( e.target.closest( '.rs-util-settings-form' ) ) {
 			enableSaveButton();
 		}
+	} );
+
+	document.addEventListener( 'click', e => {
+		const saveButton = e.target.closest( '[data-action="save-rs-util-page"]' );
+		if ( ! saveButton ) {
+			return;
+		}
+		e.preventDefault();
+		form.classList.add('is-state-saving');
+		form.submit();
 	} );
 
 	document.addEventListener( 'click', e => {
