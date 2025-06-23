@@ -92,12 +92,12 @@
 	} );
 
 	const showTogglableControls = ( toggle ) => {
-		const toggled = document.querySelectorAll( `.rs-util-settings-field-row[data-toggled-by="${toggle.id}"]` );
+		const toggled = form.querySelectorAll( `[data-toggled-by="${toggle.id}"]` );
 		toggled.forEach( fieldRow => {
-			fieldRow.setAttribute( 'aria-hidden', toggle.value ? 'false' : 'true' );
+			fieldRow.setAttribute( 'aria-hidden', ( toggle.checked ?? ( toggle.value || false ) ) ? 'false' : 'true' );
 		} );
 		if ( toggled.length ) {
-			toggle.setAttribute( 'aria-expanded', toggle.value ? 'true' : 'false' );
+			toggle.setAttribute( 'aria-expanded', ( toggle.checked ?? ( toggle.value || false ) ) ? 'true' : 'false' );
 			toggle.setAttribute( 'aria-controls', `[data-toggled-by="${toggle.id}"]` );
 			toggle.setAttribute( 'data-controls', `[data-toggled-by="${toggle.id}"]` );
 		}
