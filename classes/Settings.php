@@ -344,19 +344,19 @@ class Settings {
 			$attrs['aria-hidden']     = 'true';
 		}
 
-		$row_style = 'table';
+		$row_class = 'rs-util-settings-field-row';
+		if ( $field['subgroup'] ?? null ) {
+			$row_class = 'rs-util-settings-field-subgroup';
+		}
 		if ( $field['style'] ?? null ) {
-			$row_style = $field['style'];
+			$row_class .= ' is-style-' . $field['style'];
 		}
 
 		ob_start();
 		?>
 
-		<?php if ( empty( $field['subgroup'] ?? null ) ) : ?>
-		<div class="rs-util-settings-field-row is-style-<?php echo esc_attr( $row_style ); ?>" <?php echo array_to_attr_string( $attrs ); ?>>
-		<?php endif; ?>
-
-			<?php if ( ! empty( $label ) ) : ?>
+		<div class="<?php echo esc_attr( $row_class ); ?>" <?php echo array_to_attr_string( $attrs ); ?>>
+		<?php if ( ! empty( $label ) ) : ?>
 				<div class="rs-util-settings-field-row__label">
 					<label for="<?php echo esc_attr( $field['id'] ); ?>"><?php echo $label; ?></label>
 				</div>
@@ -369,13 +369,10 @@ class Settings {
 				</p>
 				<?php endif; ?>
 			</div>
-
-		<?php if ( empty( $field['subgroup'] ?? null ) ) : ?>
 		</div>
-		<?php endif; ?>
 
 		<?php
-		
+
 		$rendered = ob_get_clean();
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_row', $rendered, $field, $value, $this );
 		$rendered = apply_filters( 'rs_util_settings_render_field_row', $rendered, $field, $value, $this );
