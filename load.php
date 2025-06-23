@@ -54,10 +54,6 @@ function class_loader( string $class_name, ?string $class_folder = null, ?string
 	}
 }
 
-function assets_dir() {
-	return __DIR__ . '/assets';
-}
-
 function utils_dir() {
 	return __DIR__;
 }

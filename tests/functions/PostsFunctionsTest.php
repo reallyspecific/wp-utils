@@ -2,7 +2,7 @@
 
 namespace ReallySpecific\Utils\Tests\Functions;
 
-use ReallySpecific\Utils\Posts;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Posts;
 use WP_Mock;
 use Mockery;
 

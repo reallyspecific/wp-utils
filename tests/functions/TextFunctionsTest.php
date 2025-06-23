@@ -2,9 +2,8 @@
 
 namespace ReallySpecific\Utils\Tests\Functions;
 
-use ReallySpecific\Utils\Text;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Text;
 use WP_Mock;
-use Mockery;
 
 /**
  * Tests most function contained in the load.php file

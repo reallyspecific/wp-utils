@@ -8,6 +8,7 @@
 		"assets:watch": "bodykit --watch --in=assets"
 	},
 	"devDependencies": {
-		"bodykit": "git+https://github.com/reallyspecific/bodykit.git"
+		"bodykit": "git+https://github.com/reallyspecific/bodykit.git",
+		"tom-select": "^2.4.3"
 	}
 }

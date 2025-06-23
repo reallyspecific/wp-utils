@@ -14,9 +14,21 @@ function config( $key ) {
 		case 'cache_dir':
 			return __DIR__ . '/.cache';
 		case 'plugins_dir':
-			return __DIR__ . '/bootstrap/plugins';
+			return __DIR__ . '/bootstrap/wp-content/plugins';
+		case 'mu_plugins_dir':
+			return __DIR__ . '/bootstrap/wp-content/mu-plugins';
 		case 'sample_plugin_dir':
 			return config( 'plugins_dir' ) . '/sample-plugin';
+		case 'sample_plugin_url':
+			return 'https://example.com/wp-content/plugins/sample-plugin';
+		case 'mock_plugin_url':
+			return 'https://example.com/wp-content/plugins';
+		case 'mock_mu_plugin_url':
+			return 'https://example.com/wp-content/mu-plugins';
+		case 'mock_plugin_path':
+			return __DIR__ . '/bootstrap/wp-content/plugins';
+		case 'mock_mu_plugin_path':
+			return __DIR__ . '/bootstrap/wp-content/mu-plugins';
 		default:
 			return null;
 	}
@@ -35,10 +47,10 @@ function build_sample_plugin( $hash_cache_file = null ) {
 
 	$old_hash = include $hash_cache_file;
 
-	$current_hash = make_hash_from_finders( [
-		Finder::create()->files()->in( config( 'root_dir' ) . '/assets' ),
-		Finder::create()->files()->in( config( 'root_dir' ) )->exclude(['tests','vendor','vendor-bin'])->name( [ '*.php' ] ),
-	] );
+	$finder = Finder::class;
+	$config = include __DIR__ . '/sample-plugin.scoper.inc.php';
+
+	$current_hash = make_hash_from_finders( $config['finders'] );
 
 	if ( $old_hash !== $current_hash ) {
 		echo 'Sample plugin does not have up-to-date files, please run `composer scope-sample-plugin`';

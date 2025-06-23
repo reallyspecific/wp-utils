@@ -2,7 +2,7 @@
 
 namespace ReallySpecific\Utils\Tests\Classes;
 
-use ReallySpecific\Utils\MultiArray;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\MultiArray;
 use ReallySpecific\Utils\Tests\Traits\MockFunctions;
 
 use WP_Mock;

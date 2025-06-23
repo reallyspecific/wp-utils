@@ -2,6 +2,8 @@
 
 namespace ReallySpecific\Utils;
 
+use function ReallySpecific\Utils\Assets\url as assets_url;
+use function ReallySpecific\Utils\Assets\version as assets_version;
 use function ReallySpecific\Utils\Text\array_to_attr_string;
 use function ReallySpecific\Utils\Text\parsedown_line;
 use function ReallySpecific\Utils\Environment\add_global_var;
@@ -76,16 +78,16 @@ class Settings {
 		if ( ! has_action( 'admin_enqueue_scripts', [ $this::class, 'enqueue_admin_scripts' ] ) ) {
 			add_action( 'admin_enqueue_scripts', [ $this::class, 'enqueue_admin_scripts' ] );
 		}
-		if ( ! has_action( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ], 10, 2 ) ) {
+		if ( ! has_filter( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ]  ) ) {
 			add_filter( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ], 10, 2 );
 		}
 	}
 
 	public static function enqueue_admin_scripts() {
-		add_global_var( 'rs_util_settings.svg_iconset', plugins_url( 'assets/svg-iconset.svg', __DIR__ ) );
+		add_global_var( 'rs_util_settings.svg_iconset', assets_url( 'svg-iconset.svg' ) );
 
-		wp_register_style( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.css', __DIR__ ) );
-		wp_register_script( 'rs-util-admin-fields', plugins_url( 'assets/admin-fields.js', __DIR__ ) );
+		wp_register_style( 'rs-util-admin-fields', assets_url( 'admin-fields.css' ), [], assets_version() );
+		wp_register_script( 'rs-util-admin-fields', assets_url( 'admin-fields.js' ), [], assets_version() );
 		add_action( 'admin_footer', [ __CLASS__, 'render_global_settings' ] );
 	}
 
@@ -450,6 +452,10 @@ class Settings {
 
 		if ( is_callable( $field['options'] ) ) {
 			$field['options'] = call_user_func( $field['options'] );
+		}
+
+		if ( isset( $field['enable_tom'] ) ) {
+			$attrs['data-use-tom-select'] = 'true';
 		}
 		
 		$buffer .= '<select ' . array_to_attr_string( $attrs ) . '>';

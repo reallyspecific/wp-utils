@@ -2,19 +2,17 @@
 
 namespace ReallySpecific\Utils\Tests;
 
-use function ReallySpecific\Utils\setup as setup_utils;
 use function ReallySpecific\Utils\autoload_directory;
 use WP_Mock;
 
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../load.php';
 require_once __DIR__ . '/config.php';
-
-require_once config( 'root_dir' ) . '/vendor/autoload.php';
-require_once config( 'root_dir' ) . '/load.php';
 
 autoload_directory( __DIR__ . '/traits' );
 
-setup_utils();
-
-WP_Mock::bootstrap();
-
 build_sample_plugin();
+
+require_once config( 'sample_plugin_dir' ) . '/dependencies/reallyspecific/wp-utils/load.php';
+\ReallySpecific\SamplePlugin\Dependencies\RS_Utils\setup();
+WP_Mock::bootstrap();

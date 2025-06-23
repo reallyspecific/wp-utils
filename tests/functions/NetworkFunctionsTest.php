@@ -2,8 +2,7 @@
 
 namespace ReallySpecific\Utils\Tests\Functions;
 
-use function ReallySpecific\Utils\Tests\config;
-use ReallySpecific\Utils\Network;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Network;
 use WP_Mock;
 
 /**

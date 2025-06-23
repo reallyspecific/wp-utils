@@ -2,4 +2,4 @@
 .DS_Store
 vendor
 node_modules
-tests/bootstrap/sample-plugin/inc/utils
+tests/bootstrap/sample-plugin/dependencies

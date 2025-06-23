@@ -23,10 +23,6 @@
 			document.body.appendChild( svgIcons.firstElementChild );
 		}
 
-		document.querySelectorAll( '[data-use-tom-select]' ).forEach( el => {
-			new TomSelect( el );
-		} );
-
 	}
 
 	if ( typeof rsUtil_settingsPageENV === 'function' ) {

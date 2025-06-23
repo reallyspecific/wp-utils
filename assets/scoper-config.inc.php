@@ -26,24 +26,26 @@ $wp_constants = get_wp_excluded_symbols( 'exclude-wordpress-constants.json', $pr
 $wp_classes   = get_wp_excluded_symbols( 'exclude-wordpress-classes.json', $project_source_dir );
 $wp_functions = get_wp_excluded_symbols( 'exclude-wordpress-functions.json', $project_source_dir );
 
-$finder = \Isolated\Symfony\Component\Finder\Finder::class;
+if ( empty( $finder ) ) {
+    $finder = \Isolated\Symfony\Component\Finder\Finder::class;
+}
 
 return [
-    'output-dir' => __DIR__ . '/inc/utils',
+    'output-dir' => __DIR__ . '/dependencies',
 
     'finders' => [
-        $finder::create()->files()->in( $util_source_dir . '/assets' ),
-        $finder::create()->files()->in( $util_source_dir )->exclude(['tests','vendor','vendor-bin'])->name( [ '*.php' ] ),
+        $finder::create()->files()->ignoreVCS(true)->in( $project_source_dir . '/vendor/erusev' )->name( '*.php' ),
+        $finder::create()->files()->ignoreVCS(true)->exclude( [ 'node_modules', 'vendor', 'tests', '.cache' ] )->in( $util_source_dir )->name( [ '*.php', '*.css', '*.js', '*.csv', '*.svg' ] ),
     ],
 
-    'php-version' => '8.3',
+    'php-version' => '8.2',
 
     'patchers' => [
         static function ( string $filePath, string $prefix, string $contents ): string {
             if ( str_contains( $prefix, 'ReallySpecific' ) ) {
                 return str_replace(
                     "{$prefix}\ReallySpecific\Utils",
-                    "{$prefix}\Utils",
+                    "{$prefix}\RS_Utils",
                     $contents
                 );
             }

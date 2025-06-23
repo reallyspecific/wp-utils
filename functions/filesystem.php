@@ -3,7 +3,7 @@
 namespace ReallySpecific\Utils\Filesystem;
 
 use function ReallySpecific\Utils\debug;
-use function ReallySpecific\Utils\assets_dir as utils_assets_dir;
+use function ReallySpecific\Utils\Assets\path as utils_assets_dir;
 use ZipArchive;
 
 /**

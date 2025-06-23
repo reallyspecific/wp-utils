@@ -5,7 +5,7 @@ namespace ReallySpecific\Utils\Tests\Classes;
 use function ReallySpecific\Utils\Tests\config;
 
 use ReallySpecific\Utils\Tests\Traits\MockFunctions;
-use ReallySpecific\Utils\Plugin;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Plugin;
 use WP_Mock;
 
 /**
@@ -31,9 +31,6 @@ final class PluginClassTest extends WP_Mock\Tools\TestCase
 
 		define( 'WP_PLUGIN_DIR', config( 'plugins_dir' ) );
 
-		WP_Mock::userFunction( 'plugin_basename', [
-			'return' => 'basic-plugin/basic-plugin.php',
-		] );
 		$this->mock_functions();
 
 		$plugin = new BasicPlugin();
@@ -86,19 +83,19 @@ final class PluginClassTest extends WP_Mock\Tools\TestCase
 class IncompletePlugin extends Plugin {}
 
 class BasicPlugin extends Plugin {
-	function __construct() {
+	function __construct( $args = [] ) {
 		parent::__construct([
 			'name' => 'Basic Plugin',
-			'file' => config( 'plugins_dir' ) . '/basic-plugin/basic-plugin.php',
+			'file' => config( 'mock_plugin_path' ) . '/basic-plugin/basic-plugin.php',
 		]);
 	}
 }
 
 class ComplexPlugin extends Plugin {
-	function __construct() {
+	function __construct( $args = [] ) {
 		parent::__construct([
 			'name' => 'Complex Plugin',
-			'file' => config( 'plugins_dir' ) . '/complex-plugin/complex-plugin.php',
+			'file' => config( 'mock_plugin_path' ) . '/complex-plugin/complex-plugin.php',
 		]);
 	}
 
@@ -106,10 +103,10 @@ class ComplexPlugin extends Plugin {
 
 
 class DataLoadedPlugin extends Plugin {
-	function __construct() {
+	function __construct( $args = [] ) {
 		parent::__construct([
 			'name' => 'Data Loaded Plugin',
-			'file' => config( 'plugins_dir' ) . '/data-loaded-plugin/data-loaded-plugin.php',
+			'file' => config( 'mock_plugin_path' ) . '/data-loaded-plugin/data-loaded-plugin.php',
 		]);
 	}
 

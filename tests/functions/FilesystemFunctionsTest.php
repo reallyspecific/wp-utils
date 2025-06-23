@@ -3,7 +3,7 @@
 namespace ReallySpecific\Utils\Tests\Functions;
 
 use function ReallySpecific\Utils\Tests\config;
-use ReallySpecific\Utils\Filesystem;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Filesystem;
 use WP_Mock;
 
 /**
