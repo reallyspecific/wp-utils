@@ -8,10 +8,6 @@ use Exception;
 
 class MultiArray extends ArrayIterator {
 
-	protected $data = [];
-
-	protected $parent = null;
-
 	public function __construct( array|object $array = [] ) {
 		$new_array = $this->rebuild_dot_array( (array) $array );
 		parent::__construct( $new_array );

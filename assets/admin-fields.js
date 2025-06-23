@@ -56,16 +56,24 @@
 		}
 		e.preventDefault();
 
+		history.pushState( null, null, `#${tabToggle.dataset.section}` );
+		switchTab( tabToggle.dataset.section );
+	} );
+
+	const switchTab = ( section ) => {
+
+		if ( section === '' ) {
+			const firstSection = form.querySelector( `.rs-util-settings-section[data-section]` );
+			section = firstSection.dataset.section;
+		}
+
 		const tabToggles = document.querySelectorAll( '.rs-util-settings-page__tab-toggle' );
 		tabToggles.forEach( toggle => {
-			toggle.setAttribute( 'aria-expanded', toggle === tabToggle ? 'true' : 'false' );
-			const section = form.querySelector( `.rs-util-settings-section[data-section="${toggle.dataset.section}"]` );
-			section.setAttribute( 'aria-hidden', toggle === tabToggle ? 'false' : 'true' );
-			if ( toggle === tabToggle ) {
-				section.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start' });
-			}
+			toggle.setAttribute( 'aria-expanded', toggle.dataset.section === section ? 'true' : 'false' );
+			const target = form.querySelector( `.rs-util-settings-section[data-section="${toggle.dataset.section}"]` );
+			target.setAttribute( 'aria-hidden', toggle.dataset.section === section ? 'false' : 'true' );
 		} );
-	} );
+	}
 
 	document.addEventListener( 'change', e => {
 		const toggle = e.target.closest( '.rs-util-settings-field--checkbox' );
@@ -92,5 +100,15 @@
 	allToggles.forEach( toggle => {
 		showTogglableControls( toggle );
 	} );
+
+	const onPopState = () => {
+		const url = new URL( window.location.href );
+		const section = url.hash.replace( '#', '' );
+		switchTab( section );
+	}
+
+	window.addEventListener( 'popstate', onPopState );
+
+	onPopState();
 
 } )();

@@ -1,32 +1,36 @@
 html {
-	--rs-util-settings-page-light: #fff;
-	--rs-util-settings-page-dark: #000;
-	--rs-util-settings-page-background: #fff;
-	--rs-util-settings-page-text-color: #424242;
-	--rs-util-settings-page-title-color: #202020;
-	--rs-util-settings-page-light-stripe: #9DB5E0;
-	--rs-util-settings-page-heavy-stripe: #B09DE0;
-	--rs-util-settings-tab-background: #d0d0e0;
-	--rs-util-settings-tab-color: var(--rs-util-settings-page-dark);
-	--rs-util-settings-tab-active-bg: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-heavy-stripe) 80% );
-	--rs-util-settings-tab-active-color: var(--rs-util-settings-page-dark);
-	--rs-util-settings-focus-outline-color: color-mix( in srgb, var(--rs-util-settings-page-text-color), var(--rs-util-settings-page-heavy-stripe) 50% );
+	--rs-util-settings-light: #fff;
+	--rs-util-settings-dark: #000;
+	--rs-util-settings-primary: #805DA0;
+	--rs-util-settings-secondary: #5D85B0;
+
+	--rs-util-settings-page-background: var(--rs-util-settings-light);
+	--rs-util-settings-page-text-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 80% );
+	--rs-util-settings-page-title-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 90% );
+
+	--rs-util-settings-tab-background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 10% );
+	--rs-util-settings-tab-color: var(--rs-util-settings-page-title-color);
+	--rs-util-settings-tab-active-bg: var(--rs-util-settings-page-background);
+	--rs-util-settings-tab-active-color: var(--rs-util-settings-page-title-color);
+	--rs-util-settings-tab-outline-color: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-secondary) 50% );
+
+	--rs-util-settings-field-even-background: var(--rs-util-settings-page-background);
+	--rs-util-settings-field-odd-background: var(--rs-util-settings-page-background);
+	--rs-util-settings-field-border-color: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-secondary) 50% );
 
 	--rs-util-settings-button-padding: 0.75rem 2rem;
 	--rs-util-settings-stripe-padding: 0.75rem 1.5rem;
-	--rs-util-settings-section-padding: 0 2rem;
+	--rs-util-settings-field-padding: 1rem 1.25rem;
 
 
 	@media (prefers-color-scheme: dark) {
-		--rs-util-settings-page-background: #202020;
-		--rs-util-settings-page-text-color: #c0c0c0;
-		--rs-util-settings-page-title-color: #dfdfdf;
+		--rs-util-settings-light: #000;
+		--rs-util-settings-dark: #fff;
 	}
 }
 
 
 .wrap.rs-util-settings-page {
-	background: var(--rs-util-settings-page-background);
 	color: var(--rs-util-settings-page-text-color);
 	display: flex;
 	flex-direction: column;
@@ -40,7 +44,7 @@ html {
 	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
-	background: var(--rs-util-settings-page-heavy-stripe);
+	background: var(--rs-util-settings-page-background);
 	color: var(--rs-util-settings-page-title-color);
 	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
 	position: sticky;
@@ -55,19 +59,19 @@ html {
 
 .button.rs-util-settings-page__submit {
 	border-radius: 3px;
-	border: 1px solid color-mix( in srgb, var(--rs-util-settings-page-dark), var(--rs-util-settings-page-heavy-stripe) 60% );
-	background: color-mix( in srgb, var(--rs-util-settings-page-dark), var(--rs-util-settings-page-heavy-stripe) 60% );
-	color: var(--rs-util-settings-page-light);
+	border: 1px solid color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 60% );
+	background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 60% );
+	color: var(--rs-util-settings-light);
 	font-weight: bold;
 	font-size: 1rem;
 	&:hover, &:active, &:focus {
-		border-color: color-mix( in srgb, var(--rs-util-settings-page-dark), var(--rs-util-settings-page-heavy-stripe) 70% );
-		background: color-mix( in srgb, var(--rs-util-settings-page-dark), var(--rs-util-settings-page-heavy-stripe) 70% );
-		color: var(--rs-util-settings-page-light);
+		border-color: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 70% );
+		background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 70% );
+		color: var(--rs-util-settings-light);
 	}
 	&:focus, &:active {
-		border: 1px solid var(--rs-util-settings-focus-outline-color);
-		outline: 1px solid var(--rs-util-settings-focus-outline-color);
+		border: 1px solid var(--rs-util-settings-tab-outline-color);
+		outline: 1px solid var(--rs-util-settings-tab-outline-color);
 	}
 }
 
@@ -77,17 +81,17 @@ html {
 	justify-content: start;
 	align-items: center;
 	gap: 0 1rem;
-	border-bottom: 1px solid var(--rs-util-settings-tab-active);
-	margin: 1rem 2rem 0
+	border-bottom: 1px solid var(--rs-util-settings-tab-outline-color);
+	margin: 1rem 0 0;
 }
 
 .rs-util-settings-page__tab-toggle {
 	appearance: none;
 	background: var(--rs-util-settings-tab-background);
-	border: 1px solid var(--rs-util-settings-tab-active-bg);
+	border: 2px solid var(--rs-util-settings-tab-background);
 	color: var(--rs-util-settings-page-text-color);
 	cursor: pointer;
-	padding: var(--rs-util-settings-button-padding, 0.75rem 2rem);
+	padding: 0.75rem 1.5rem;
 	font-weight: bold;
 	outline: none;
 
@@ -97,8 +101,7 @@ html {
 		color: var(--rs-util-settings-tab-active-color);
 	}
 	&:focus, &:active {
-		outline: 1px solid var(--rs-util-settings-focus-outline-color);
-		border-color: var(--rs-util-settings-focus-outline-color);
+		border-color: var(--rs-util-settings-tab-outline-color);
 	}
 
 	&[aria-expanded="true"] {
@@ -119,13 +122,20 @@ html {
 	justify-content: start;
 	align-items: stretch;
 	gap: 0;
-	padding: 0 2rem;
+	padding: 0 0;
 
 	.rs-util-settings-field-section__title {
 		margin: 0;
 		padding:  2rem 1.5rem;
-		border-bottom: 1px solid var(--rs-util-settings-tab-active-bg);
-		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active-bg) 60% );
+		background: var(--rs-util-settings-tab-active-bg);
+		color: var(--rs-util-settings-tab-active-color);
+		font-size: 1.5rem;
+	}
+
+	.rs-util-settings-field-section__description {
+		margin: 0;
+		padding:  0 1.5rem 2rem;
+		background: var(--rs-util-settings-tab-active-bg);
 		color: var(--rs-util-settings-tab-active-color);
 	}
 }
@@ -135,6 +145,10 @@ html {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem 2rem;
+	
+	&.is-state-saving {
+		pointer-events: none;
+	}
 }
 
 .rs-util-settings-form-table {
@@ -145,6 +159,7 @@ html {
 	gap: 0;
 	align-items: start;
 	justify-items: start;
+	border-top: 1px solid var(--rs-util-settings-field-border-color);
 
 	.rs-util-settings-field-group,
 	.rs-util-settings-field-row {
@@ -158,10 +173,8 @@ html {
 		border: none;
 		margin: 0;
 		padding: 0;
-		.rs-util-settings-field-group__label {
-			font-size: 1rem;
-			font-weight: bold;
-			align-self: stretch;
+		.rs-util-settings-field-row + .rs-util-settings-field-row {
+			border-top: 1px solid color-mix( in srgb, transparent, var(--rs-util-settings-field-border-color) 50% );
 		}
 		.rs-util-settings-field-group__content {
 			display: grid;
@@ -174,12 +187,15 @@ html {
 				&[aria-hidden="false"] {
 					display: grid;
 				}
+				.rs-util-settings-field-value {
+					padding: 0;
+				}
 				.rs-util-settings-field-row__label {
 					padding-right: 0;
 					font-weight: bold;
 				}
 				&:nth-child( 2n+1 ) {
-					background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 10% );
+					background: color-mix( in srgb, transparent, var(--rs-util-settings-field-odd-background), 20% );
 				}
 				.rs-util-settings-field-value {
 					grid-column: 2 / span 2;
@@ -210,8 +226,7 @@ html {
 					}
 					.rs-util-settings-field-value:not(:has(.rs-util-settings-field__label)) {
 						padding-top: 0;
-						padding-bottom: 0.5rem;
-						padding-left: 0;
+						padding-bottom: 0;
 					}
 				}
 			}
@@ -234,19 +249,21 @@ html {
 	& > .rs-util-settings-field-row,
 	& > .rs-util-settings-field-group {
 		grid-column: 1 / span 3;
-		background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 20% );
+		background: var(--rs-util-settings-field-odd-background);
+		border-bottom: 1px solid var(--rs-util-settings-field-border-color);
 		&:nth-child( 2n ) {
-			background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 30% );
+			background: var(--rs-util-settings-field-even-background);
 		}
 	}
 	& > .rs-util-settings-field-row > .rs-util-settings-field-row__label,
 	& > .rs-util-settings-field-group > .rs-util-settings-field-group__label {
 		padding: var(--rs-util-settings-stripe-padding, 1rem 1.5rem);
 		line-height: 2rem;
-		font-size: 1.25rem;
+		font-size: 1.125rem;
 		grid-column: 1 / span 1;
 		margin: 0;
-		background: color-mix( in srgb, transparent, var(--rs-util-settings-page-light-stripe) 20% );
+		font-weight: bold;
+		align-self: stretch;
 	}
 }
 
@@ -258,9 +275,11 @@ html {
 }
 
 .rs-util-settings-field-value {
+	grid-column: 2 / span 2;
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem 1rem;
+	padding: var(--rs-util-settings-field-padding);
 	.rs-util-settings-field__description {
 		margin: 0;
 		width: 100%;
@@ -268,12 +287,13 @@ html {
 	}
 }
 
-.rs-util-settings-field-value--checkbox {
+.rs-util-settings-field-value--checkbox:has(.rs-util-settings-field-icon) {
 	display: grid;
-	grid-template-columns: subgrid;
+	grid-template-columns: auto auto 1fr;
 	align-items: center;
+	justify-items: start;
 	gap: 0;
-	
+
 	input {
 		opacity: 0;
 		appearance: none;
@@ -281,52 +301,55 @@ html {
 		height: 1.5rem;
 		position: relative;
 		z-index: 1;
-		+ .rs-util-settings-field-icon {
-			width: 3.75rem;
-			aspect-ratio: 26 / 16;
-			z-index: 0;
-			--rs-util-svg-iconset--toggle__dot-fill: color-mix( in srgb, transparent, currentColor 50% );
-			--rs-util-svg-iconset--toggle__outline-fill: color-mix( in srgb, transparent, currentColor 50% );
-		}
-		&:checked + .rs-util-settings-field-icon {
-			--rs-util-svg-iconset--toggle__dot-fill: currentColor;
-			--rs-util-svg-iconset--toggle__dot-translate: 8px;
-			--rs-util-svg-iconset--toggle__outline-fill: var(--rs-util-settings-focus-outline-color);
-		}
 	}
-	&:has(.rs-util-settings-field-icon) {
-		&::before {
-			content: "OFF";
-			width: 1.25rem;
-			font-size: 10px;
-			letter-spacing: -0.05em;
-			text-align: left;
-			display: block;
-			transform: translateX( 40% );
-		}
-		&::before,input,.rs-util-settings-field-icon {
-			grid-column: 1 / span 1;
-			grid-row: 1 / span 1;
-			align-self: center;
-			justify-self: center;
-			margin: 0;
-			
-		}
-		input[type="checkbox"]:checked::before, 
-		input[type="radio"]:checked::before {
-			display: none;
-			content: none;
-		}
+	.rs-util-settings-field-icon {
+		transform: translate(-0.5rem);
+		width: 3.75rem;
+		aspect-ratio: 26 / 16;
+		z-index: 0;
+		--rs-util-svg-iconset--toggle__dot-fill: color-mix( in srgb, transparent, currentColor 50% );
+		--rs-util-svg-iconset--toggle__outline-fill: color-mix( in srgb, transparent, currentColor 50% );
 	}
-	&:has(.rs-util-settings-field-icon):has(:checked)::before {
+	input:checked + .rs-util-settings-field-icon {
+		--rs-util-svg-iconset--toggle__dot-fill: var(--rs-util-settings-secondary);
+		--rs-util-svg-iconset--toggle__dot-translate: 8px;
+		--rs-util-svg-iconset--toggle__outline-fill: var(--rs-util-settings-page-text-color);
+	}
+	&::before {
+		content: "OFF";
+		width: 1.25rem;
+		font-size: 10px;
+		letter-spacing: -0.05em;
+		text-align: left;
+		display: block;
+		transform: translateX( calc( 40% - 0.5rem ) );
+		color: var(--rs-util-settings-page-text-color);
+	}
+	&::before,input,.rs-util-settings-field-icon {
+		grid-column: 1 / span 1;
+		grid-row: 1 / span 1;
+		align-self: center;
+		justify-self: center;
+		margin: 0;
+	}
+	input[type="checkbox"]:checked::before,
+	input[type="radio"]:checked::before {
+		display: none;
+		content: none;
+	}
+	&:has(:checked)::before {
 		content: "ON";
-		transform: translateX( -25% );
+		transform: translateX( calc( -25% + 0.5rem ) );
 		letter-spacing: 0;
+		color: var(--rs-util-settings-secondary);
 	}
-	&:has(.rs-util-settings-field-icon):has(.rs-util-settings-field-row__label) {
+	&:has(.rs-util-settings-field-row__label) {
 		&::before,input,.rs-util-settings-field-icon {
 			grid-column: 2 / span 1;
 		}
+	}
+	.rs-util-settings-field__description {
+		grid-column: 1 / span 3;
 	}
 }
 

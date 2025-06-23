@@ -630,7 +630,9 @@ class Settings {
 
 	public function update( $key, $value, $save = true ) {
 
-		$this->load();
+		if ( ! isset( $this->cache ) ) {
+			$this->load();
+		}
 
 		$this->cache[ $key ] = $value;
 
