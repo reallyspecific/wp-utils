@@ -59,7 +59,7 @@
 		const tabToggles = document.querySelectorAll( '.rs-util-settings-page__tab-toggle' );
 		tabToggles.forEach( toggle => {
 			toggle.setAttribute( 'aria-expanded', toggle === tabToggle ? 'true' : 'false' );
-			const section = form.querySelector( `.rs-util-settings-field-section[data-section="${toggle.dataset.section}"]` );
+			const section = form.querySelector( `.rs-util-settings-section[data-section="${toggle.dataset.section}"]` );
 			section.setAttribute( 'aria-hidden', toggle === tabToggle ? 'false' : 'true' );
 			if ( toggle === tabToggle ) {
 				section.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start' });

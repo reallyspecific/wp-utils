@@ -254,9 +254,9 @@ class Settings {
 						<h2 class="rs-util-settings-field-section__title"><?php echo $section['title']; ?></h2>
 						<?php endif; ?>
 						<?php if ( isset( $section['description'] ) ) : ?>
-						<p class="rs-util-settings-field-section__description">
-						<?php echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); ?>
-						</p>
+							<p class="rs-util-settings-field-section__description"><?php
+								echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); 
+							?></p>
 						<?php endif; ?>
 
 						<?php if ( isset( $section['fields'] ) ) : ?>
@@ -275,7 +275,7 @@ class Settings {
 										printf( 
 											'<div class="rs-util-settings-field-group">'
 											. '<div class="rs-util-settings-field-group__label">%s</div>'
-											. '<div class="rs-util-settings-field-group__content">', 
+											. '<div class="rs-util-settings-field-group__content">',
 										$current_group );
 									}
 								}
@@ -288,6 +288,9 @@ class Settings {
 
 								do_action( 'rs_util_settings_render_field_row_afterend', $field, $section, $this );
 								do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this );
+							}
+							if ( $current_group ) {
+								printf( '</div></div>' );
 							}
 							?>
 						</div>
