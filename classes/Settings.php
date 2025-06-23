@@ -253,10 +253,10 @@ class Settings {
 				<?php $i = 0; foreach( $this->sections as $section ) : ?>
 					<div aria-hidden="<?php echo ( ! $i ) ? 'false' : 'true'; ?>" class="rs-util-settings-section" data-section="<?php echo $section['id']; ?>">
 						<?php if ( isset( $section['title'] ) ) : ?>
-						<h2 class="rs-util-settings-field-section__title"><?php echo $section['title']; ?></h2>
+						<h2 class="rs-util-settings-section__title"><?php echo $section['title']; ?></h2>
 						<?php endif; ?>
 						<?php if ( isset( $section['description'] ) ) : ?>
-							<p class="rs-util-settings-field-section__description"><?php
+							<p class="rs-util-settings-section__description"><?php
 								echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); 
 							?></p>
 						<?php endif; ?>

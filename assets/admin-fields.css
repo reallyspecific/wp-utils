@@ -122,9 +122,9 @@ html {
 	justify-content: start;
 	align-items: stretch;
 	gap: 0;
-	padding: 0 0;
+	padding: 0;
 
-	.rs-util-settings-field-section__title {
+	.rs-util-settings-section__title {
 		margin: 0;
 		padding:  2rem 1.5rem;
 		background: var(--rs-util-settings-tab-active-bg);
@@ -132,7 +132,7 @@ html {
 		font-size: 1.5rem;
 	}
 
-	.rs-util-settings-field-section__description {
+	.rs-util-settings-section__description {
 		margin: 0;
 		padding:  0 1.5rem 2rem;
 		background: var(--rs-util-settings-tab-active-bg);
