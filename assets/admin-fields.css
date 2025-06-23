@@ -167,16 +167,6 @@ html {
 		grid-auto-rows: auto;
 	}
 
-	& > .rs-util-settings-field-row,
-	& > .rs-util-settings-field-group {
-		grid-column: 1 / span 2;
-		background: var(--rs-util-settings-field-odd-background);
-		border-bottom: 1px solid var(--rs-util-settings-field-border-color);
-		&:nth-child( 2n ) {
-			background: var(--rs-util-settings-field-even-background);
-		}
-	}
-
 	.rs-util-settings-field-group {
 		display: grid;
 		grid-template-columns: subgrid;
@@ -195,8 +185,7 @@ html {
 			grid-column: 2 / span 1;
 			.rs-util-settings-field-row {
 				min-height: 0;
-				grid-column: start / end;
-				width: 100%;
+				grid-column: 1 / -1;
 				grid-template-columns: subgrid [label] [value];
 				.rs-util-settings-field-row__label {
 					grid-column: label;
@@ -232,6 +221,16 @@ html {
 					}
 				}
 			}
+		}
+	}
+
+	& > .rs-util-settings-field-row,
+	& > .rs-util-settings-field-group {
+		grid-column: 1 / span 2;
+		background: var(--rs-util-settings-field-odd-background);
+		border-bottom: 1px solid var(--rs-util-settings-field-border-color);
+		&:nth-child( 2n ) {
+			background: var(--rs-util-settings-field-even-background);
 		}
 	}
 
