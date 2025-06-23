@@ -227,7 +227,7 @@ html {
 
 	& > .rs-util-settings-field-row > .rs-util-settings-field-row__label,
 	& > .rs-util-settings-field-group > .rs-util-settings-field-group__label {
-		padding: var(--rs-util-settings-stripe-padding, 1rem 1.5rem);
+		padding: 1rem 1.5rem;
 		line-height: 2rem;
 		font-size: 1.125rem;
 		grid-column: 1 / span 1;

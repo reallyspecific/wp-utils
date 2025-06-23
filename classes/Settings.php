@@ -280,9 +280,11 @@ class Settings {
 										$current_group = $field['group'];
 										printf( 
 											'<div class="rs-util-settings-field-group">'
-											. '<div class="rs-util-settings-field-group__label">%s</div>'
+											. '<div class="rs-util-settings-field-group__label">%s%s</div>'
 											. '<div class="rs-util-settings-field-group__content">',
-										$current_group );
+										$current_group,
+										isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : ''
+									);
 									}
 									$current_group = $field['group'] ?? null;
 									$current_subgroup = null;
