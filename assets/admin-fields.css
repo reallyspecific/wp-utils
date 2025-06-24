@@ -5,8 +5,8 @@ html {
 	--rs-util-settings-secondary: #5D85B0;
 
 	--rs-util-settings-page-background: var(--rs-util-settings-light);
-	--rs-util-settings-page-text-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 80% );
-	--rs-util-settings-page-title-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 90% );
+	--rs-util-settings-page-text-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 75% );
+	--rs-util-settings-page-title-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 85% );
 
 	--rs-util-settings-tab-background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 10% );
 	--rs-util-settings-tab-color: var(--rs-util-settings-page-title-color);
@@ -189,9 +189,9 @@ html {
 				grid-template-columns: subgrid [label] [value];
 				.rs-util-settings-field-row__label {
 					grid-column: label;
-					padding-right: 0;
 					font-weight: bold;
 					white-space: nowrap;
+					padding: 0.25rem 0 0;
 				}
 				.rs-util-settings-field-value {
 					grid-column: value;
@@ -267,7 +267,6 @@ html {
 	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
 	.rs-util-settings-field-row__label {
 		flex: 0 0 auto;
-		padding: 0.25rem 0 0;
 	}
 	.rs-util-settings-field-value {
 		flex: 0 0 auto;
@@ -279,6 +278,7 @@ html {
 	padding: var(--rs-util-settings-stripe-padding, 0.5rem 1.5rem);
 	align-items: center;
 	.rs-util-settings-field-row__label {
+		padding-left: 0;
 		padding-top: 0;
 		padding-bottom: 0;
 	}
