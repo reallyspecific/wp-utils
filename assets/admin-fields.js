@@ -1,6 +1,6 @@
 ( async function() {
 
-	const TomSelect = require( 'tom-select' );
+	const { TomSelect } = require( 'tom-select' );
 
 	const form = document.querySelector( '.rs-util-settings-form' );
 	if ( ! form ) {

@@ -171,6 +171,7 @@ html {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-auto-rows: auto;
+		align-items: start;
 		appearance: none;
 		border: none;
 		margin: 0;
@@ -191,7 +192,7 @@ html {
 					grid-column: label;
 					font-weight: bold;
 					white-space: nowrap;
-					padding: 0.25rem 0 0;
+					padding-right: 0;
 				}
 				.rs-util-settings-field-value {
 					grid-column: value;
@@ -218,7 +219,7 @@ html {
 
 	.rs-util-settings-field-row__label {
 		grid-column: 1 / span 1;
-		padding: 1rem 1.5rem;
+		padding: 1.25rem 0 0 1.5rem;
 	}
 	.rs-util-settings-field-row__value {
 		grid-column: 2 / span 1;
@@ -267,6 +268,7 @@ html {
 	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
 	.rs-util-settings-field-row__label {
 		flex: 0 0 auto;
+		padding: 0.25rem 0 0;
 	}
 	.rs-util-settings-field-value {
 		flex: 0 0 auto;
@@ -274,9 +276,9 @@ html {
 	}
 }
 
-.rs-util-settings-field-row--checkbox {
-	padding: var(--rs-util-settings-stripe-padding, 0.5rem 1.5rem);
+.rs-util-settings-field-group .rs-util-settings-field-row--checkbox {
 	align-items: center;
+	padding: var(--rs-util-settings-stripe-padding, 0.5rem 1.5rem);
 	.rs-util-settings-field-row__label {
 		padding-left: 0;
 		padding-top: 0;
@@ -294,6 +296,14 @@ html {
 	align-items: center;
 	justify-items: start;
 	gap: 0;
+
+	.rs-util-settings-field-group & {
+		padding: 0;
+	}
+
+	.rs-util-settings-field-row__label + & {
+		padding-left: 1rem;
+	}
 
 	input {
 		opacity: 0;

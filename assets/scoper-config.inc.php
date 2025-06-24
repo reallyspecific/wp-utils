@@ -35,7 +35,7 @@ return [
 
     'finders' => [
         $finder::create()->files()->ignoreVCS(true)->in( $project_source_dir . '/vendor/erusev' )->name( '*.php' ),
-        $finder::create()->files()->ignoreVCS(true)->exclude( [ 'node_modules', 'vendor', 'tests', '.cache' ] )->in( $util_source_dir )->name( [ '*.php', '*.css', '*.js', '*.csv', '*.svg' ] ),
+        $finder::create()->files()->ignoreVCS(true)->exclude( [ 'node_modules', 'vendor', 'tests', '.cache' ] )->in( $util_source_dir )->name( [ '*.php', '*.css', '*.js', '*.csv', '*.svg', '*.map' ] ),
     ],
 
     'php-version' => '8.2',
