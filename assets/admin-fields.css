@@ -75,8 +75,8 @@ html {
 
 	&:has(form.is-state-saving) {
 		pointer-events: none;
-		.button-submit::before {
-			content: "Saving...";
+		.button-submit .rs-util-settings-icon {
+			display: inline-block;
 		}
 		> *:not(.rs-util-settings-page-title) {
 			opacity: 0.5;
@@ -166,10 +166,50 @@ html {
 
 }
 
+.rs-util-settings-page-actions {
+	display: flex;
+	flex-direction: row;
+	justify-content: end;
+	align-items: center;
+	gap: 1rem;
+	margin-top: 1rem;
+
+	position: sticky;
+	bottom: calc( -100% - 1rem );
+
+	transition: bottom 1s ease-in-out;
+	z-index: 99;
+
+	&:has(.button-submit:not(:disabled)) {
+		bottom: 1rem;
+	}
+	
+}
+
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .button.rs-util-settings-page__submit {
 	background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 60% );
 	color: var(--rs-util-settings-light);
 	font-size: 1rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 1rem;
+
+	.rs-util-settings-icon {
+		display: none;
+		width: 1rem;
+		height: 1rem;
+		--rs-util-svg-icon-color: var(--rs-util-settings-light);
+		animation: rotate 2s infinite linear;
+	}
 
 	/*border-radius: 3px;
 	border: 1px solid color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 60% );
@@ -313,9 +353,6 @@ html {
 			margin-top: 0;
 		}
 
-		.rs-util-settings-field-row {
-			gap: 1rem;
-		}
 		.rs-util-settings-field-row + .rs-util-settings-field-row {
 			border-top: 1px solid color-mix( in srgb, transparent, var(--rs-util-settings-field-border-color) 20% );
 		}
@@ -324,6 +361,7 @@ html {
 			display: grid;
 			grid-template-columns: [start] min-content 1fr [end];
 			grid-column: 1 / span 2;
+			gap: 0 2rem;
 			padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
 			&[aria-hidden="true"] {
 				display: none;
@@ -354,14 +392,7 @@ html {
 	}
 
 	& > .rs-util-settings-field-row {
-		& > .rs-util-settings-field-row__label {
-			line-height: 2rem;
-			font-size: 1.125rem;
-			grid-column: 1 / span 1;
-			margin: 0;
-			font-weight: normal;
-			align-self: stretch;
-		}
+		padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
 	}
 
 	& > .rs-util-settings-field-row,
@@ -433,11 +464,10 @@ html {
 		}
 	}
 
-	&.is-style-inline {
+	.rs-util-settings-field-row__group {
 		/* if only grid supported intrinsic column widths in subgrid... */
-		.rs-util-settings-inline-fields {
-			display: flex;
-		}
+
+		display: flex;
 		.rs-util-settings-field-value {
 			flex: 0 0 auto;
 			padding: 0;

@@ -232,18 +232,18 @@ class Settings {
 			<div class="rs-util-settings-page-title">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
 				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
-				<button disabled type="button" data-action="save-rs-util-page" class="button button-primary button-submit rs-util-settings-page__submit">Save Changes</button>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
+				<?php if ( count( $this->sections ) > 1 ) : ?>
+					<div class="rs-util-settings-page__tabs">
+						<?php $i = 0; foreach( $this->sections as $section ) : ?>
+							<button type="button" aria-expanded="<?php echo ( ! $i ) ? 'true' : 'false'; ?>" class="rs-util-settings-page__tab-toggle" data-section="<?php echo $section['id']; ?>"><?php 
+								echo $section['tab_label'] ?? $section['title'] ?? 'General'; 
+							?></button>
+						<?php $i++; endforeach; ?>
+					</div>
+				<?php endif; ?>
 			</div>
-			<?php if ( count( $this->sections ) > 1 ) : ?>
-			<div class="rs-util-settings-page__tabs">
-				<?php $i = 0; foreach( $this->sections as $section ) : ?>
-					<button type="button" aria-expanded="<?php echo ( ! $i ) ? 'true' : 'false'; ?>" class="rs-util-settings-page__tab-toggle" data-section="<?php echo $section['id']; ?>"><?php 
-						echo $section['tab_label'] ?? $section['title'] ?? 'General'; 
-					?></button>
-				<?php $i++; endforeach; ?>
-			</div>
-			<?php endif; ?>
+			
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_beforestart', $this ); ?>
 			<?php do_action( 'rs_util_settings_render_form_beforestart', $this ); ?>
 			<form class="rs-util-settings-form" method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
@@ -334,6 +334,13 @@ class Settings {
 			</form>
 			<?php do_action( 'rs_util_settings_render_form_afterend', $this ); ?>
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_afterend', $this ); ?>
+
+			<div class="rs-util-settings-page-actions">
+				<button disabled type="button" data-action="save-rs-util-page" class="button button-primary button-submit rs-util-settings-page__submit">
+					<svg class="rs-util-settings-icon rs-util-settings-icon--refresh" xmlns="http://www.w3.org/2000/svg"><use href="#rs-util-svg-iconset--refresh"></use></svg>
+					<span><?php _e( 'Save Changes', 'rs-util-settings' ); ?></span>
+				</button>
+			</div>
 		</div>
 		<?php
 
