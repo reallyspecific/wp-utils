@@ -184,6 +184,13 @@ html {
 		bottom: 1rem;
 	}
 	
+	border: var(--rs-util-settings-global-border);
+	border-radius: var(--rs-util-settings-global-border-radius);
+	background: var(--rs-util-settings-page-background);
+	box-shadow: var(--rs-util-settings-global-shadow);
+	color: var(--rs-util-settings-page-title-color);
+	padding: var(--rs-util-settings-global-padding);
+	border-top: 1px solid var(--rs-util-settings-global-border-color);
 }
 
 @keyframes rotate {
