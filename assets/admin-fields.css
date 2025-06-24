@@ -257,7 +257,7 @@ html {
 		display: block;
 		font-size: 0.875rem;
 		line-height: 1.5;
-		margin: 1rem 0 0;
+		margin: 1rem 0 0 0;
 	}
 }
 
@@ -305,6 +305,10 @@ html {
 		margin: 1rem 0;
 		padding: 0;
 
+		& .rs-util-settings-field-group__description {
+			margin-bottom: 0;
+		}
+
 		+ .rs-util-settings-field-group {
 			margin-top: 0;
 		}
@@ -313,7 +317,7 @@ html {
 			gap: 1rem;
 		}
 		.rs-util-settings-field-row + .rs-util-settings-field-row {
-			border-top: 1px solid color-mix( in srgb, transparent, var(--rs-util-settings-field-border-color) 50% );
+			border-top: 1px solid color-mix( in srgb, transparent, var(--rs-util-settings-field-border-color) 20% );
 		}
 		.rs-util-settings-field-group__content {
 			position: relative;
@@ -321,34 +325,36 @@ html {
 			grid-template-columns: [start] min-content 1fr [end];
 			grid-column: 1 / span 2;
 			padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
-			.rs-util-settings-field-row {
-				min-height: 0;
-				grid-column: 1 / -1;
-				grid-template-columns: subgrid [label] [value];
-				.rs-util-settings-field-row__label {
-					grid-column: label;
-					font-weight: bold;
-					white-space: nowrap;
-					padding-right: 0;
+			&[aria-hidden="true"] {
+				display: none;
+			}
+		}
+
+		&:has(.rs-util-settings-field-group__content[data-toggled-by]) {
+			& > .rs-util-settings-field-group__label {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				.rs-util-settings-field-row {
+					margin-left: auto;
+					padding: 0;
+					flex: 0 0 max-content;
+					display: flex;
 				}
 				.rs-util-settings-field-value {
-					grid-column: value;
-					&:first-child {
-						grid-column: 1 / -1;
-					}
+					flex: 0 0 max-content;
+					flex-wrap: nowrap;
 				}
-				&:nth-child( 2n+1 ) {
-					background: color-mix( in srgb, transparent, var(--rs-util-settings-field-odd-background), 20% );
+				.rs-util-settings-field-row__label {
+					font-size: 1rem;
+					font-weight: normal;
 				}
 			}
 		}
 	}
 
 	& > .rs-util-settings-field-row {
-		padding: calc( var(--rs-util-settings-global-padding) * 2 );
-
 		& > .rs-util-settings-field-row__label {
-			padding-top: 1rem;
 			line-height: 2rem;
 			font-size: 1.125rem;
 			grid-column: 1 / span 1;
@@ -376,15 +382,6 @@ html {
 		}
 	}
 
-	.rs-util-settings-field-row__label {
-		grid-column: 1 / span 1;
-		padding: 1.25rem 0 0;
-	}
-	.rs-util-settings-field-row__value {
-		grid-column: 2 / span 1;
-		padding: var(--rs-util-settings-field-padding);
-	}
-
 	& > .rs-util-settings-field-group > .rs-util-settings-field-group__label {
 		font-size: 1.125rem;
 		grid-column: 1 / span 2;
@@ -407,7 +404,6 @@ html {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem 1rem;
-	padding: var(--rs-util-settings-field-padding);
 	.rs-util-settings-field__description {
 		margin: 0;
 		width: 100%;
@@ -415,35 +411,50 @@ html {
 	}
 }
 
-.rs-util-settings-field-row.is-style-inline {
-	display: flex;
-	flex-direction: row;
-	align-items: start;
-	justify-content: start;
-	flex-wrap: wrap;
-	gap: 0.5rem 1rem;
+.rs-util-settings-field-row {
+	grid-column: 1 / span 2;
+	grid-row: span 1;
+
+	display: grid;
+	grid-template-columns: subgrid;
+
 	padding: var(--rs-util-settings-field-padding);
+
 	.rs-util-settings-field-row__label {
-		flex: 0 0 auto;
-		padding: 0.25rem 0 0;
+		grid-area: 1 / span 1;
+		font-size: 1.125rem;
+		line-height: 2rem;
+		width: max-content;
 	}
-	.rs-util-settings-field-value {
-		flex: 0 0 auto;
-		padding: 0;
+	.rs-util-settings-field-row__value {
+		grid-column: 1 / span 2;
+		&:first-child {
+			grid-column: 1 / span 1;
+		}
 	}
+
+	&.is-style-inline {
+		/* if only grid supported intrinsic column widths in subgrid... */
+		.rs-util-settings-inline-fields {
+			display: flex;
+		}
+		.rs-util-settings-field-value {
+			flex: 0 0 auto;
+			padding: 0;
+		}
+	}
+
 }
+
 
 .rs-util-settings-field-group .rs-util-settings-field-row--checkbox {
 	align-items: center;
 	padding: var(--rs-util-settings-field-padding);
 	.rs-util-settings-field-row__label {
-		padding-left: 0;
-		padding-top: 0;
-		padding-bottom: 0;
+		
 	}
 	.rs-util-settings-field-value {
-		padding-top: 0;
-		padding-bottom: 0;
+		
 	}
 }
 

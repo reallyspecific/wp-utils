@@ -273,7 +273,7 @@ class Settings {
 								if ( ( $field['group'] ?? null ) !== $current_group ) {
 									if ( $current_group ) {
 										if ( $current_subgroup ) {
-											printf( '</div>' );
+											printf( '</div></div>' );
 										}
 										printf( '</div></div>' );
 									}
@@ -297,12 +297,16 @@ class Settings {
 
 								if ( ( $field['subgroup'] ?? null ) !== $current_subgroup ) {
 									if ( $current_subgroup ) {
-										printf( '</div>' );
+										printf( '</div></div>' );
 									}
 									if ( $field['subgroup'] ) {
 										$current_subgroup = $field['subgroup'];
-										printf( '<div class="rs-util-settings-field-row is-style-inline"%s>',
-											isset( $field['subgroup_toggled_by'] ) ? ' data-toggled-by="' . sanitize_title( $field['subgroup_toggled_by'] ) . '"' : '' 
+										printf( 
+											'<div class="rs-util-settings-field-row"%s>'
+											. '<div class="rs-util-settings-field-row__label">%s</div>'
+											. '<div class="rs-util-settings-field-row__group">',
+											isset( $field['subgroup_toggled_by'] ) ? ' data-toggled-by="' . sanitize_title( $field['subgroup_toggled_by'] ) . '"' : '',
+											$current_subgroup,
 										);
 									}
 									$current_subgroup = $field['subgroup'] ?? null;
@@ -313,7 +317,7 @@ class Settings {
 								do_action( $this->slug . '_rs_util_settings_render_field_row_afterend', $field, $section, $this );
 							}
 							if ( $current_subgroup ) {
-								printf( '</div>' );
+								printf( '</div></div>' );
 							}
 							if ( $current_group ) {
 								printf( '</div></div>' );
