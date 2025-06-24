@@ -183,9 +183,7 @@
 	justify-content: end;
 	align-items: center;
 	gap: 1rem;
-	margin-top: 1rem;
-	margin-left: var(--rs-util-settings-global-cell-margin);
-	margin-right: var(--rs-util-settings-global-cell-margin);
+	margin: 0;
 
 	position: fixed;
 	top: 100%;
