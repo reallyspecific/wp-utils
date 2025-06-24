@@ -452,7 +452,7 @@ class Settings {
 				}
 				$render_template = '<input %1$s>';
 				if ( $attrs['type'] === 'checkbox' || $attrs['type'] === 'radio' ) {
-					$render_template .= '<svg xmlns="http://www.w3.org/2000/svg" class="rs-util-settings-field-icon"><use href="#rs-util-svg-iconset--toggle" /></svg>';
+					$render_template .= '<span class="rs-util-settings-field-icon__toggle"></span>';
 				}
 				if ( isset( $field['value_label'] ) ) {
 					$render_template .= '<label for="' . $attrs['id'] . '">' . $field['value_label'] . '</label>';
@@ -576,7 +576,7 @@ class Settings {
 				}
 				$buffer .= sprintf( 
 					'<div class="rs-util-settings-field__option">'
-					. '<svg xmlns="http://www.w3.org/2000/svg" class="rs-util-settings-field-icon"><use href="#rs-util-svg-iconset--toggle" /></svg>'
+					. '<span class="rs-util-settings-field-icon__toggle"></span>'
 					. '<input type="%1$s" value="%2$s" %3$s><label for="%2$s">%4$s</label>'
 					. '</div>',
 					empty( $attrs['multiple'] ) ? 'radio' : 'checkbox',
