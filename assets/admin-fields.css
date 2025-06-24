@@ -27,8 +27,17 @@ html {
 	--rs-util-settings-field-border-color: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-secondary) 50% );
 
 	--rs-util-settings-button-padding: 0.75rem 2rem;
-	--rs-util-settings-stripe-padding: 0.75rem 1.5rem;
-	--rs-util-settings-field-padding: 1rem 1.25rem;
+	--rs-util-settings-stripe-padding: 0.75rem 0;
+	--rs-util-settings-field-padding: 1rem 0;
+
+	--rs-util-settings-input-text-color: var(--rs-util-settings-page-text-color);
+	--rs-util-settings-input-background: var(--rs-util-settings-page-background);
+	--rs-util-settings-input-border: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 60% );
+	--rs-util-settings-input-border-radius: 4px;
+	--rs-util-settings-input-shadow: 0 2px 4px color-mix( in srgb, var(--rs-util-settings-page-background), #000 10% );
+	--rs-util-settings-input-padding: 0.35rem 1rem;
+	--rs-util-settings-input-font-size: 0.875rem;
+	--rs-util-settings-input-line-height: 1;
 
 	--rs-util-settings-global-border: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 80% );
 	--rs-util-settings-global-border-radius: 3px;
@@ -70,6 +79,29 @@ html {
 		> *:not(.rs-util-settings-page-title) {
 			opacity: 0.5;
 		}
+	}
+
+	input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+
+		font-size: var(--rs-util-settings-input-font-size);
+		line-height: var(--rs-util-settings-input-line-height);
+
+		color: var(--rs-util-settings-input-text-color);
+		background-color: var(--rs-util-settings-input-background);
+
+		border: var(--rs-util-settings-input-border);
+		border-radius: var(--rs-util-settings-input-border-radius);
+		box-shadow: var(--rs-util-settings-input-shadow);
+		padding: var(--rs-util-settings-input-padding);
+
+	}
+
+	select {
+		padding-right: 3rem;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-down' %3E%3Cpolyline points='6 9 12 15 18 9' /%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: 5px right center;
+		background-size: 1rem;
 	}
 }
 
@@ -217,7 +249,7 @@ html {
 	grid-template-columns: auto 1fr;
 	grid-auto-rows: auto;
 	grid-template-areas: "label group";
-	gap: 1rem;
+	gap: 1rem 2rem;
 	align-items: start;
 	justify-items: start;
 
@@ -225,6 +257,7 @@ html {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-auto-rows: auto;
+		gap: 1rem;
 	}
 
 	.rs-util-settings-field-group {
@@ -275,7 +308,7 @@ html {
 		background: var(--rs-util-settings-page-background);
 		box-shadow: var(--rs-util-settings-global-shadow);
 		color: var(--rs-util-settings-page-title-color);
-		padding: var(--rs-util-settings-global-padding);
+		padding: calc( var(--rs-util-settings-global-padding) * 2 );
 
 		grid-column: 1 / span 2;
 		background: var(--rs-util-settings-field-odd-background);
@@ -291,12 +324,12 @@ html {
 	}
 	.rs-util-settings-field-row__value {
 		grid-column: 2 / span 1;
-		padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+		padding: var(--rs-util-settings-field-padding);
 	}
 
 	& > .rs-util-settings-field-row > .rs-util-settings-field-row__label,
 	& > .rs-util-settings-field-group > .rs-util-settings-field-group__label {
-		padding: 1rem 1.5rem 1rem 0;
+		padding-top: 1rem;
 		line-height: 2rem;
 		font-size: 1.125rem;
 		grid-column: 1 / span 1;
@@ -333,7 +366,7 @@ html {
 	justify-content: start;
 	flex-wrap: wrap;
 	gap: 0.5rem 1rem;
-	padding: var(--rs-util-settings-stripe-padding, 0.75rem 1.5rem);
+	padding: var(--rs-util-settings-field-padding);
 	.rs-util-settings-field-row__label {
 		flex: 0 0 auto;
 		padding: 0.25rem 0 0;
@@ -346,7 +379,7 @@ html {
 
 .rs-util-settings-field-group .rs-util-settings-field-row--checkbox {
 	align-items: center;
-	padding: var(--rs-util-settings-stripe-padding, 0.5rem 1.5rem);
+	padding: var(--rs-util-settings-field-padding);
 	.rs-util-settings-field-row__label {
 		padding-left: 0;
 		padding-top: 0;
@@ -375,54 +408,65 @@ html {
 	input {
 		opacity: 0;
 		appearance: none;
-		width: 2rem;
+		width: 3rem;
 		height: 1.5rem;
 		position: relative;
 		z-index: 1;
-	}
-	.rs-util-settings-field-icon {
-		width: 2.5rem;
-		height: 1.5rem;
-		border-radius: 1.5rem;
-		border: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 50% );
-		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 30% );
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		&::before {
-			display: block;
-			content: "";
-			width: 1.4rem;
-			height: 1.4rem;
-			border-radius: 50%;
-			background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-page-text-color) 50% );
-			order: 0;
-		}
-		&::after {
-			display: block;
-			content: "OFF";
-			width: 1.25rem;
-			font-size: 10px;
-			letter-spacing: -0.04em;
-			text-align: right;
-			color: var(--rs-util-settings-page-text-color);
-			order: 1;
-		}
-		color: var(--rs-util-settings-page-title-color);
-		padding: var(--rs-util-settings-global-padding);
 
+		+ .rs-util-settings-field-icon__toggle {
+			z-index: 0;
+			margin-left: -3.5rem;
+		}
 	}
-	input:checked + .rs-util-settings-field-icon {
-		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 10% );
+
+}
+
+.rs-util-settings-field-icon__toggle {
+	width: 3rem;
+	height: auto;
+	border-radius: 1.5rem;
+	border: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 50% );
+	background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 20% );
+	
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 2px;
+
+	&::before {
+		display: block;
+		content: "";
+		aspect-ratio: 1;
+		width: 1.5rem;
+		
+		border-radius: 1.5rem;
+		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 50% );
+		order: 0;
+	}
+	&::after {
+		display: block;
+		content: "OFF";
+		width: 1.25rem;
+		font-size: 10px;
+		letter-spacing: -0.04em;
+		text-align: right;
+		color: var(--rs-util-settings-page-text-color);
+		order: 1;
+		margin-right: 0.25rem;
+	}
+
+	input:checked + & {
+		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-page-text-color) 5% );
 		&::before {
-			background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-secondary) 50% );
+			background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-secondary) 80% );
 			order: 2;
 		}
 		&::after {
 			content: "ON";
 		}
 	}
-}
+
+} 
 
 .rs-util-settings-field--multicheck {
 	display: flex;
