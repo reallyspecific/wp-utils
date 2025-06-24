@@ -457,6 +457,9 @@ class Settings {
 				if ( isset( $field['value_label'] ) ) {
 					$render_template .= '<label for="' . $attrs['id'] . '">' . $field['value_label'] . '</label>';
 				}
+				if ( ! empty( $field['toggles_group'] ) ) {
+					$attrs['data-toggles-group'] = is_string( $field['toggles_group'] ) ? $field['toggles_group'] : 'self';
+				}
 				break;
 			case 'textarea':
 				$attrs['rows'] = $field['rows'] ?? null;

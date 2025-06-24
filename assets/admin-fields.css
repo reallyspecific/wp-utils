@@ -39,7 +39,9 @@ html {
 	--rs-util-settings-input-font-size: 0.875rem;
 	--rs-util-settings-input-line-height: 1;
 
-	--rs-util-settings-global-border: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 80% );
+	--rs-util-settings-global-border-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 80% );
+	--rs-util-settings-global-border: none;
+	
 	--rs-util-settings-global-border-radius: 3px;
 	--rs-util-settings-global-padding: 1rem;
 	--rs-util-settings-global-shadow: 0 2px 5px color-mix( in srgb, var(--rs-util-settings-page-background), #000 20% );
@@ -141,6 +143,7 @@ html {
 	box-shadow: var(--rs-util-settings-global-shadow);
 	color: var(--rs-util-settings-page-title-color);
 	padding: var(--rs-util-settings-global-padding);
+	border-bottom: 1px solid var(--rs-util-settings-global-border-color);
 
 	position: sticky;
 	top: calc( var(--wp-admin--admin-bar--height) + 1rem );
@@ -242,6 +245,7 @@ html {
 		box-shadow: var(--rs-util-settings-global-shadow);
 		color: var(--rs-util-settings-page-title-color);
 		padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
+		border-bottom: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-global-border-color) 50% );
 
 		font-weight: normal;
 		font-size: 1.25rem;
@@ -277,7 +281,7 @@ html {
 	grid-template-columns: auto 1fr;
 	grid-auto-rows: auto;
 	grid-template-areas: "label group";
-	gap: 1rem 2rem;
+	gap: 0 2rem;
 	align-items: start;
 	justify-items: start;
 
@@ -285,6 +289,10 @@ html {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-auto-rows: auto;
+	}
+	.rs-util-settings-field-row + .rs-util-settings-field-row {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
 	}
 
 	.rs-util-settings-field-group {
@@ -294,8 +302,13 @@ html {
 		align-items: start;
 		appearance: none;
 		border: none;
-		margin: 0;
+		margin: 1rem 0;
 		padding: 0;
+
+		+ .rs-util-settings-field-group {
+			margin-top: 0;
+		}
+
 		.rs-util-settings-field-row {
 			gap: 1rem;
 		}
@@ -306,7 +319,8 @@ html {
 			position: relative;
 			display: grid;
 			grid-template-columns: [start] min-content 1fr [end];
-			grid-column: 2 / span 1;
+			grid-column: 1 / span 2;
+			padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
 			.rs-util-settings-field-row {
 				min-height: 0;
 				grid-column: 1 / -1;
@@ -330,6 +344,20 @@ html {
 		}
 	}
 
+	& > .rs-util-settings-field-row {
+		padding: calc( var(--rs-util-settings-global-padding) * 2 );
+
+		& > .rs-util-settings-field-row__label {
+			padding-top: 1rem;
+			line-height: 2rem;
+			font-size: 1.125rem;
+			grid-column: 1 / span 1;
+			margin: 0;
+			font-weight: normal;
+			align-self: stretch;
+		}
+	}
+
 	& > .rs-util-settings-field-row,
 	& > .rs-util-settings-field-group {
 
@@ -338,11 +366,11 @@ html {
 		background: var(--rs-util-settings-page-background);
 		box-shadow: var(--rs-util-settings-global-shadow);
 		color: var(--rs-util-settings-page-title-color);
-		padding: calc( var(--rs-util-settings-global-padding) * 2 );
+		
 
 		grid-column: 1 / span 2;
 		background: var(--rs-util-settings-field-odd-background);
-		border-bottom: 1px solid var(--rs-util-settings-field-border-color);
+		border-bottom: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-global-border-color) 40% );
 		&:nth-child( 2n ) {
 			background: var(--rs-util-settings-field-even-background);
 		}
@@ -357,15 +385,13 @@ html {
 		padding: var(--rs-util-settings-field-padding);
 	}
 
-	& > .rs-util-settings-field-row > .rs-util-settings-field-row__label,
 	& > .rs-util-settings-field-group > .rs-util-settings-field-group__label {
-		padding-top: 1rem;
-		line-height: 2rem;
 		font-size: 1.125rem;
-		grid-column: 1 / span 1;
+		grid-column: 1 / span 2;
 		margin: 0;
 		font-weight: bold;
-		align-self: stretch;
+		padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
+		border-bottom: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-global-border-color) 20% );
 	}
 }
 

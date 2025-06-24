@@ -15,6 +15,37 @@ const initForm = () => {
 		showTogglableControls( toggle );
 	} );
 
+	const groupToggles = thisForm().querySelectorAll( '[data-toggles-group]' );
+	groupToggles.forEach( toggle => {
+
+		let group;
+
+		if ( toggle.dataset.togglesGroup === 'self' ) {
+
+			group = toggle.closest( '.rs-util-settings-field-group' );
+
+			const field = toggle.closest( '.rs-util-settings-field-row' );
+			const mainLabel = group.children[0];
+			const content = group.children[1];
+			content.setAttribute( 'aria-hidden', toggle.checked ? 'false' : 'true' );
+			content.setAttribute( 'data-toggled-by', toggle.id );
+
+			mainLabel.append( field );
+
+		} else {
+
+			group = thisForm().querySelector( `#${toggle.dataset.togglesGroup}` );
+			group.setAttribute( 'aria-hidden', toggle.checked ? 'false' : 'true' );
+			group.setAttribute( 'data-toggled-by', toggle.id );
+
+		}
+
+		toggle.setAttribute( 'aria-expanded', toggle.checked ? 'true' : 'false' );
+		toggle.setAttribute( 'aria-controls', `[data-toggled-by="${toggle.id}"]` );
+		toggle.setAttribute( 'data-controls', `[data-toggled-by="${toggle.id}"]` );
+
+	} );
+
 }
 
 const onReady = async () => {
