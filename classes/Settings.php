@@ -229,10 +229,10 @@ class Settings {
 		
 		?>
 		<div class="wrap rs-util-settings-page">
-			<div class="rs-util-settings-page__title">
+			<div class="rs-util-settings-page-title">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
 				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
-				<button disabled type="button" data-action="save-rs-util-page" class="button primary-button rs-util-settings-page__submit">Save Changes</button>
+				<button disabled type="button" data-action="save-rs-util-page" class="button button-primary button-submit rs-util-settings-page__submit">Save Changes</button>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
 			</div>
 			<?php if ( count( $this->sections ) > 1 ) : ?>
@@ -252,13 +252,14 @@ class Settings {
 				<?php wp_nonce_field( $this->slug ); ?>
 				<?php $i = 0; foreach( $this->sections as $section ) : ?>
 					<div aria-hidden="<?php echo ( ! $i ) ? 'false' : 'true'; ?>" class="rs-util-settings-section" data-section="<?php echo $section['id']; ?>">
-						<?php if ( isset( $section['title'] ) ) : ?>
-						<h2 class="rs-util-settings-section__title"><?php echo $section['title']; ?></h2>
-						<?php endif; ?>
-						<?php if ( isset( $section['description'] ) ) : ?>
-							<p class="rs-util-settings-section__description"><?php
-								echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); 
-							?></p>
+						<?php if ( ! empty( $section['title'] ) ) : ?>
+						<h2 class="rs-util-settings-section__title"><?php echo $section['title']; ?>
+							<?php if ( ! empty( $section['description'] ) ) : ?>
+								<small class="rs-util-settings-section__description"><?php
+									echo parsedown_line( $section['description'], 'description', 'rs-util-settings' ); 
+								?></small>
+							<?php endif; ?>
+						</h2>
 						<?php endif; ?>
 
 						<?php if ( isset( $section['fields'] ) ) : ?>
