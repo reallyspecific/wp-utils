@@ -53,13 +53,17 @@ html {
 	}
 }
 
+#wpbody-content:has(.rs-util-settings-page) {
+	padding: 0;
+}
+
 
 .rs-util-settings-page {
 	color: var(--rs-util-settings-page-text-color);
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
-	gap: 1.5rem;
+	gap: 1rem;
 	position: relative;
 
 	> * {
@@ -138,7 +142,6 @@ html {
 .rs-util-settings-page-title {
 
 	border: var(--rs-util-settings-global-border);
-	border-radius: var(--rs-util-settings-global-border-radius);
 	background: var(--rs-util-settings-page-background);
 	box-shadow: var(--rs-util-settings-global-shadow);
 	color: var(--rs-util-settings-page-title-color);
