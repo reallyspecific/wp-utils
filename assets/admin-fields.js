@@ -1,6 +1,6 @@
 ( async function() {
 
-	const TomSelect = require( 'tom-select/popular' );
+	const TomSelect = await import( 'tom-select/popular' );
 
 	const form = document.querySelector( '.rs-util-settings-form' );
 	if ( ! form ) {

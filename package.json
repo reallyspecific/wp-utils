@@ -2,7 +2,7 @@
 	"name": "wp-utils",
 	"version": "1.0.0",
 	"license": "GPL-3.0-or-later",
-	"type": "module",
+	"type": "commonjs",
 	"scripts": {
 		"assets:build": "bodykit --build=all --in=assets",
 		"assets:watch": "bodykit --watch --in=assets"
