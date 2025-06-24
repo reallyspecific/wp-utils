@@ -1,3 +1,5 @@
+@import "../node_modules/tom-select/dist/css/tom-select.default.css";
+
 html {
 	--rs-util-settings-light: #fff;
 	--rs-util-settings-dark: #000;
