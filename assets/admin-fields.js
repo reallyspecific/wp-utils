@@ -1,6 +1,6 @@
 ( async function() {
 
-	const { TomSelect } = require( 'tom-select' );
+	const TomSelect = require( 'tom-select/popular' );
 
 	const form = document.querySelector( '.rs-util-settings-form' );
 	if ( ! form ) {
@@ -24,7 +24,7 @@
 		}
 
 		document.querySelectorAll( '[data-use-tom-select]' ).forEach( el => {
-			new TomSelect( el );
+			el.tom = new TomSelect( el );
 		} );
 
 	}
