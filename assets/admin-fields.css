@@ -1,3 +1,4 @@
+@import "../node_modules/@wordpress/base-styles/build-style/admin-schemes.css";
 @import "../node_modules/tom-select/dist/css/tom-select.css";
 
 html {
@@ -10,6 +11,8 @@ html {
 	--rs-util-settings-page-text-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 75% );
 	--rs-util-settings-page-title-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 85% );
 
+	/* much of the tab styles are overridden by wp-admin ui, hopefully they bring css vars into the
+	   admin some day. */
 	--rs-util-settings-tab-background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 10% );
 	--rs-util-settings-tab-color: var(--rs-util-settings-page-title-color);
 	--rs-util-settings-tab-border: none;

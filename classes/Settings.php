@@ -228,8 +228,8 @@ class Settings {
 		$current_values = $this->get();
 		
 		?>
-		<div class="wrap rs-util-settings-page wp-core-ui">
-			<div class="rs-util-settings-page-title wp-ui-primary">
+		<div class="wrap rs-util-settings-page">
+			<div class="rs-util-settings-page-title">
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
 				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
@@ -335,7 +335,7 @@ class Settings {
 			<?php do_action( 'rs_util_settings_render_form_afterend', $this ); ?>
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_afterend', $this ); ?>
 
-			<div class="rs-util-settings-page-actions wp-ui-primary">
+			<div class="rs-util-settings-page-actions">
 				<button disabled type="button" data-action="save-rs-util-page" class="button button-primary button-submit rs-util-settings-page__submit">
 					<svg class="rs-util-settings-icon rs-util-settings-icon--refresh" xmlns="http://www.w3.org/2000/svg"><use href="#rs-util-svg-iconset--refresh"></use></svg>
 					<span><?php _e( 'Save Changes', 'rs-util-settings' ); ?></span>

@@ -160,6 +160,11 @@
   dependencies:
     undici-types "~7.8.0"
 
+"@wordpress/base-styles@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@wordpress/base-styles/-/base-styles-6.1.0.tgz#3d38761001e328864e0917767014ce7c7fcc48eb"
+  integrity sha512-5AC4M7jXQaSknrSiuBbUWJa00jYr6i3yABf93VFuVzy9QGZQTvupQo2/bi6uAZ98pDruniScrnJJq8UG6JsoJQ==
+
 accepts@~1.3.4, accepts@~1.3.8:
   version "1.3.8"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.8.tgz#0bf0be125b67014adcb0b0921e62db7bffe16b2e"
