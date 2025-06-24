@@ -660,6 +660,8 @@ class Settings {
 		}
 
 		$this->save();
+
+		do_action( 'rs_util_settings_saved', $this );
 	}
 
 	public function get( ?string $key = null, $nocache = false ) {

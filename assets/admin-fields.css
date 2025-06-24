@@ -13,12 +13,12 @@
 	--rs-util-settings-page-text-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 75% );
 	--rs-util-settings-page-title-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 85% );
 
-	/*
-	--rs-util-settings-tab-background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 10% );
-	--rs-util-settings-tab-color: var(--rs-util-settings-page-title-color);
-	--rs-util-settings-tab-border: none;
+	
+	--rs-util-settings-tab-background: var(--rs-util-settings-primary-inverse);
+	--rs-util-settings-tab-color: var(--rs-util-settings-primary);
+	--rs-util-settings-tab-border-color: var(--rs-util-settings-secondary);
 	--rs-util-settings-tab-shadow: none;
-	*/
+	
 	--rs-util-settings-tab-radius: var(--rs-util-settings-global-border-radius);
 	--rs-util-settings-tab-active-bg: var(--rs-util-settings-primary);
 	--rs-util-settings-tab-active-color: var(--rs-util-settings-primary-inverse);
@@ -46,13 +46,14 @@
 	--rs-util-settings-input-font-size: 0.875rem;
 	--rs-util-settings-input-line-height: 1;
 
-	--rs-util-settings-global-border-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-dark) 80% );
+	--rs-util-settings-global-border-color: var(--wp-admin-theme-color-darker-20);
 	--rs-util-settings-global-border: none;
 	
 	--rs-util-settings-global-border-radius: 3px;
 	--rs-util-settings-global-padding: 1rem;
 	--rs-util-settings-global-shadow: 0 2px 5px color-mix( in srgb, var(--rs-util-settings-page-background), #000 20% );
 	--rs-util-settings-global-outline: 2px solid color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 60% );
+	--rs-util-settings-global-cell-margin: 2rem;
 
 	@media (prefers-color-scheme: dark) {
 		--rs-util-settings-light: #000;
@@ -60,10 +61,13 @@
 	}
 }
 
-#wpbody-content:has(.rs-util-settings-page) {
+#wpcontent:has(.rs-util-settings-page) {
 	padding: 0;
 }
 
+.wrap.rs-util-settings-page {
+	margin: 0;
+}
 
 .rs-util-settings-page {
 	color: var(--rs-util-settings-page-text-color);
@@ -146,17 +150,16 @@
 
 }
 
-.rs-util-settings-page-title {
+.wp-ui .rs-util-settings-page-title {
 
 	border: var(--rs-util-settings-global-border);
-	background: var(--rs-util-settings-page-background);
+	background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-primary) 90% );
 	box-shadow: var(--rs-util-settings-global-shadow);
-	color: var(--rs-util-settings-page-title-color);
 	padding: var(--rs-util-settings-global-padding);
 	border-bottom: 1px solid var(--rs-util-settings-global-border-color);
 
 	position: sticky;
-	top: calc( var(--wp-admin--admin-bar--height) + 1rem );
+	top: var(--wp-admin--admin-bar--height);
 	z-index: 99;
 
 	display: flex;
@@ -169,38 +172,52 @@
 		padding: 0;
 		font-size: 1.5rem;
 		line-height: 1.5;
-	}
-	h1 {
-		margin: 0;
+		color: inherit;
 	}
 
 }
 
-.rs-util-settings-page-actions {
+.wp-ui .rs-util-settings-page-actions {
 	display: flex;
 	flex-direction: row;
 	justify-content: end;
 	align-items: center;
 	gap: 1rem;
 	margin-top: 1rem;
+	margin-left: var(--rs-util-settings-global-cell-margin);
+	margin-right: var(--rs-util-settings-global-cell-margin);
 
-	position: sticky;
-	bottom: calc( -100% - 1rem );
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: calc( 100% - 160px );
+	.auto-fold & {
+		@media only screen and (max-width: 960px) {
+			width: calc( 100% - 36px );
+		}
+		@media only screen and (max-width: 782px) {
+			width: 100%;
+		}
+	}
+	margin-left: 0;
+	margin-right: 0;
+	border-radius: 0;
+	opacity: 1;
 
-	transition: bottom 1s ease-in-out;
+	transition: bottom 0.5s ease-in-out, opacity 0.5s;
 	z-index: 99;
 
-	&:has(.button-submit:not(:disabled)) {
-		bottom: 1rem;
-	}
-	
-	border: var(--rs-util-settings-global-border);
-	border-radius: var(--rs-util-settings-global-border-radius);
-	background: var(--rs-util-settings-page-background);
-	box-shadow: var(--rs-util-settings-global-shadow);
-	color: var(--rs-util-settings-page-title-color);
 	padding: var(--rs-util-settings-global-padding);
 	border-top: 1px solid var(--rs-util-settings-global-border-color);
+	background-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-primary) 90% );
+
+}
+.wp-ui .rs-util-settings-page-actions:has(button:disabled) {
+	bottom: -100%;
+	pointer-events: none;
+	opacity: 0;
+	height: 0;
+	overflow: hidden;
 }
 
 @keyframes rotate {
@@ -213,8 +230,6 @@
 }
 
 .button.rs-util-settings-page__submit {
-	background: color-mix( in srgb, var(--rs-util-settings-dark), var(--rs-util-settings-primary) 60% );
-	color: var(--rs-util-settings-light);
 	font-size: 1rem;
 	display: inline-flex;
 	align-items: center;
@@ -253,31 +268,31 @@
 
 .rs-util-settings-page__tab-toggle {
 	appearance: none;
-	background: var(--rs-util-settings-tab-background);
+	/*background: var(--rs-util-settings-tab-background);
 	border: var(--rs-util-settings-tab-border);
 	color: var(--rs-util-settings-tab-color);
 	border-radius: var(--rs-util-settings-tab-radius);
-	box-shadow: var(--rs-util-settings-tab-shadow);
+	box-shadow: var(--rs-util-settings-tab-shadow);*/
 
 	cursor: pointer;
-	padding: var(--rs-util-settings-global-padding);
-	font-weight: bold;
-	outline: none;
 
 	&:hover, &:active {
 		background: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active-bg) 40% );
 		border-color: color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-tab-active-bg) 40% );
 		color: var(--rs-util-settings-tab-active-color);
 	}
-	&:focus, &:active {
-		outline: 2px solid var(--rs-util-settings-tab-outline-color);
+
+	&[aria-expanded="false"] {
+		background: var(--rs-util-settings-tab-background);
+		border-color: var(--rs-util-settings-tab-border);
+		color: var(--rs-util-settings-tab-color);
 	}
 
 	&[aria-expanded="true"] {
-		background: var(--rs-util-settings-tab-active-bg);
+		/*background: var(--rs-util-settings-tab-active-bg);
 		border: var(--rs-util-settings-tab-active-border);
 		box-shadow: var(--rs-util-settings-tab-active-shadow);
-		color: var(--rs-util-settings-tab-active-color);
+		color: var(--rs-util-settings-tab-active-color);*/
 		pointer-events: none;
 	}
 }
@@ -290,6 +305,8 @@
 	align-items: stretch;
 	gap: 1rem;
 	padding: 0;
+	margin-left: var(--rs-util-settings-global-cell-margin);
+	margin-right: var(--rs-util-settings-global-cell-margin);
 
 	&[aria-hidden="true"] {
 		display: none;
@@ -428,6 +445,7 @@
 		&:nth-child( 2n ) {
 			background: var(--rs-util-settings-field-even-background);
 		}
+		
 	}
 
 	& > .rs-util-settings-field-group > .rs-util-settings-field-group__label {
@@ -437,9 +455,9 @@
 		font-weight: bold;
 		padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
 		border-bottom: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-global-border-color) 20% );
+		
 	}
 }
-
 .rs-util-settings-field-subgroup {
 	display: inline-flex;
 	width: min-content;
@@ -493,16 +511,25 @@
 
 }
 
+@media only screen and (max-width: 782px) {
+	.rs-util-settings-form-table {
+		grid-template-columns: 1fr;
+	}
+	.rs-util-settings-form-table .rs-util-settings-field-group .rs-util-settings-field-group__content,
+	.rs-util-settings-form-table > .rs-util-settings-field-row,
+	.rs-util-settings-form-table > .rs-util-settings-field-group,
+	.rs-util-settings-form-table > .rs-util-settings-field-group > .rs-util-settings-field-group__label,
+	.rs-util-settings-field-row,
+	.rs-util-settings-field-row .rs-util-settings-field-row__value,
+	.rs-util-settings-field-value {
+		grid-column: 1 / span 1;
+	}
+}
+
 
 .rs-util-settings-field-group .rs-util-settings-field-row--checkbox {
 	align-items: center;
 	padding: var(--rs-util-settings-field-padding);
-	.rs-util-settings-field-row__label {
-		
-	}
-	.rs-util-settings-field-value {
-		
-	}
 }
 
 .rs-util-settings-field-value--checkbox {
