@@ -458,6 +458,8 @@ class Settings {
 
 		if ( isset( $field['ordering'] ) ) {
 			$attrs['name'] .= '[]';
+			$attrs['data-ordering-field'] = true;
+			$attrs['id'] = '';
 		}
 
 		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
