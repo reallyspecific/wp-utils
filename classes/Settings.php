@@ -281,7 +281,7 @@ class Settings {
 										$current_group = $field['group'];
 										printf(
 											'<div class="rs-util-settings-field-group"%s>'
-											. '<div class="rs-util-settings-field-group__label">%s%s%s</div>'
+											. '<div class="rs-util-settings-field-group__label">%s%s</div>'
 											. '<div class="rs-util-settings-field-group__content">',
 										isset( $field['ordering'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
 										$current_group,
@@ -456,7 +456,9 @@ class Settings {
 		$attrs['class'][] = 'rs-util-settings-field--' . $field['type'];
 		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
 
-		
+		if ( isset( $field['ordering'] ) ) {
+			$attrs['name'] .= '[]';
+		}
 
 		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
 		switch( $tag ) {
