@@ -279,12 +279,14 @@ class Settings {
 									}
 									if ( $field['group'] ?? null ) {
 										$current_group = $field['group'];
-										printf( 
-											'<div class="rs-util-settings-field-group">'
-											. '<div class="rs-util-settings-field-group__label">%s%s</div>'
+										printf(
+											'<div class="rs-util-settings-field-group"%s>'
+											. '<div class="rs-util-settings-field-group__label">%s%s%s</div>'
 											. '<div class="rs-util-settings-field-group__content">',
+										isset( $field['ordering'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
 										$current_group,
-										isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : ''
+										isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : '',
+										
 									);
 									}
 									$current_group = $field['group'] ?? null;
@@ -302,10 +304,11 @@ class Settings {
 									if ( $field['subgroup'] ) {
 										$current_subgroup = $field['subgroup'];
 										printf( 
-											'<div class="rs-util-settings-field-row"%s>'
+											'<div class="rs-util-settings-field-row"%s%s>'
 											. '<div class="rs-util-settings-field-row__label">%s</div>'
 											. '<div class="rs-util-settings-field-row__group">',
 											isset( $field['subgroup_toggled_by'] ) ? ' data-toggled-by="' . sanitize_title( $field['subgroup_toggled_by'] ) . '"' : '',
+											isset( $field['ordering'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
 											$current_subgroup,
 										);
 									}

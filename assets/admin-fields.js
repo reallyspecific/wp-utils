@@ -46,6 +46,28 @@ const initForm = () => {
 
 	} );
 
+	const orderedFields = thisForm().querySelectorAll( '[data-ordered]' );
+	orderedFields.forEach( field => {
+		const hiddenOrder = field.querySelector( `input[type="hidden"][name="${field.dataset.ordered}"]` );
+		if ( ! ( hiddenOrder?.value ?? false ) ) {
+			return;
+		}
+		field.currentOrder = hiddenOrder.value;
+		const label = field.querySelector( '.rs-util-settings-field-row__label' );
+		const upButton = document.createElement( 'button' );
+		upButton.type = 'button';
+		upButton.textContent = 'Move field up';
+		upButton.setAttribute( 'data-action', 'move-up' );
+		upButton.classList.add( 'button', 'rs-util-settings-field-row-ordering', 'rs-util-settings-field-row-ordering--up' );
+		label.append( upButton );
+		const downButton = document.createElement( 'button' );
+		downButton.type = 'button';
+		downButton.textContent = 'Move field down';
+		downButton.setAttribute( 'data-action', 'move-down' );
+		downButton.classList.add( 'button', 'rs-util-settings-field-row-ordering', 'rs-util-settings-field-row-ordering--down' );
+		label.append( downButton );
+	} );
+
 }
 
 const onReady = async () => {
