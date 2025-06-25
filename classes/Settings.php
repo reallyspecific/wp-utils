@@ -372,6 +372,11 @@ class Settings {
 		}
 
 		ob_start();
+
+		if ( $field['type'] === 'hidden' ) {
+			$this->render_field( $field, $value );
+		} else {
+
 		?>
 
 		<div class="<?php echo esc_attr( $row_class ); ?>" <?php echo array_to_attr_string( $attrs ); ?>>
@@ -391,6 +396,8 @@ class Settings {
 		</div>
 
 		<?php
+
+		}
 
 		$rendered = ob_get_clean();
 		$rendered = apply_filters( $this->slug . '_rs_util_settings_render_field_row', $rendered, $field, $value, $this );
