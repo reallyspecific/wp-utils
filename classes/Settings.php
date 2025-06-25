@@ -283,7 +283,7 @@ class Settings {
 											'<div class="rs-util-settings-field-group"%s>'
 											. '<div class="rs-util-settings-field-group__label">%s%s</div>'
 											. '<div class="rs-util-settings-field-group__content">',
-										isset( $field['ordering'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
+										isset( $field['ordering'] ) && empty( $field['subgroup'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
 										$current_group,
 										isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : '',
 										
