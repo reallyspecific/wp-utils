@@ -9,6 +9,7 @@
         }
     ],
     "require": {
+        "composer-runtime-api": "^2.2.2",
         "php": ">=8.2",
         "erusev/parsedown": "^1.7"
     },
@@ -19,7 +20,7 @@
         "php-stubs/wp-cli-stubs": "^2.11",
         "sniccowp/php-scoper-wordpress-excludes": "^6.8"
     },
-    "bin": [ "tools/cli.php" ],
+    "bin": [ "tools/rs-cli" ],
     "scripts": {
         "scope-sample-plugin": "php-scoper add-prefix -f --config=tests/sample-plugin.scoper.inc.php",
         "test": "./vendor/bin/phpunit",

@@ -2,6 +2,8 @@
 
 namespace ReallySpecific\Utils\Tools;
 
+include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+
 use function ReallySpecific\Utils\Filesystem\canonical_path;
 use function ReallySpecific\Utils\Filesystem\recursive_rm_dir;
 use function ReallySpecific\Utils\Filesystem\recursive_copy_dir;
