@@ -2,7 +2,7 @@
 
 namespace ReallySpecific\Utils\Tools;
 
-include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+include __DIR__ . '/../functions/filesystem.php';
 
 use function ReallySpecific\Utils\Filesystem\canonical_path;
 use function ReallySpecific\Utils\Filesystem\recursive_rm_dir;
@@ -10,10 +10,6 @@ use function ReallySpecific\Utils\Filesystem\recursive_copy_dir;
 
 use Exception;
 
-$action = match( $args[0] ?? '' ) {
-	'copy'  => 'copy_into_project',
-	default => die( 'Unknown action: ' . $args[0] ),
-};
 
 function copy_into_project() {
 
@@ -51,8 +47,13 @@ function copy_into_project() {
 		recursive_copy_dir( $source, $destination, verbose: ! empty( $args['v'] ) );
 	} catch ( Exception $e ) {
 		echo "Failed to copy: " . $e->getMessage() . "\n";
-		die;
+		return false;
 	}
 
 	echo "Done.\n";
 }
+
+$action = match( $argv[1] ?? '' ) {
+	'copy'  => copy_into_project(),
+	default => die( 'Unknown action: ' . $argv[1] ),
+};
