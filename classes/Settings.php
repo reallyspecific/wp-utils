@@ -88,7 +88,10 @@ class Settings {
 
 		wp_register_style( 'rs-util-admin-fields', assets_url( 'admin-fields.css' ), [], assets_version() );
 		wp_register_script( 'rs-util-admin-fields', assets_url( 'admin-fields.js' ), [], assets_version() );
+		wp_add_inline_script( 'rs-util-admin-fields', 'SettingsPage.install();', 'after' );
 		add_action( 'admin_footer', [ __CLASS__, 'render_global_settings' ] );
+
+		do_action( 'rs_util_settings_enqueue_admin_scripts' );
 	}
 
 	public static function render_global_settings() {
@@ -223,10 +226,7 @@ class Settings {
 	public function render() {
 
 		wp_enqueue_style( 'rs-util-admin-fields' );
-		wp_enqueue_script( 'rs-util-admin-fields' );
 
-		$current_values = $this->get();
-		
 		?>
 		<div class="wrap rs-util-settings-page wp-ui">
 			<div class="rs-util-settings-page-title wp-ui-primary">
@@ -281,13 +281,12 @@ class Settings {
 										$current_group = $field['group'];
 										printf(
 											'<div class="rs-util-settings-field-group"%s>'
-											. '<div class="rs-util-settings-field-group__label">%s%s</div>'
+											. '<div class="rs-util-settings-field-group__label"><span>%s</span>%s</div>'
 											. '<div class="rs-util-settings-field-group__content">',
-										isset( $field['ordering'] ) && empty( $field['subgroup'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
-										$current_group,
-										isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : '',
-										
-									);
+											isset( $field['ordering'] ) && empty( $field['subgroup'] ) ? ' data-ordered="' . $field['ordering'] . '"' : '',
+											$current_group,
+											isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : '',
+										);
 									}
 									$current_group = $field['group'] ?? null;
 									$current_subgroup = null;
@@ -305,10 +304,10 @@ class Settings {
 										$current_subgroup = $field['subgroup'];
 										printf( 
 											'<div class="rs-util-settings-field-row"%s%s>'
-											. '<div class="rs-util-settings-field-row__label">%s</div>'
+											. '<div class="rs-util-settings-field-row__label"><span>%s</span></div>'
 											. '<div class="rs-util-settings-field-row__group">',
 											isset( $field['subgroup_toggled_by'] ) ? ' data-toggled-by="' . sanitize_title( $field['subgroup_toggled_by'] ) . '"' : '',
-											isset( $field['ordering'] ) ? ' data-ordered="' . $field['name'] . '"' : '',
+											isset( $field['ordering'] ) ? ' data-ordered="' . $field['ordering'] . '"' : '',
 											$current_subgroup,
 										);
 									}
@@ -347,6 +346,7 @@ class Settings {
 		</div>
 		<?php
 
+		wp_enqueue_script( 'rs-util-admin-fields' );
 	}
 
 	public function render_field_row( array $field, $value = null, $echo = true ) {
@@ -457,7 +457,6 @@ class Settings {
 		$attrs['class'] = trim( implode( ' ', array_unique( $attrs['class'] ) ) );
 
 		if ( isset( $field['ordering'] ) ) {
-			$attrs['name'] .= '[]';
 			$attrs['data-ordering-field'] = true;
 			$attrs['id'] = '';
 		}
@@ -521,8 +520,11 @@ class Settings {
 
 		if ( isset( $field['enable_tom'] ) ) {
 			$attrs['data-use-tom-select'] = 'true';
+			if ( isset( $field['data'] ) ) {
+				$attrs['data-source'] = $field['data'];
+			}
 		}
-		
+
 		$buffer .= '<select ' . array_to_attr_string( $attrs ) . '>';
 		foreach( $field['options'] as $key => $option ) {
 			if ( isset( $option['group'] ) ) {

@@ -493,51 +493,68 @@
 
 		&:has(.button) {
 			display: grid;
-			grid-template-columns: auto auto 1fr;
-			grid-template-rows: auto;
-			grid-template-areas: "up down label";
-			gap: 0.5rem;
+			grid-template-columns: auto 1fr;
+			grid-template-rows: auto 1fr;
+			grid-template-areas: "up label"
+								 "down space";
+			align-items: center;
+			gap: 0;
 		}
 		
 		.rs-util-settings-field-row-ordering {
+			display: block;
 			font-size: 0;
 			color: transparent;
 			overflow: hidden;
 			text-indent: -100vw;
-			width: 1rem;
-			height: 1rem;
+			width: 1.75rem;
+			height: auto;
+			
 			position: relative;
+			padding: 0;
 
 			background: none;
 			border: none;
 			outline: none;
 			cursor: pointer;
 
-			&::before {
-				content: "\f343";
-				font-family: "dashicons";
-				font-size: 1rem;
-				color: var(--rs-util-settings-secondary);
-				position: absolute;
-				width: 100%;
-				height: 100%;
-				inset: 0;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-			&--up {
-				grid-area: up;
-			}
-			&--down {
-				grid-area: down;
-				&::before {
-					content: "\f347";
-				}
-			}
+			border-radius: 3px;
 
+			background-color: var(--rs-util-settings-secondary);
+			mask-image: var(--rs-util-svg-icon--caret-up);
+			mask-size: contain;
+			mask-repeat: no-repeat;
+			mask-position: center;
+
+			&:hover, &:active {
+				background-color: var(--rs-util-settings-primary);
+			}
+			&:focus {
+				outline: 2px solid var(--rs-util-settings-primary);
+				outline-offset: 2px;
+			}
 		}
+		.rs-util-settings-field-row-ordering--up {
+			grid-area: up;
+		}
+		.rs-util-settings-field-row-ordering--down {
+			grid-area: down;
+			transform: rotate(180deg);
+			margin-right: 1rem;
+			align-self: start;
+		}
+
 	}
+
+	[data-ordering-group] &:first-child .rs-util-settings-field-row-ordering--up {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+	[data-ordering-group] &:last-child .rs-util-settings-field-row-ordering--down {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
 	.rs-util-settings-field-row__value {
 		grid-column: 1 / span 2;
 		&:first-child {
@@ -547,16 +564,55 @@
 
 	.rs-util-settings-field-row__group {
 		/* if only grid supported intrinsic column widths in subgrid... */
-
 		display: flex;
-		.rs-util-settings-field-value {
-			flex: 0 0 auto;
-			padding: 0;
-		}
+		flex-wrap: wrap;
+		gap: 0.5rem 1rem;
 	}
 
 }
 
+.rs-util-settings-field-subgroup {
+
+	display: grid;
+	grid-template-columns: 0fr auto;
+	grid-auto-rows: auto 0fr;
+	grid-template-areas: "label value"
+						"description description";
+	gap: 0;
+
+	&:has(.rs-util-settings-field__description) {
+		grid-template-columns: minmax( auto, 15rem ) auto;
+		column-gap: 0.5rem;
+	}
+
+	&:has(.rs-util-settings-field__description) {
+		grid-template-rows: auto auto;
+		row-gap: 0.5rem;
+	}
+
+	.rs-util-settings-field-row__label {
+		grid-area: label;
+		font-size: 0.875rem;
+		font-weight: bold;
+		line-height: 1.5;
+		max-width: 15rem;
+		width: max-content;
+		align-self: center;
+	}
+	.rs-util-settings-field-value {
+		grid-area: 1 / 1 / -1 / -1;
+		display: grid;
+		grid-template-rows: subgrid;
+		grid-template-columns: subgrid;
+		grid-template-areas: inherit;
+		.rs-util-settings-field {
+			grid-area: value;
+		}
+		.rs-util-settings-field__description {
+			grid-area: description;
+		}
+	}
+}
 @media only screen and (max-width: 782px) {
 	.rs-util-settings-form-table {
 		grid-template-columns: 1fr;
@@ -702,3 +758,6 @@
 	}
 }
 
+html {
+	--rs-util-svg-icon--caret-up: url("data:image/svg+xml, %0A%3Csvg%20width=%2224%22%20height=%2224%22%20xmlns=%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox=%220%200%2024%2024%22%20preserveAspectRatio=%22xMidYMid%20meet%22%3E%0A%20%20%3C!--Boxicons%20v3.0%20https%3A%2F%2Fboxicons.com%20%7C%20License%20%20https%3A%2F%2Fdocs.boxicons.com%2Ffree--%3E%0A%20%20%3Cpath%20d=%22M6.65%2016h10.69c.64%200%20.99-.76.56-1.24l-5.35-6.11a.753.753%200%200%200-1.13%200l-5.35%206.11c-.42.48-.08%201.24.56%201.24Z%22%3E%3C%2Fpath%3E%0A%3C%2Fsvg%3E");
+}

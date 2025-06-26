@@ -11,5 +11,8 @@
 		"@wordpress/base-styles": "^6.1.0",
 		"bodykit": "git+https://github.com/reallyspecific/bodykit.git",
 		"tom-select": "^2.4.3"
+	},
+	"dependencies": {
+		"sortablejs": "^1.15.6"
 	}
 }

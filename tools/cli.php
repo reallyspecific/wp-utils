@@ -1,0 +1,33 @@
+<?php
+
+namespace ReallySpecific\Utils\Tools;
+
+use function ReallySpecific\Utils\Filesystem\canonical_path;
+use function ReallySpecific\Utils\Filesystem\recursive_rm_dir;
+use function ReallySpecific\Utils\Filesystem\recursive_copy_dir;
+
+$action = match( $args[0] ?? '' ) {
+	'copy'  => 'copy_into_project',
+	default => die( 'Unknown action: ' . $args[0] ),
+};
+
+function copy_into_project() {
+
+	$args = getopt( 'v', [ 'source', 'destination', 'subdir' ] );
+
+	$source = $args['source'] ?? getenv( 'RS_UTIL_SOURCE' );
+	if ( empty( $source ) ) {
+		die( 'RS_UTIL_SOURCE or --source not defined.' );
+	}
+
+	$here = rtrim( getcwd(), '/' );
+	$destination = $args['destination'] ?? 'vendor/reallyspecific/wp-utils';
+
+	$destination_path = canonical_path( $here . '/' . $destination );
+
+	echo "Deleting $destination_path\n";
+
+	recursive_rm_dir( $destination );
+	recursive_copy_dir( $source, $destination, verbose: ! empty( $args['v'] ) );
+
+}
