@@ -17,11 +17,11 @@ class SettingsPage {
 
 		const allToggledBy = this.form.querySelectorAll( '[data-toggled-by]' );
 		allToggledBy.forEach( toggleTarget => {
-			const toggle = thisForm().querySelector( `#${toggleTarget.dataset.toggledBy}` );
+			const toggle = this.form.querySelector( `#${toggleTarget.dataset.toggledBy}` );
 			if ( ! toggle ) {
 				return;
 			}
-			showTogglableControls( toggle );
+			this.showTogglableControls( toggle );
 		} );
 	
 		const groupToggles = this.form.querySelectorAll( '[data-toggles-group]' );
@@ -43,7 +43,7 @@ class SettingsPage {
 	
 			} else {
 	
-				group = thisForm().querySelector( `#${toggle.dataset.togglesGroup}` );
+				group = this.form.querySelector( `#${toggle.dataset.togglesGroup}` );
 				group.setAttribute( 'aria-hidden', toggle.checked ? 'false' : 'true' );
 				group.setAttribute( 'data-toggled-by', toggle.id );
 	
@@ -62,21 +62,29 @@ class SettingsPage {
 				return;
 			}
 			field.currentOrder = hiddenOrder.value || ( index + 1 );
-			const label = field.querySelector( '.rs-util-settings-field-row__label' );
+			const rowControls = document.createElement( 'div' );
+			rowControls.classList.add( 'rs-util-settings-field-row-order-controls' );
+			field.append( rowControls );
 	
 			const upButton = document.createElement( 'button' );
 			upButton.type = 'button';
 			upButton.textContent = 'Move field up';
 			upButton.setAttribute( 'data-action', 'move-up' );
 			upButton.classList.add( 'button', 'rs-util-settings-field-row-ordering', 'rs-util-settings-field-row-ordering--up' );
-			label.append( upButton );
+			rowControls.append( upButton );
 	
 			const downButton = document.createElement( 'button' );
 			downButton.type = 'button';
 			downButton.textContent = 'Move field down';
 			downButton.setAttribute( 'data-action', 'move-down' );
 			downButton.classList.add( 'button', 'rs-util-settings-field-row-ordering', 'rs-util-settings-field-row-ordering--down' );
-			label.append( downButton );
+			rowControls.append( downButton );
+
+			const grabButton = document.createElement( 'button' );
+			grabButton.type = 'button';
+			grabButton.textContent = 'Drag to reorder';
+			grabButton.classList.add( 'button', 'rs-util-settings-field-row-ordering', 'rs-util-settings-field-row-ordering--grabber' );
+			rowControls.append( grabButton );
 	
 			field.parentElement.dataset.orderingGroup = field.dataset.ordered;
 	
@@ -87,35 +95,32 @@ class SettingsPage {
 			[ ...group.children ]
 				.sort( ( a, b ) => ( a.currentOrder - b.currentOrder ) )
 				.forEach( node => group.appendChild( node ) );
+
+			SettingsPage.makeSortable( group, {
+				handle: '.rs-util-settings-field-row-ordering--grabber',
+				onSort: () => this.updateSortingIds( group),
+			} );
 		} );
 
-		this.listen( 'change', '.rs-util-settings-form', this.enableSaveButton );
-		this.listen( 'click', '[data-action="save-rs-util-page"]', this.save );
-		this.listen( 'click', '.rs-util-settings-page__tab-toggle', this.clickTab );
-		this.listen( 'change', '[data-controls]', this.showTogglableControls );
-		this.listen( 'click', '.rs-util-settings-field-row-ordering', this.clickReorderButton );
+		document.querySelectorAll( '[data-use-tom-select]' ).forEach( SettingsPage.makeSelectable );
+
+		SettingsPage.listen( 'change', '.rs-util-settings-form', field => SettingsPage.enableSaveButton( field ) );
+		SettingsPage.listen( 'change', '[data-controls]', field => this.showTogglableControls( field ) );
+		SettingsPage.listen( 'click', '[data-action="save-rs-util-page"]', () => this.save() );
+		SettingsPage.listen( 'click', '.rs-util-settings-page__tab-toggle', button => this.clickTab( button ) );
+		SettingsPage.listen( 'click', '.rs-util-settings-field-row-ordering', button => this.clickReorderButton( button ) );
+		SettingsPage.listen( 'click', '.rs-util-settings-page [data-action]', button => this.handleAction( button ) );
 
 		window.addEventListener( 'popstate', this.onPopState );
 	}
 
-	ready() {
-
-		/*const settings = rsUtil_settingsPageENV();
-
-		if ( settings.svg_iconset && ! document.querySelector( '#rs-util-svg-iconset' ) ) {
-			const svgIcons = document.createElement( 'div' );
-			try {
-				const svg = await fetch( settings.svg_iconset );
-				const svgText = await svg.text();
-				svgIcons.innerHTML = svgText;
-			} catch ( e ) {
-				console.error( e );
-			}
-			document.body.appendChild( svgIcons.firstElementChild );
-		}*/
-
-		document.querySelectorAll( '[data-use-tom-select]' ).forEach( makeSelectable );
-
+	handleAction( button ) {
+		switch( button.dataset.action ) {
+			case 'remove-item':
+				SettingsPage.removeListItem( button.closest( '.rs-util-settings-sortable-list-item' ) );
+				SettingsPage.enableSaveButton();
+				break;
+		}
 	}
 
 	save() {
@@ -125,7 +130,7 @@ class SettingsPage {
 
 	clickTab( toggle ) {
 		history.pushState( null, null, `#${toggle.dataset.section}` );
-		this.switchTab( toggle.dataset.section );
+		SettingsPage.switchTab( toggle.dataset.section, this.form );
 	}
 
 	clickReorderButton( orderingButton ) {
@@ -135,47 +140,30 @@ class SettingsPage {
 		if ( ! hiddenOrder ) {
 			return;
 		}
-		const currentOrder = hiddenOrder.value + '';
 
 		const swapWith = orderingButton.dataset.action === 'move-up' 
 			? field.previousElementSibling
 			: field.nextElementSibling;
 
 		if ( swapWith ) {
-			const newOrder = swapWith.querySelector( `input[data-ordering-field]` );
-			if ( ! newOrder ) {
-				return;
-			}
-
-			hiddenOrder.value = newOrder.value + '';
-			hiddenOrder.currentOrder = newOrder.value + '';
-			newOrder.value = currentOrder;
-			newOrder.currentOrder = currentOrder;
-
 			if ( orderingButton.dataset.action === 'move-up' ) {
 				field.insertAdjacentElement( 'afterend', swapWith );
 			} else {
 				field.insertAdjacentElement( 'beforebegin', swapWith );
 			}
 
-			enableSaveButton();
+			SettingsPage.enableSaveButton();
+			this.updateSortingIds( field.closest( '[data-ordering-group]' ) );
 
 		}
 
 	}
 
-	switchTab( section ) {
-
-		if ( section === '' ) {
-			const firstSection = this.form.querySelector( `.rs-util-settings-section[data-section]` );
-			section = firstSection.dataset.section;
-		}
-
-		const tabToggles = document.querySelectorAll( '.rs-util-settings-page__tab-toggle' );
-		tabToggles.forEach( toggle => {
-			toggle.setAttribute( 'aria-expanded', toggle.dataset.section === section ? 'true' : 'false' );
-			const target = this.form.querySelector( `.rs-util-settings-section[data-section="${toggle.dataset.section}"]` );
-			target.setAttribute( 'aria-hidden', toggle.dataset.section === section ? 'false' : 'true' );
+	updateSortingIds( group ) {
+		const fields = group.querySelectorAll( '.rs-util-settings-field-row' );
+		fields.forEach( ( field, index ) => {
+			field.querySelector( `input[data-ordering-field]` ).value = index + 1;
+			field.currentOrder = index + 1;
 		} );
 	}
 
@@ -194,11 +182,26 @@ class SettingsPage {
 	onPopState() {
 		const url = new URL( window.location.href );
 		const section = url.hash.replace( '#', '' );
-		this.switchTab( section );
+		SettingsPage.switchTab( section, this.form );
 	}
 
-	enableSaveButton() {
+	static enableSaveButton() {
 		document.querySelector( '.rs-util-settings-page .rs-util-settings-page__submit' ).disabled = false;
+	}
+
+	static switchTab( section, form ) {
+
+		if ( ! section ) {
+			const firstSection = form.querySelector( `.rs-util-settings-section[data-section]` );
+			section = firstSection.dataset.section;
+		}
+
+		const tabToggles = document.querySelectorAll( '.rs-util-settings-page__tab-toggle' );
+		tabToggles.forEach( toggle => {
+			toggle.setAttribute( 'aria-expanded', toggle.dataset.section === section ? 'true' : 'false' );
+			const target = form.querySelector( `.rs-util-settings-section[data-section="${toggle.dataset.section}"]` );
+			target.setAttribute( 'aria-hidden', toggle.dataset.section === section ? 'false' : 'true' );
+		} );
 	}
 
 	static listen( eventName, selector, callback ) {
@@ -235,35 +238,117 @@ class SettingsPage {
 			...moreArgs,
 		};
 
+		if ( el.dataset.action === 'add-item' ) {
+			const group = el.closest( '.rs-util-settings-field-value' );
+			const list  = group.querySelector( '.rs-util-settings-sortable-list' );
+			SettingsPage.makeSortable( list, {
+				onSort: () => {
+					SettingsPage.updateListValues( group );
+				}
+			} );
+			tomArgs.onItemAdd = ( value, ...args ) => {
+				const label = el.currentResults?.[ value ] ?? value;
+				SettingsPage.addListItem( group, value, label );
+				el.tom.clear();
+				el.tom.blur();
+			};
+		}
+
 		if ( el.dataset.source ) {
+			const source = JSON.parse( el.dataset.source );
+			const valueField = source.value.split('.');
+			const labelField = source.label.split('.');
 			tomArgs.load = ( query, callback ) => {
-				const url = el.dataset.source.replace( '@query', encodeURIComponent( query ) );
+				const url = source.url.replace( '@query', encodeURIComponent( query ) );
 				fetch( url )
 					.then( response => response.json() )
 					.then( data => {
 						const results = [];
 						el.currentResults ??= {};
 						data.forEach( item => {
-							results.push( {
-								id: item.id,
-								title: item.title.rendered,
+							let value = item;
+							valueField.forEach( field => {
+								value = value[field];
 							} );
-							el.currentResults[item.id] = item.title.rendered;
+							let label = item;
+							labelField.forEach( field => {
+								label = label[field];
+							} );
+							results.push( { value, label } );
+							el.currentResults[value] = label;
 						} );
 						callback( results );
 					} )
 					.catch( error => console.error( error ) );
 			};
-			tomArgs.valueField  = 'id';
-			tomArgs.labelField  = 'title';
-			tomArgs.searchField = 'title';
+			tomArgs.valueField  = 'value';
+			tomArgs.labelField  = 'label';
+			tomArgs.searchField = 'label';
 		}
 
 		el.tom = new TomSelect( el, tomArgs );
 	}
 
 	static makeSortable( el, args = {} ) {
-		Sortable.create( el, args );
+
+		Sortable.create( el, {
+			animation: 150,
+			ghostClass: 'sortable-ghost',
+			chosenClass: 'sortable-chosen',
+			handle: '.rs-util-settings-draggable-handle',
+			...args
+		} );
+	}
+
+	static addListItem = ( group, value, label ) => {
+
+		const values = ( group.querySelector( 'input[type="hidden"]' ).value
+			? JSON.parse( group.querySelector( 'input[type="hidden"]' ).value )
+			: null ) || [];
+		
+		values.push( value );
+		group.querySelector( 'input[type="hidden"]' ).value = JSON.stringify( values );
+
+
+		const newItem = document.createElement('div');
+		newItem.classList.add( 'rs-util-settings-sortable-list-item' );
+		newItem.dataset.value = value;
+		newItem.innerHTML = `
+			<span class="rs-util-settings-draggable-handle"></span>
+			<span>${label}</span>
+			<button type="button" class="rs-util-settings-trash-btn" data-action="remove-item">Remove Item</button>
+		`;
+
+		const list = group.querySelector( '.rs-util-settings-sortable-list' );
+		list.append( newItem );
+
+		SettingsPage.enableSaveButton();
+
+	}
+
+	static removeListItem = ( item ) => {
+
+		const group = item.closest( '.rs-util-settings-field-value' );
+
+		item.remove();
+
+		SettingsPage.updateListValues( group );
+		SettingsPage.enableSaveButton();
+	}
+
+	static updateListValues( group ) {
+
+		const hiddenValueField = group.querySelector( 'input[type="hidden"]' );
+
+		const list = group.querySelector( '.rs-util-settings-sortable-list' );
+		const values = [];
+		list.querySelectorAll( '.rs-util-settings-sortable-list-item' ).forEach( item => {
+			values.push( item.dataset.value );
+		} );
+		hiddenValueField.value = JSON.stringify( values );
+
+		SettingsPage.enableSaveButton();
+
 	}
 
 	static install() {
@@ -271,5 +356,7 @@ class SettingsPage {
 	}
 
 }
+
+window.rsUtil_SettingsPage = SettingsPage;
 
 export default SettingsPage;

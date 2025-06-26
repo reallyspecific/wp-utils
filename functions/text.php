@@ -18,6 +18,9 @@ function array_to_attr_string( $attributes = [] ) {
 		if ( $value === false ) {
 			$value = 'false';
 		}
+		if ( ! is_string( $value ) ) {
+            $value = json_encode( $value, true ) ?: '';
+        }
 		$attr_string .= ' ' . $key . '="' . esc_attr( $value ) . '"';
 	}
 
