@@ -562,8 +562,8 @@ class Settings {
 						'%s' .
 						'<button type="button" class="rs-util-settings-trash-btn" data-action="remove-item">Remove Sticky</button>' .
 					'</div>',
-				    esc_attr( $item_id ),
-				    esc_html( $item )
+					esc_attr( $item_id ),
+					esc_html( $item )
 				);
 			}
 			$buffer .= '</div>';
@@ -749,7 +749,11 @@ class Settings {
 		if ( empty( $key ) ) {
 			return $this->cache->to_array();
 		}
-		return $this->cache[ $key ];
+		$value = $this->cache[$key];
+		if ( $value instanceof MultiArray ) {
+			return $value->to_array();
+		}
+		return $value;
 	}
 
 	public function __get( $key ) {
