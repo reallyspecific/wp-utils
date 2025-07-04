@@ -9,6 +9,8 @@ use function ReallySpecific\Utils\Text\parsedown_line;
 use function ReallySpecific\Utils\Environment\add_global_var;
 use function ReallySpecific\Utils\Environment\get_global_var_footer_script;
 
+use Exception;
+
 class Settings {
 
 	private array $settings = [];
@@ -24,6 +26,7 @@ class Settings {
 	private ?int $post_id = null;
 
 	private ?MultiArray $cache = null;
+
 
 	/**
 	 * Constructor for the class.
@@ -42,8 +45,19 @@ class Settings {
 			'parent'      => false,
 		] );
 
+        if ( empty( $props['slug'] ) ) {
+            throw new Exception( 'slug parameter is required' );
+        }
+
 		$this->slug = sanitize_title( $props['slug'] );
 		unset( $props['slug'] );
+
+        if ( empty( $props['page_title'] ) ) {
+            $props['page_title'] = $props['menu_title'] ?? ucwords( $this->slug );
+        }
+        if ( empty( $props['menu_title'] ) ) {
+            $props['menu_title'] = $props['page_title'];
+        }
 
 		$this->settings = $props;
 

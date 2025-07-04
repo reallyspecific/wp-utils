@@ -196,3 +196,26 @@ function recursive_add_dir_to_zip( &$zip_archive, string $source_folder, string 
 	}
 	closedir( $dir );
 }
+
+function get_classes_from_dir( string $directory_path, string $namespace = '' ) : array {
+
+    if ( ! is_dir( $directory_path ) ) {
+        throw new Exception( 'Not a directory: ' . $directory_path );
+    }
+    $dir       = opendir( $directory_path );
+    $classes = [];
+    while ( false !== ( $file = readdir( $dir ) ) ) {
+        if ( str_starts_with( $file, '.' ) ) {
+            continue;
+        }
+        if ( ! str_ends_with( $file, '.php' ) ) {
+            continue;
+        }
+        $class_name = basename( $file, '.php' );
+
+        $classes[ $class_name ] = $namespace . '\\' . $class_name;
+    }
+
+    return $classes;
+
+}

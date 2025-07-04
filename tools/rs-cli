@@ -1,5 +1,4 @@
 <?php
-# 
 
 namespace ReallySpecific\Utils\Tools;
 
@@ -13,11 +12,20 @@ use Exception;
 
 $opts = getopt( 'cv', [ 'source::', 'destination::', 'subdir::' ] );
 
+function replace_env_vars( string $string ): string {
+	if ( preg_match_all( '/\{([A-Z0-9-_]*)\}/', $string, $matches ) ) {
+		foreach( $matches[0] as $index => $match ) {
+			$string = str_replace( $match, getenv( $matches[$index][1] ), $string );
+		}
+	}
+	return $string;
+}
+
 function copy_into_project( $opts ) {
 
 	$here = rtrim( getcwd(), '/' );
 
-	$source = $opts['source'] ?? getenv( 'RS_UTIL_SOURCE' );
+	$source = replace_env_vars( ['source'] ?? getenv( 'RS_UTIL_SOURCE' ) );
 	if ( empty( $source ) ) {
 		die( 'RS_UTIL_SOURCE or --source not defined.' );
 	}
@@ -33,7 +41,7 @@ function copy_into_project( $opts ) {
 		echo "Copying Subdirectory: {$opts['subdir']}\n";
 	}
 
-	$destination = $opts['destination'] ?? 'vendor/reallyspecific/wp-utils';
+	$destination = replace_env_vars( ['destination'] ?? 'vendor/reallyspecific/wp-utils' );
 	$subdir = $opts['subdir'] ?? '';
 	if ( $subdir ) {
 		$destination .= '/' . $subdir;

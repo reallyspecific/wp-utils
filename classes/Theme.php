@@ -19,6 +19,8 @@ abstract class Theme extends Plugin {
 		add_action( 'wp_enqueue_scripts', [ $this, 'install_public_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'install_admin_assets' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
+
+        add_action( 'after_setup_theme', [ $this, 'setup' ] );
 	}
 
 	public function get_root_file() {
@@ -35,10 +37,11 @@ abstract class Theme extends Plugin {
 	}
 
 	public function get_wp_data( $key = null ) {
+        $all_data = parent::get_wp_data();
 		if ( empty( $key ) ) {
-			return $this->data;
+			return $all_data;
 		}
-		return $this->data->get( $key ) ?? null;
+		return $all_data->get( $key ) ?? null;
 	}
 
 	private function attach_assets( $assets, $type, $dest = 'public' ) {
