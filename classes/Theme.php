@@ -9,9 +9,15 @@ abstract class Theme extends Plugin {
 		'scripts' => [],
 	];
 
+	protected $env = [];
+
 	function __construct( array $props = [] ) {
 
 		parent::__construct( [ 'update_plugin_filter' => 'update_themes', ...$props ] );
+
+		if ( isset( $props['env'] ) ) {
+			$this->env = $props['env'];
+		}
 	
 		$this->attach_assets( $props['stylesheets'] ?? [], 'stylesheet' );
 		$this->attach_assets( $props['scripts'] ?? [], 'script' );
@@ -19,6 +25,7 @@ abstract class Theme extends Plugin {
 		add_action( 'wp_enqueue_scripts', [ $this, 'install_public_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'install_admin_assets' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
+		add_action( 'wp_head', [ $this, 'install_environment_variables' ] );
 
         add_action( 'after_setup_theme', [ $this, 'setup' ] );
 	}
@@ -145,6 +152,28 @@ abstract class Theme extends Plugin {
 				$stylesheet['dependencies'] ?? [],
 				$stylesheet['version'] ?? $this->get_version(),
 			);
+		}
+	}
+
+	public function add_env( $key, $value ) {
+		$this->env[ $key ] = $value;
+	}
+
+	public function get_env( $key ) {
+		return $this->env[ $key ] ?? null;
+	}
+
+	public function get_env_vars() {
+		return $this->env;
+	}
+
+	public function install_environment_variables() {
+		$env = $this->get_env_vars();
+		if ( empty( $env ) ) {
+			return;
+		}
+		foreach( $env as $key => $value ) {
+			echo '<script>window.' . $key . ' = "' . $value . '";</script>';
 		}
 	}
 

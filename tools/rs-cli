@@ -15,7 +15,7 @@ $opts = getopt( 'cv', [ 'source::', 'destination::', 'subdir::' ] );
 function replace_env_vars( string $string ): string {
 	if ( preg_match_all( '/\{([A-Z0-9-_]*)\}/', $string, $matches ) ) {
 		foreach( $matches[0] as $index => $match ) {
-			$string = str_replace( $match, getenv( $matches[$index][1] ), $string );
+			$string = str_replace( $match, getenv( $matches[1][$index] ), $string );
 		}
 	}
 	return $string;
@@ -25,7 +25,7 @@ function copy_into_project( $opts ) {
 
 	$here = rtrim( getcwd(), '/' );
 
-	$source = replace_env_vars( ['source'] ?? getenv( 'RS_UTIL_SOURCE' ) );
+	$source = replace_env_vars( $opts['source'] ?? getenv( 'RS_UTIL_SOURCE' ) );
 	if ( empty( $source ) ) {
 		die( 'RS_UTIL_SOURCE or --source not defined.' );
 	}
@@ -41,7 +41,7 @@ function copy_into_project( $opts ) {
 		echo "Copying Subdirectory: {$opts['subdir']}\n";
 	}
 
-	$destination = replace_env_vars( ['destination'] ?? 'vendor/reallyspecific/wp-utils' );
+	$destination = replace_env_vars( $opts['destination'] ?? 'vendor/reallyspecific/wp-utils' );
 	$subdir = $opts['subdir'] ?? '';
 	if ( $subdir ) {
 		$destination .= '/' . $subdir;
@@ -56,11 +56,13 @@ function copy_into_project( $opts ) {
 
 	echo "Deleting $destination_path\n";
 
-	recursive_rm_dir( $destination );
+
 
 	echo "Copying $source_path to $destination_path\n";
 	try {
-		recursive_copy_dir( $source, $destination, verbose: isset( $opts['v'] ) );
+		$current_permissions = fileperms( $source_path );
+		recursive_rm_dir( $destination );
+		recursive_copy_dir( $source, $destination, verbose: isset( $opts['v'] ), chmod_flags: $current_permissions );
 	} catch ( Exception $e ) {
 		echo "Failed to copy: " . $e->getMessage() . "\n";
 		return false;

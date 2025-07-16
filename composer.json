@@ -25,7 +25,8 @@
         "scope-sample-plugin": "php-scoper add-prefix -f --config=tests/sample-plugin.scoper.inc.php",
         "test": "./vendor/bin/phpunit",
         "retest": "composer scope-sample-plugin && ./vendor/bin/phpunit",
-        "no-dev": "composer update --prefer-dist --no-dev"
+        "no-dev": "composer update --prefer-dist --no-dev",
+        "copy-bodykit": "php ./tools/rs-cli -cv --source=\"{RS_BODYKIT_SOURCE}\" --destination=\"node_modules/bodykit\""
     },
     "config": {
         "allow-plugins": {

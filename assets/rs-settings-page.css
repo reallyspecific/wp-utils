@@ -418,7 +418,7 @@
 		.rs-util-settings-field-group__content {
 			position: relative;
 			display: grid;
-			grid-template-columns: [start] min-content 1fr [end];
+			grid-template-columns: [start] max-content 1fr [end];
 			grid-column: 1 / span 2;
 			gap: 0 2rem;
 			padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );

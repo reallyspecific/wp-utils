@@ -60,7 +60,7 @@ function recursive_rm_dir( string $src ) : void {
  * @return void
  * @throws Exception If the destination folder already exists.
  */
-function recursive_copy_dir( string $source_folder, string $destination_folder, bool $verbose = false ) : void {
+function recursive_copy_dir( string $source_folder, string $destination_folder, bool $verbose = false, string $chmod_flags = null ) : void {
 
 	if ( file_exists( $destination_folder ) ) {
 		throw new Exception( "Destination folder `$destination_folder` already exists" );
@@ -78,6 +78,9 @@ function recursive_copy_dir( string $source_folder, string $destination_folder, 
 			recursive_copy_dir( "$source_folder/$file", "$destination_folder/$file", $verbose );
 		} else {
 			copy( "$source_folder/$file", "$destination_folder/$file" );
+			if ( ! empty( $chmod_flags ) ) {
+				chmod( "$destination_folder/$file", $chmod_flags );
+			}
 			if ( $verbose ) {
 				echo "Copying $destination_folder/$file\n"; 
 			}

@@ -14,5 +14,10 @@
 	},
 	"dependencies": {
 		"sortablejs": "^1.15.6"
+	},
+	"config": {
+		"bodykit": {
+			"targetBrowsers": ">= 0.25%"
+		}
 	}
 }
