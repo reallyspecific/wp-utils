@@ -8,10 +8,15 @@
 namespace ReallySpecific\Utils;
 
 function setup() {
+	static $setup = false;
+	if ( $setup ) {
+		return;
+	}
 	autoload_directory( __DIR__ . '/functions' );
 	spl_autoload_register( function( $class_name ) {
 		class_loader( $class_name );
 	} );
+	$setup = true;
 }
 
 /**
@@ -20,10 +25,24 @@ function setup() {
  * @param mixed $abs_path
  * @return void
  */
-function autoload_directory( $abs_path ) {
-	$files = glob( rtrim( $abs_path, '/' ) . '/*.php' );
-	foreach ( $files as $file ) {
-		include_once $file;
+function autoload_directory( $abs_path, $recursive = false ) {
+	$abs_path = rtrim( $abs_path, '/' );
+	if ( ! is_dir( $abs_path ) ) {
+		throw new Exception( 'Not a directory: ' . $abs_path );
+	}
+	$dir = opendir( $abs_path );
+	while ( false !== ( $file = readdir( $dir ) ) ) {
+		if ( str_starts_with( $file, '.' ) ) {
+			continue;
+		}
+		if ( is_dir( $abs_path . '/' . $file ) && $recursive ) {
+			autoload_directory( $abs_path . '/' . $file, $recursive );
+			continue;
+		}
+		if ( ! str_ends_with( $file, '.php' ) ) {
+			continue;
+		}
+		include_once $abs_path . '/' . $file;
 	}
 }
 

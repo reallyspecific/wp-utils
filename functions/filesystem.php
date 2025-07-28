@@ -33,15 +33,14 @@ function recursive_mk_dir( $path ): bool {
  * @param string $src The directory to remove.
  * @return void
  */
-function recursive_rm_dir( string $src ) : void {
+function recursive_rm_dir( string $src ): void {
 	$dir = opendir( $src );
 	while ( false !== ( $file = readdir( $dir ) ) ) {
 		if ( ( $file != '.' ) && ( $file != '..' ) ) {
 			$full = $src . '/' . $file;
 			if ( is_dir( $full ) ) {
 				recursive_rm_dir( $full );
-			}
-			else {
+			} else {
 				unlink( $full );
 			}
 		}
@@ -56,11 +55,11 @@ function recursive_rm_dir( string $src ) : void {
  *
  * @param string $source_folder
  * @param string $destination_folder
- * @param bool $verbose Whether to output filenames as they are copied.
+ * @param bool   $verbose Whether to output filenames as they are copied.
  * @return void
  * @throws Exception If the destination folder already exists.
  */
-function recursive_copy_dir( string $source_folder, string $destination_folder, bool $verbose = false, string $chmod_flags = null ) : void {
+function recursive_copy_dir( string $source_folder, string $destination_folder, bool $verbose = false, ?string $chmod_flags = null ): void {
 
 	if ( file_exists( $destination_folder ) ) {
 		throw new Exception( "Destination folder `$destination_folder` already exists" );
@@ -69,8 +68,8 @@ function recursive_copy_dir( string $source_folder, string $destination_folder, 
 
 	$directory = opendir( $source_folder );
 
-	while (( $file = readdir($directory)) !== false ) {
-		if ($file === '.' || $file === '..' || $file === 'node_modules' || $file === 'tests' ) {
+	while ( ( $file = readdir( $directory ) ) !== false ) {
+		if ( $file === '.' || $file === '..' || $file === 'node_modules' || $file === 'tests' ) {
 			continue;
 		}
 
@@ -82,13 +81,12 @@ function recursive_copy_dir( string $source_folder, string $destination_folder, 
 				chmod( "$destination_folder/$file", $chmod_flags );
 			}
 			if ( $verbose ) {
-				echo "Copying $destination_folder/$file\n"; 
+				echo "Copying $destination_folder/$file\n";
 			}
 		}
 	}
 
 	closedir( $directory );
-
 }
 
 /**
@@ -97,13 +95,16 @@ function recursive_copy_dir( string $source_folder, string $destination_folder, 
  * @param string ...$paths paths to join, only the first can be absolute.
  * @return string The combined paths
  */
-function join_path( ...$paths ) : string {
+function join_path( ...$paths ): string {
 	if ( empty( $paths ) ) {
 		return '';
 	}
 	$combined = rtrim( array_shift( $paths ), '/' );
 	while ( count( $paths ) > 0 ) {
-		$combined .= '/' . ltrim( array_shift( $paths ), '/' );
+		$path = array_shift( $paths );
+		if ( ! empty( $path ) ) {
+			$combined .= '/' . ltrim( $path, '/' );
+		}
 	}
 	return canonical_path( $combined );
 }
@@ -116,9 +117,9 @@ function join_path( ...$paths ) : string {
  * @param string $separator
  * @return string
  */
-function canonical_path( string $path, string $separator = '/' ) : string {
-	$canonical = [];
-	$path = explode( $separator, $path );
+function canonical_path( string $path, string $separator = '/' ): string {
+	$canonical = array();
+	$path      = explode( $separator, $path );
 
 	foreach ( $path as $segment ) {
 		switch ( $segment ) {
@@ -138,14 +139,14 @@ function canonical_path( string $path, string $separator = '/' ) : string {
 	return rtrim( join( $separator, $canonical ), $separator );
 }
 
-function get_extension_from_mime_type( string $mime_type ) : ?string {
+function get_extension_from_mime_type( string $mime_type ): ?string {
 
-	// wordpress's mime list is too limited, we gonna use our own
+	// WordPress's mime list is too limited, we gonna use our own
 
 	$mime_list = wp_cache_get( 'mime_types', 'rs_wp_util' );
 	if ( ! $mime_list ) {
-		$csv_list = fopen( utils_assets_dir() . '/mime-types.csv', 'r' );
-		$mime_list = [];
+		$csv_list  = fopen( utils_assets_dir() . '/mime-types.csv', 'r' );
+		$mime_list = array();
 		while ( ( $line = fgetcsv( $csv_list ) ) !== false ) {
 			if ( isset( $mime_list[ $line[1] ] ) ) {
 				$mime_list[ $line[1] ] .= '|' . $line[0];
@@ -159,7 +160,7 @@ function get_extension_from_mime_type( string $mime_type ) : ?string {
 	return $mime_list[ $mime_type ] ?? null;
 }
 
-function make_zip_from_folder( string $source_folder, string $destination_zip_file ) : bool {
+function make_zip_from_folder( string $source_folder, string $destination_zip_file ): bool {
 
 	$zip_archive = new ZipArchive();
 
@@ -170,7 +171,7 @@ function make_zip_from_folder( string $source_folder, string $destination_zip_fi
 	if ( $zip_archive->open( $destination_zip_file, ( ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) !== true ) {
 		return debug( false, 'Failed to create zip archive' );
 	}
-	
+
 	recursive_add_dir_to_zip( $zip_archive, $source_folder );
 	if ( $zip_archive->status != ZIPARCHIVE::ER_OK ) {
 		return debug( false, 'Failed to write files to zip' );
@@ -179,7 +180,6 @@ function make_zip_from_folder( string $source_folder, string $destination_zip_fi
 	$zip_archive->close();
 
 	return true;
-
 }
 
 function recursive_add_dir_to_zip( &$zip_archive, string $source_folder, string $rel = '/' ): void {
@@ -200,25 +200,24 @@ function recursive_add_dir_to_zip( &$zip_archive, string $source_folder, string 
 	closedir( $dir );
 }
 
-function get_classes_from_dir( string $directory_path, string $namespace = '' ) : array {
+function get_classes_from_dir( string $directory_path, string $namespace = '' ): array {
 
-    if ( ! is_dir( $directory_path ) ) {
-        throw new Exception( 'Not a directory: ' . $directory_path );
-    }
-    $dir       = opendir( $directory_path );
-    $classes = [];
-    while ( false !== ( $file = readdir( $dir ) ) ) {
-        if ( str_starts_with( $file, '.' ) ) {
-            continue;
-        }
-        if ( ! str_ends_with( $file, '.php' ) ) {
-            continue;
-        }
-        $class_name = basename( $file, '.php' );
+	if ( ! is_dir( $directory_path ) ) {
+		throw new Exception( 'Not a directory: ' . $directory_path );
+	}
+	$dir     = opendir( $directory_path );
+	$classes = array();
+	while ( false !== ( $file = readdir( $dir ) ) ) {
+		if ( str_starts_with( $file, '.' ) ) {
+			continue;
+		}
+		if ( ! str_ends_with( $file, '.php' ) ) {
+			continue;
+		}
+		$class_name = basename( $file, '.php' );
 
-        $classes[ $class_name ] = $namespace . '\\' . $class_name;
-    }
+		$classes[ $class_name ] = $namespace . '\\' . $class_name;
+	}
 
-    return $classes;
-
+	return $classes;
 }
