@@ -8,6 +8,11 @@
             "email": "reallyspecific@pm.me"
         }
     ],
+    "autoload-dev": {
+        "psr-4": {
+            "ReallySpecific\\Utils\\": "classes/"
+        }
+    },
     "require": {
         "composer-runtime-api": "^2.2.2",
         "php": ">=8.2",
