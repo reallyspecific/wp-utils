@@ -13,6 +13,12 @@
             "ReallySpecific\\Utils\\": "./classes/"
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.flops:reallyspecific/rs-code-standards.git"
+        }
+    ],
     "require": {
         "composer-runtime-api": "^2.2.2",
         "php": ">=8.2",
@@ -23,7 +29,8 @@
         "humbug/php-scoper": "^0.18",
         "bamarni/composer-bin-plugin": "^1.8",
         "php-stubs/wp-cli-stubs": "^2.11",
-        "sniccowp/php-scoper-wordpress-excludes": "^6.8"
+        "sniccowp/php-scoper-wordpress-excludes": "^6.8",
+        "reallyspecific/rs-code-standards": "dev-main"
     },
     "bin": [ "tools/rs-cli" ],
     "scripts": {
@@ -35,7 +42,8 @@
     },
     "config": {
         "allow-plugins": {
-            "bamarni/composer-bin-plugin": true
+            "bamarni/composer-bin-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     }
 }
