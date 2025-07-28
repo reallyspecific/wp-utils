@@ -8,9 +8,9 @@
             "email": "reallyspecific@pm.me"
         }
     ],
-    "autoload-dev": {
+    "autoload": {
         "psr-4": {
-            "ReallySpecific\\Utils\\": "classes/"
+            "ReallySpecific\\Utils\\": "./classes/"
         }
     },
     "require": {

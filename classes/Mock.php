@@ -2,9 +2,9 @@
 
 namespace ReallySpecific\Utils;
 
-use WP_Mock;
+use ReallySpecific\Utils\Mocks\Functions;
 
-class Mock extends WP_Mock {
+class Mock extends \WP_Mock {
 
 	static Functions $functions;
 	public static function setUp(): void {
