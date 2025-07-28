@@ -30,8 +30,12 @@ function url( string $path = '', $debug = null ) {
 
 function version() {
 	try {
-		return file_get_contents( path( 'version.php' ) );
+		$version_file = path( 'version.php' );
+		if ( is_file( $version_file ) ) {
+			return include $version_file;
+		}
 	} catch ( Exception $e ) {
-		return null;
+
 	}
+	return null;
 }

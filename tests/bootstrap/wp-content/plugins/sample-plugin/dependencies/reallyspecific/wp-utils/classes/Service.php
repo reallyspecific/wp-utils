@@ -15,14 +15,15 @@ abstract class Service
     public function __construct(Plugin &$plugin)
     {
         $this->plugin =& $plugin;
+        $this->maybe_register_settings();
     }
-    public static function maybe_register_settings()
+    public function maybe_register_settings()
     {
         if (static::SETTINGS_NAMESPACE) {
-            add_action('admin_init', [static::class, 'register_settings']);
+            add_action('admin_init', [$this, 'register_settings']);
         }
     }
-    public static function register_settings()
+    public function register_settings()
     {
     }
     /**
@@ -64,7 +65,7 @@ abstract class Service
         }
         return $this->plugin->settings();
     }
-    public function get_setting($key)
+    public function get_setting(?string $key = null)
     {
         return $this->settings()->get($key);
     }

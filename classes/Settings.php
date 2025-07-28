@@ -715,9 +715,10 @@ endforeach;
 					$subattrs['checked'] = 'checked';
 				}
 				$buffer .= sprintf(
-					'<div class="rs-util-settings-field__option">'
-					. '<span class="rs-util-settings-field-icon__toggle"></span>'
-					. '<input type="%1$s" value="%2$s" %3$s><label for="%2$s">%4$s</label>'
+					'<div class="rs-util-settings-field__option is-style-toggle">'
+					. '<input type="%1$s" value="%2$s" %3$s>'
+                    . '<span class="rs-util-settings-field-icon__toggle"></span>'
+                    . '<label for="%2$s">%4$s</label>'
 					. '</div>',
 					empty( $attrs['multiple'] ) ? 'radio' : 'checkbox',
 					esc_attr( $subkey ),

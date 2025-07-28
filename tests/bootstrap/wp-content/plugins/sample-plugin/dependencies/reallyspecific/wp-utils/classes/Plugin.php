@@ -5,6 +5,8 @@ namespace ReallySpecific\SamplePlugin\Dependencies\RS_Utils;
 use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Settings;
 use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Service_Host;
 use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\Updatable;
+use ReallySpecific\SamplePlugin\Dependencies\RS_Utils\MultiArray;
+use Exception;
 abstract class Plugin
 {
     use Service_Host;
@@ -18,6 +20,8 @@ abstract class Plugin
     protected $settings = [];
     protected $data = [];
     protected $updater = null;
+    protected $assets = ['stylesheets' => [], 'scripts' => []];
+    public MultiArray $env;
     /**
      * Creates a new instance of the plugin.
      * @return Plugin
@@ -46,7 +50,7 @@ abstract class Plugin
             throw new \Exception('Plugin was constructed without a `name` property.');
         }
         if (empty($props['file'])) {
-            throw new \Exception('Plugin was constructed without a `file` property.');
+            throw new Exception('Plugin was constructed without a `file` property.');
         }
         $this->root_file = $props['file'];
         $this->root_path = trailingslashit(dirname($this->root_file));
@@ -54,11 +58,35 @@ abstract class Plugin
         $this->i18n_path = $props['i18n_path'] ?? $this->get_root_path() . 'languages';
         $this->name = $props['name'];
         $this->slug = $props['slug'] ?? sanitize_title(basename($this->root_path));
+        $this->attach_assets($props['stylesheets'] ?? [], 'stylesheet');
+        $this->attach_assets($props['scripts'] ?? [], 'script');
         add_action('init', [$this, 'get_wp_data']);
         add_action('init', [$this, 'setup_updater']);
         add_action('init', [$this, 'install_textdomain']);
-        add_action('plugins_loaded', [$this, 'setup']);
+        add_action('wp_enqueue_scripts', [$this, 'install_public_assets']);
+        add_action('admin_enqueue_scripts', [$this, 'install_admin_assets']);
+        add_action('enqueue_block_editor_assets', [$this, 'install_editor_assets']);
+        add_action('enqueue_block_assets', [$this, 'install_fse_styles']);
+        if (did_action('plugins_loaded')) {
+            $this->setup();
+        } else {
+            add_action('plugins_loaded', [$this, 'setup']);
+        }
         $this->register_settings();
+        $this->env = new MultiArray();
+    }
+    public function get_version()
+    {
+        $version = wp_cache_get('version', $this->name);
+        if (!$version) {
+            $version_path = $this->get_path('assets/dist/version.php');
+            $version = include $version_path;
+            if (empty($version)) {
+                $version = get_plugin_data($this->root_path)->get('Version');
+            }
+            wp_cache_set('version', $version, $this->name);
+        }
+        return $version;
     }
     /**
      * Not necessary to be implemented, executed at the end of the constructor method.
@@ -135,6 +163,9 @@ abstract class Plugin
             case 'data':
                 return $this->data;
             default:
+                if (isset($this->services[$key])) {
+                    return $this->services[$key];
+                }
                 return null;
         }
     }
@@ -219,5 +250,82 @@ abstract class Plugin
             return ob_get_clean();
         };
         return $encapsulator($template);
+    }
+    protected function attach_assets($assets, $type, $dest = 'public')
+    {
+        foreach ($assets as $handle => $resource) {
+            list($name, $dest) = explode('|', $handle) + [null, $dest];
+            if (!is_array($resource)) {
+                $resource = ['path' => $resource];
+            }
+            $asset_path = substr($resource['path'], 0, 1) === '/' ? $resource['path'] : $this->get_path($resource['path']);
+            $asset_uri = $this->get_url($resource['path']);
+            $dep_path = dirname($asset_path) . '/' . basename($asset_path, '.js') . '.asset.php';
+            if (file_exists($dep_path)) {
+                $dep = include $dep_path;
+                foreach ($dep as $key => $value) {
+                    $resource[$key] ??= $value;
+                }
+            }
+            $this->assets[$type . 's'][] = ['name' => $name, 'dest' => $dest, 'url' => $asset_uri, 'path' => $asset_path, 'env' => $resource['env'] ?? null, 'version' => $resource['version'] ?? $this->get_version(), 'dependencies' => $resource['dependencies'] ?? []];
+        }
+    }
+    public function install_public_assets()
+    {
+        $this->install_scripts('public');
+        $this->install_styles('public');
+    }
+    public function install_admin_assets()
+    {
+        $this->install_scripts('admin');
+        $this->install_styles('admin');
+    }
+    public function install_editor_assets()
+    {
+        $this->install_scripts('editor', \false);
+        $this->install_styles('editor');
+    }
+    public function install_fse_styles()
+    {
+        if (is_admin()) {
+            $this->install_styles('fse');
+        }
+    }
+    private function install_scripts($dest, $in_footer = \true)
+    {
+        foreach ($this->assets['scripts'] as $script) {
+            if ($script['dest'] !== $dest) {
+                continue;
+            }
+            wp_register_script($script['name'], $script['url'], $script['dependencies'] ?? [], $script['version'] ?? $this->get_version(), $script['in_footer'] ?? $in_footer);
+            if (!empty($script['env'])) {
+                wp_add_inline_script($script['name'], sprintf('window.global = { ...window.global, %s: %s }', $script['env'], json_encode($this->get_env($script['env']))), 'before');
+            }
+            wp_enqueue_script($script['name']);
+        }
+    }
+    private function install_styles($dest)
+    {
+        foreach ($this->assets['stylesheets'] as $stylesheet) {
+            if ($stylesheet['dest'] !== $dest) {
+                continue;
+            }
+            wp_enqueue_style($stylesheet['name'], $stylesheet['url'], $stylesheet['dependencies'] ?? [], $stylesheet['version'] ?? $this->get_version());
+        }
+    }
+    public function add_env($key, $value)
+    {
+        $this->env[$key] = $value;
+    }
+    public function get_env($key)
+    {
+        $env = $this->env[$key];
+        if ($env instanceof MultiArray) {
+            return $env->to_array();
+        }
+    }
+    public function get_env_vars()
+    {
+        return $this->env;
     }
 }

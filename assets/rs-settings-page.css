@@ -774,6 +774,7 @@
 	padding: var(--rs-util-settings-field-padding);
 }
 
+.rs-util-settings-field__option.is-style-toggle,
 .rs-util-settings-field-value--checkbox {
 	display: flex;
 	align-items: center;
@@ -843,6 +844,10 @@
 		&::after {
 			content: "ON";
 		}
+	}
+
+	+ input {
+		display: none;
 	}
 
 }
