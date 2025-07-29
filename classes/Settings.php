@@ -13,11 +13,11 @@ use Exception;
 
 class Settings {
 
-	private array $settings = array();
+	private array $settings = [];
 
 	private ?string $hook = null;
 
-	private array $sections = array();
+	private array $sections = [];
 
 	private ?string $slug = null;
 
@@ -27,6 +27,11 @@ class Settings {
 
 	private ?MultiArray $cache = null;
 
+	/*
+	 * This prevents multiple versions of RS Utils from interfering with
+	 * each other.
+	 */
+	public static $page_namespace = null;
 
 	/**
 	 * Constructor for the class.
@@ -35,17 +40,21 @@ class Settings {
 	 * @param string $menu_title The title of the menu.
 	 * @param array  $props Additional properties for the settings.
 	 */
-	public function __construct( array $props = array() ) {
+	public function __construct( array $props = [] ) {
+
+		if ( empty( static::$page_namespace ) ) {
+			static::$page_namespace = 'rs-util-settings-' . base64_encode( crc32( __DIR__ ) );
+		}
 
 		$props = wp_parse_args(
 			$props,
-			array(
+			[
 				'slug'        => null,
 				'capability'  => 'manage_options',
 				'option_name' => null,
 				'post_id'     => null,
 				'parent'      => false,
-			)
+			]
 		);
 
 		if ( empty( $props['slug'] ) ) {
@@ -69,16 +78,16 @@ class Settings {
 		}
 
 		if ( is_multisite() && $props['capability'] === 'manage_network_options' ) {
-			add_action( 'network_admin_menu', array( $this, 'install' ) );
+			add_action( 'network_admin_menu', [ $this, 'install' ] );
 			$this->multisite = true;
 		} else {
-			add_action( 'admin_menu', array( $this, 'install' ) );
+			add_action( 'admin_menu', [ $this, 'install' ] );
 		} // todo: need another option for Post IDs.
 
 		static $registered = false;
 		if ( ! $registered ) {
-			add_filter( 'rs_util_settings_sanitize_field_value', array( $this, 'sanitize_textarea_field' ), 10, 2 );
-			add_filter( 'rs_util_settings_sanitize_field_value', array( $this, 'sanitize_sortable_field' ), 10, 2 );
+			add_filter( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_textarea_field' ], 10, 2 );
+			add_filter( 'rs_util_settings_sanitize_field_value', [ $this, 'sanitize_sortable_field' ], 10, 2 );
 			$registered = true;
 		}
 	}
@@ -92,30 +101,29 @@ class Settings {
 	public function setup( $props ) {
 		$settings       = wp_parse_args(
 			$props,
-			array(
+			[
 				'menu_title' => ucwords( $this->slug ),
 				'page_title' => ucwords( $this->slug ),
-			)
+			]
 		);
-		$this->settings = array(
+		$this->settings = [
 			...$this->settings,
 			...$settings,
-		);
-		if ( ! has_action( 'admin_enqueue_scripts', array( $this::class, 'enqueue_admin_scripts' ) ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this::class, 'enqueue_admin_scripts' ) );
+		];
+		if ( ! has_action( 'admin_enqueue_scripts', [ $this::class, 'enqueue_admin_scripts' ] ) ) {
+			add_action( 'admin_enqueue_scripts', [ $this::class, 'enqueue_admin_scripts' ] );
 		}
-		if ( ! has_filter( 'rs_util_settings_sanitize_field_value', array( $this::class, 'sanitize_textarea_field' ) ) ) {
-			add_filter( 'rs_util_settings_sanitize_field_value', array( $this::class, 'sanitize_textarea_field' ), 10, 2 );
+		if ( ! has_filter( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ] ) ) {
+			add_filter( 'rs_util_settings_sanitize_field_value', [ $this::class, 'sanitize_textarea_field' ], 10, 2 );
 		}
 	}
+
 
 	public static function enqueue_admin_scripts() {
 		// add_global_var( 'rs_util_settings.svg_iconset', assets_url( 'svg-iconset.svg' ) );
 
-		wp_register_style( 'rs-util-settings-page', assets_url( 'rs-settings-page.css' ), array(), assets_version() );
-		wp_register_script( 'rs-util-settings-page', assets_url( 'rs-settings-page.js' ), array(), assets_version() );
-		// wp_add_inline_script( 'rs-util-settings-page', 'rsUtil_SettingsPage.install();', 'after' );
-		// add_action( 'admin_footer', [ __CLASS__, 'render_global_settings' ] );
+		wp_register_style( static::$page_namespace, assets_url( 'rs-settings-page.css' ), [], assets_version() );
+		wp_register_script( static::$page_namespace, assets_url( 'rs-settings-page.js' ), [], assets_version() );
 
 		do_action( 'rs_util_settings_enqueue_admin_scripts' );
 	}
@@ -144,7 +152,7 @@ class Settings {
 				$this->settings['menu_title'],
 				$this->settings['capability'],
 				$this->slug,
-				array( $this, 'render' ),
+				[ $this, 'render' ],
 				$this->settings['icon_url'] ?? null,
 				$this->settings['position'] ?? null
 			);
@@ -155,12 +163,12 @@ class Settings {
 				$this->settings['menu_title'],
 				$this->settings['capability'],
 				$this->slug,
-				array( $this, 'render' ),
+				[ $this, 'render' ],
 				$this->settings['position'] ?? null
 			);
 		}
-		add_action( $this->hook, array( $this, 'save_form' ), -1 );
-		add_action( 'in_admin_header', array( $this, 'hide_notices_from_other_plugins' ), 99 );
+		add_action( $this->hook, [ $this, 'save_form' ], -1 );
+		add_action( 'in_admin_header', [ $this, 'hide_notices_from_other_plugins' ], 99 );
 	}
 
 	/**
@@ -170,20 +178,20 @@ class Settings {
 	 * @param array  $props The properties of the section. Default is an empty array.
 	 * @return void
 	 */
-	public function add_section( string $id = 'default', array $props = array() ) {
+	public function add_section( string $id = 'default', array $props = [] ) {
 		if ( ! empty( $props['fields'] ) ) {
 			$fields = $props['fields'];
 			unset( $props['fields'] );
 		}
 		$this->sections[ $id ] = wp_parse_args(
 			$props,
-			array(
+			[
 				'id'          => $id,
 				'title'       => null,
 				'description' => null,
 				'order'       => ( count( $this->sections ) + 1 ) * 10,
-				'fields'      => array(),
-			)
+				'fields'      => [],
+			]
 		);
 		if ( ! empty( $fields ) ) {
 			foreach ( $fields as $field ) {
@@ -232,7 +240,7 @@ class Settings {
 		if ( $section_id === null ) {
 			$section_id = 'default';
 			if ( ! isset( $this->sections['default'] ) ) {
-				$this->add_section( 'default', array( 'order' => 0 ) );
+				$this->add_section( 'default', [ 'order' => 0 ] );
 			}
 		}
 		if ( ! isset( $this->sections[ $section_id ] ) ) {
@@ -243,7 +251,7 @@ class Settings {
 		}
 		$this->sections[ $section_id ]['fields'][] = wp_parse_args(
 			$props,
-			array(
+			[
 				'type'        => 'text',
 				'order'       => ( count( $this->sections[ $section_id ]['fields'] ) + 1 ) * 10,
 				'label'       => $props['name'],
@@ -251,18 +259,18 @@ class Settings {
 				'default'     => null,
 				'placeholder' => null,
 				'description' => null,
-			)
+			]
 		);
 	}
 
 	public function render() {
 
-		wp_enqueue_style( 'rs-util-settings-page' );
+		wp_enqueue_style( static::$page_namespace );
 
 		?>
 		<div class="wrap rs-util-settings-page wp-ui">
 			<div class="rs-util-settings-page-title wp-ui-primary">
-				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>	
+				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_afterstart', $this ); ?>
 				<h1 class="wp-heading-inline"><?php echo $this->settings['page_title']; ?></h1>
 				<?php do_action( $this->slug . '_rs_util_settings_render_form_title_beforeend', $this ); ?>
 				<?php if ( count( $this->sections ) > 1 ) : ?>
@@ -280,7 +288,7 @@ endforeach;
 					</div>
 				<?php endif; ?>
 			</div>
-			
+
 			<?php do_action( $this->slug . '_rs_util_settings_render_form_beforestart', $this ); ?>
 			<?php do_action( 'rs_util_settings_render_form_beforestart', $this ); ?>
 			<form class="rs-util-settings-form" method="post" action="<?php echo $this->settings['form_url'] ?? $_SERVER['REQUEST_URI']; ?>">
@@ -322,9 +330,10 @@ endforeach;
 									if ( $field['group'] ?? null ) {
 										$current_group = $field['group'];
 										printf(
-											'<div class="rs-util-settings-field-group"%s>'
+											'<div class="rs-util-settings-field-group" id="%s" %s>'
 											. '<div class="rs-util-settings-field-group__label"><span>%s</span>%s</div>'
 											. '<div class="rs-util-settings-field-group__content">',
+											sanitize_title( $field['group'] ),
 											isset( $field['ordering'] ) && empty( $field['subgroup'] ) ? ' data-ordered="' . $field['ordering'] . '"' : '',
 											$current_group,
 											isset( $field['group_desc'] ) ? '<p class="rs-util-settings-field-group__description">' . parsedown_line( $field['group_desc'], 'description', 'rs-util-settings' ) . '</p>' : '',
@@ -390,7 +399,7 @@ endforeach;
 		</div>
 		<?php
 
-		wp_enqueue_script( 'rs-util-settings-page' );
+		wp_enqueue_script( static::$page_namespace );
 	}
 
 	public function render_field_row( array $field, $value = null, $echo = true ) {
@@ -401,7 +410,7 @@ endforeach;
 		$description = apply_filters( $this->slug . '_rs_util_settings_render_field_row_description', $field['description'] ?? null, $field, $value, $this );
 		$description = apply_filters( 'rs_util_settings_render_field_row_description', $description, $field, $value, $this );
 
-		$attrs = array();
+		$attrs = [];
 		if ( isset( $field['toggled_by'] ) ) {
 			$attrs['data-toggled-by'] = sanitize_title( $field['toggled_by'] );
 			$attrs['aria-hidden']     = 'true';
@@ -471,28 +480,30 @@ endforeach;
 
 	public function render_field( array $field, $value = null, $echo = true ) {
 
-		$field_name = $field['name'];
+		$field_name = $field['name'] ?? null;
 		$tag        = match ( $field['type'] ) {
 			'options'   => 'multicheck',
 			'select'    => 'select',
-			'sortable'  => 'select',
+			'sortable'  => 'sortable',
 			'textarea'  => 'textarea',
 			default     => 'input',
 		};
 		$attrs = wp_parse_args(
-			$field['attrs'] ?? array(),
-			array(
+			$field['attrs'] ?? [],
+			[
 				'id'       => $field['id'],
 				'name'     => null,
 				'required' => filter_var( $field['required'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
-				'class'    => $field['class'] ?? array(),
+				'class'    => $field['class'] ?? [],
 				'multiple' => filter_var( $field['multiple'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'multiple' : null,
-			)
+			]
 		);
 
-		$attrs['name'] = $attrs['name'] ?? $this->parse_field_name( $field_name, ! empty( $attrs['multiple'] ) );
+		if ( $field_name ) {
+			$attrs['name'] = $attrs['name'] ?? $this->parse_field_name( $field_name, ! empty( $attrs['multiple'] ) );
+		}
 
-		$attrs['class']   = is_array( $attrs['class'] ) ? $attrs['class'] : array( $attrs['class'] );
+		$attrs['class']   = is_array( $attrs['class'] ) ? $attrs['class'] : [ $attrs['class'] ];
 		$attrs['class'][] = match ( $field['type'] ) {
 			'input'    => 'regular-text',
 			'textarea' => 'large-text',
@@ -511,7 +522,7 @@ endforeach;
 			$attrs['data-toggles-group'] = is_string( $field['toggles_group'] ) ? $field['toggles_group'] : 'self';
 		}
 
-		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : array() );
+		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
 
 		switch ( $tag ) {
 			case 'input':
@@ -541,10 +552,13 @@ endforeach;
 				break;
 			case 'select':
 				$attrs['placeholder'] = $field['placeholder'] ?? null;
-				$render_template      = array( $this, 'render_select' );
+				$render_template      = [ $this, 'render_select' ];
 				break;
 			case 'multicheck':
-				$render_template = array( $this, 'render_multicheck' );
+				$render_template = [ $this, 'render_multicheck' ];
+				break;
+			case 'sortable':
+				$render_template = [ $this, 'render_sortable' ];
 				break;
 		}
 		if ( is_callable( $render_template ) ) {
@@ -568,54 +582,6 @@ endforeach;
 			$field['options'] = call_user_func( $field['options'] );
 		}
 
-		if ( $field['type'] === 'sortable' ) {
-			$attrs['data-use-tom-select'] = 'true';
-			$attrs['data-action']         = 'add-item';
-			$attrs['multiple']            = false;
-			if ( str_ends_with( $attrs['name'], '[]' ) ) {
-				$attrs['name'] = substr( $attrs['name'], 0, -2 );
-			}
-
-			$hidden_attrs = array(
-				'name'  => $attrs['name'],
-				'type'  => 'hidden',
-				'value' => $value ? json_encode( $value ) : '',
-			);
-			unset( $attrs['name'] );
-			unset( $attrs['value'] );
-
-			$hidden_attrs = apply_filters( 'rs_util_settings_render_sortable_hidden_attrs', $hidden_attrs, $field, $value, $this );
-
-			$buffer .= '<input type="hidden" ' . array_to_attr_string( $hidden_attrs ) . '>';
-
-			$buffer .= '<div class="rs-util-settings-sortable-list">';
-			$values  = apply_filters( 'rs_util_settings_render_sortable_values', $value ?: array(), $field, $this );
-			foreach ( $values as $item ) {
-				if ( is_array( $item ) ) {
-					$item_id    = $item['value'];
-					$item_label = $item['label'] ?? $item_id;
-				} else {
-					$item_id = $item;
-					if ( isset( $field['options'] ) ) {
-						$option     = $field['options'][ $item_id ] ?? null;
-						$item_label = $option['label'] ?? $item_id;
-					}
-				}
-				$buffer .= sprintf(
-					'<div class="rs-util-settings-sortable-list-item" data-value="%s">' .
-						'<span class="rs-util-settings-draggable-handle"></span>' .
-						'%s' .
-						'<button type="button" class="rs-util-settings-trash-btn" data-action="remove-item">Remove Sticky</button>' .
-					'</div>',
-					esc_attr( $item_id ),
-					esc_html( $item_label )
-				);
-			}
-			$buffer .= '</div>';
-
-			$value = '';
-		}
-
 		if ( ! empty( $field['enable_tom'] ) ) {
 			$attrs['data-use-tom-select'] = 'true';
 			if ( is_array( $field['enable_tom'] ) ) {
@@ -626,11 +592,11 @@ endforeach;
 			$value                = $field['data_value'] ?? 'id';
 			$label                = $field['data_label'] ?? 'title';
 			$attrs['data-source'] = json_encode(
-				array(
+				[
 					'url'   => $field['data'],
 					'value' => $value,
 					'label' => $label,
-				)
+				]
 			);
 		}
 
@@ -638,12 +604,12 @@ endforeach;
 		foreach ( $field['options'] as $key => $option ) {
 			if ( isset( $option['group'] ) ) {
 				$buffer    .= sprintf( '<optgroup label="%s">', esc_attr( $option['group'] ) );
-				$suboptions = $option['options'] ?? array();
+				$suboptions = $option['options'] ?? [];
 			} else {
-				$suboptions = array( $key => $option );
+				$suboptions = [ $key => $option ];
 			}
 			foreach ( $suboptions as $subkey => $suboption ) {
-				$subattrs = array();
+				$subattrs = [];
 				$label    = '';
 				if ( is_string( $suboption ) ) {
 					$label = $suboption;
@@ -686,12 +652,12 @@ endforeach;
 		foreach ( $field['options'] as $key => $option ) {
 			if ( isset( $option['group'] ) ) {
 				$buffer    .= sprintf( '<fieldset class="rs-util-settings-field__fieldset"><legend><strong>%s</strong></legend>', esc_attr( $option['group'] ) );
-				$suboptions = $option['options'] ?? array();
+				$suboptions = $option['options'] ?? [];
 			} else {
-				$suboptions = array( $key => $option );
+				$suboptions = [ $key => $option ];
 			}
 			foreach ( $suboptions as $subkey => $suboption ) {
-				$subattrs = array( 'class' => '' );
+				$subattrs = [ 'class' => '' ];
 				$label    = '';
 				if ( is_string( $suboption ) ) {
 					$label = $suboption;
@@ -711,14 +677,19 @@ endforeach;
 				$subattrs['class'] = $class;
 				$subattrs['name']  = empty( $attrs['multiple'] ) ? $attrs['name'] : str_replace( '[]', "[{$subkey}]", $attrs['name'] );
 
+				if ( ! empty( $suboption['toggles_group'] ) ) {
+					$subattrs['data-toggles-group'] = is_string( $suboption['toggles_group'] ) ? $suboption['toggles_group'] : 'self';
+					$subattrs['id']                 = sanitize_title( str_replace( '[', '__', $subattrs['name'] ) . '--' . $subkey );
+				}
+
 				if ( $subkey === $value || ( is_array( $value ) && in_array( $subkey, $value ) ) ) {
 					$subattrs['checked'] = 'checked';
 				}
 				$buffer .= sprintf(
 					'<div class="rs-util-settings-field__option is-style-toggle">'
 					. '<input type="%1$s" value="%2$s" %3$s>'
-                    . '<span class="rs-util-settings-field-icon__toggle"></span>'
-                    . '<label for="%2$s">%4$s</label>'
+					. '<span class="rs-util-settings-field-icon__toggle"></span>'
+					. '<label for="%2$s">%4$s</label>'
 					. '</div>',
 					empty( $attrs['multiple'] ) ? 'radio' : 'checkbox',
 					esc_attr( $subkey ),
@@ -734,6 +705,135 @@ endforeach;
 		$buffer .= '</div>';
 
 		return $buffer;
+	}
+
+	public function render_sortable( array $field, $value, array $attrs ) {
+		$buffer = '';
+
+		if ( ! empty( $field['options'] ) && empty( $field['new_fields'] ) ) {
+			$field['new_fields'] = [
+				'value' => [
+					'type'                => 'select',
+					'data-use-tom-select' => 'true',
+					'multiple'            => false,
+					'options'             => $field['options'],
+				],
+			];
+			$field['add_button'] = false;
+			if ( ! isset( $field['item_label'] ) ) {
+				$field['item_label'] = '{value.label}';
+			}
+		}
+
+		if ( str_ends_with( $attrs['name'], '[]' ) ) {
+			$attrs['name'] = substr( $attrs['name'], 0, -2 );
+		}
+
+		$hidden_attrs = [
+			'name'  => $attrs['name'],
+			'type'  => 'hidden',
+			'value' => $value ? json_encode( $value ) : '',
+		];
+		unset( $attrs['name'] );
+		unset( $attrs['value'] );
+
+		$item_label_pattern = $field['item_label'] ?? '{value}';
+
+		$hidden_attrs = apply_filters( 'rs_util_settings_render_sortable_hidden_attrs', $hidden_attrs, $field, $value, $this );
+
+		$buffer .= '<input type="hidden" ' . array_to_attr_string( $hidden_attrs ) . '>';
+
+		$buffer .= '<div class="rs-util-settings-sortable-list" data-sortable="list" data-label="' . $item_label_pattern . '">';
+		$values  = apply_filters( 'rs_util_settings_render_sortable_values', $value ?: [], $field, $this );
+		foreach ( $values as $index => $item ) {
+			/*
+			if ( is_array( $item ) ) {
+				$item_id    = $item['value'];
+				$item_label = $item['label'] ?? $item_id;
+				if ( ! empty( $field['show_value'] ) ) {
+					$item_label .= ' (' . $item_id . ')';
+				}
+			} else {
+				$item_id = $item;
+				if ( isset( $field['options'] ) ) {
+					$option     = $field['options'][ $item_id ] ?? null;
+					$item_label = $option['label'] ?? $item_id;
+				}
+			}*/
+			$item_label = $this->get_sortable_item_label( $item, $field, $item_label_pattern );
+
+			$buffer .= sprintf(
+				'<div class="rs-util-settings-sortable-list-item" data-order="%s" data-value="%s">' .
+				'<span class="rs-util-settings-draggable-handle"></span>' .
+				'%s' .
+				'<button type="button" class="rs-util-settings-trash-btn" data-action="remove-item">Remove Sticky</button>' .
+				'</div>',
+				esc_attr( $index ),
+				esc_attr( json_encode( $item ) ),
+				esc_html( $item_label )
+			);
+		}
+		$buffer .= '</div>';
+
+		$buffer .= '<div class="rs-util-settings-sortable-list__new-field" data-sortable="item-fields">';
+
+		foreach ( $field['new_fields'] as $field_key => $new_field ) {
+
+			$new_field_id = $field['id'] . '--new--' . $field_key;
+			$new_field    = [
+				...$new_field,
+				'id'    => $new_field_id,
+				'name'  => null,
+				'key'   => $field_key,
+				'attrs' => [
+					...( $new_field['attrs'] ?? [] ),
+					'data-key' => $field_key,
+				],
+			];
+
+			// $buffer .= '<div class="rs-util-settings-sortable-list__new-field-property">';
+			$buffer .= sprintf( '<label for="%s">%s</label>', esc_attr( $new_field_id ), esc_html( $new_field['label'] ) );
+
+			switch ( $new_field['type'] ) {
+				case 'select':
+					$buffer .= $this->render_select( $new_field, null, [] );
+					break;
+				default:
+					$new_field['attrs']['type'] = $new_field['type'] === 'input' ? 'text' : $new_field['type'];
+					$new_field['type']          = 'input';
+					$buffer                    .= $this->render_field( $new_field, null, [] );
+			}
+
+			// $buffer .= '</div>';
+		}
+		$buffer .= '<button type="button" class="button button-secondary rs-util-settings-sortable-list__new-field-add-btn" data-action="add-item">Add</button>';
+		$buffer .= '</div>';
+		return $buffer;
+	}
+
+	private function get_sortable_item_label( $item, $field, $item_label_pattern = null ) {
+		if ( ! is_array( $item ) ) {
+			$item = [ 'value' => $item ];
+		}
+		if ( is_null( $item_label_pattern ) ) {
+			$first_field = key( $field['new_fields'] );
+			if ( $first_field ) {
+				$item_label_pattern = "{$first_field}";
+			}
+		}
+		$label = $item_label_pattern ?? '{value}';
+		foreach ( $item as $key => $value ) {
+			if ( isset( $field['new_fields'][ $key ]['options'] ) ) {
+				$option = $field['options'][ $value ] ?? null;
+				if ( $option ) {
+					foreach ( $option as $subkey => $subvalue ) {
+						$label = str_replace( "{{$key}.{$subkey}}", $subvalue, $label );
+					}
+				}
+			}
+			$label = str_replace( '{' . $key . '}', $value, $label );
+		}
+		return $label;
 	}
 
 	private function get_request_value( string $key, array $request ) {
@@ -760,7 +860,7 @@ endforeach;
 			return;
 		}
 
-		$this->cache = new MultiArray( array() );
+		$this->cache = new MultiArray( [] );
 
 		$post_data = apply_filters( 'rs_util_settings_save_form_post_data', $_POST, $this );
 
@@ -791,7 +891,7 @@ endforeach;
 					$sanitization_function = 'sanitize_text_field';
 				}
 				if ( is_array( $field_value ) ) {
-					$new_value = array();
+					$new_value = [];
 					foreach ( $field_value as $value ) {
 						$new_value[] = call_user_func( $sanitization_function, $value, $field );
 					}
@@ -833,9 +933,9 @@ endforeach;
 
 	private function load() {
 		if ( $this->multisite ) {
-			$cache = get_site_option( $this->settings['option_name'], array() ) ?: array();
+			$cache = get_site_option( $this->settings['option_name'], [] ) ?: [];
 		} else {
-			$cache = get_option( $this->settings['option_name'], array() ) ?: array();
+			$cache = get_option( $this->settings['option_name'], [] ) ?: [];
 		}
 		$this->cache = new MultiArray( $cache );
 	}
@@ -873,7 +973,7 @@ endforeach;
 		add_filter( $this->slug . '_' . $hook, $callback, $priority, $args );
 	}
 
-	public static function sanitize_textarea_field( $callback_function, $field = array() ) {
+	public static function sanitize_textarea_field( $callback_function, $field = [] ) {
 
 		if ( ( $field['type'] ?? null ) === 'textarea' ) {
 			return 'sanitize_textarea_field';
@@ -882,7 +982,7 @@ endforeach;
 		return $callback_function;
 	}
 
-	public static function sanitize_sortable_field( $callback_function, $field = array() ) {
+	public static function sanitize_sortable_field( $callback_function, $field = [] ) {
 
 		if ( ( $field['type'] ?? null ) === 'sortable' ) {
 			return function ( $value ) {

@@ -476,6 +476,10 @@
 		margin: 1rem 0;
 		padding: 0;
 
+		&[aria-hidden="true"] {
+			display: none !important;
+		}
+
 		& .rs-util-settings-field-group__description {
 			margin-bottom: 0;
 		}
@@ -501,10 +505,24 @@
 
 		&:has(.rs-util-settings-field-group__content[data-toggled-by]) {
 			& > .rs-util-settings-field-group__label {
-				display: flex;
+				display: grid;
+				gap: 0;
+				grid-template-columns: 1fr auto;
+				grid-template-rows: auto auto;
+				grid-template-areas: "label toggle"
+							"description description";
 				align-items: center;
-				justify-content: space-between;
+				justify-items: start;
+				.rs-util-settings-field-group__description {
+					grid-area: description;
+					margin: 0;
+					font-size: 0.875rem;
+					line-height: 1.5;
+					font-weight: normal;
+				}
+
 				.rs-util-settings-field-row {
+					grid-area: toggle;
 					margin-left: auto;
 					padding: 0;
 					flex: 0 0 max-content;
@@ -552,7 +570,7 @@
 		font-weight: bold;
 		padding: var(--rs-util-settings-global-padding) calc( var(--rs-util-settings-global-padding) * 2 );
 		border-bottom: 1px solid color-mix( in srgb, var(--rs-util-settings-page-background), var(--rs-util-settings-global-border-color) 20% );
-		
+
 	}
 }
 .rs-util-settings-field-subgroup {
@@ -648,7 +666,7 @@
 		font-size: 1.125rem;
 		line-height: 2rem;
 		width: max-content;
-
+		align-self: baseline;
 	}
 
 	[data-ordering-group] &:first-child .rs-util-settings-field-row-ordering--up {
@@ -865,7 +883,7 @@
 		margin: 0;
 		display: flex;
 		flex-wrap: wrap;
-		align-items: baseline;
+		align-items: center;
 		gap: 0.5rem;
 
 		input {
@@ -874,6 +892,7 @@
 		}
 		label {
 			display: block;
+			font-size: 0.875rem;
 		}
 	}
 }
@@ -898,6 +917,13 @@
 	height: var(--code-textarea-height,auto);
 }
 
+.is-style-large-text {
+	height: 400px;
+}
+.is-style-medium-text {
+	height: 200px;
+}
+
 .rs-util-settings-field-subgroup,
 .rs-util-settings-field-row {
 	&[aria-hidden="true"] {
@@ -913,6 +939,43 @@
 	align-items: stretch;
 	gap: 0.5rem;
 	align-self: stretch;
+
+	.rs-util-settings-field-value &__new-field {
+		display: grid;
+		grid-template-rows: [label] auto [input] auto;
+		grid-auto-columns: minmax(min-content,200px);
+		grid-auto-flow: column dense;
+		gap: 0.5rem 0.25rem;
+
+		> button {
+			grid-row: input;
+			/*grid-column: -1 / span 1;*/
+			max-width: max-content;
+		}
+
+		> label {
+			grid-row: label;
+			font-size: 11px;
+			font-weight: bold;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: var(--rs-util-settings-input-label-color);
+		}
+		> .rs-util-settings-field {
+			grid-area: unset !important;
+			grid-row: input;
+			max-width: 200px;
+		}
+	}
+	.rs-util-settings-field-value &__new-field-property {
+		grid-row: 1 / span 2;
+		display: grid;
+		grid-template-rows: subgrid;
+		grid-template-columns: auto;
+		grid-template-areas: "label" "value";
+		gap: inherit;
+
+	}
 }
 
 .rs-util-settings-sortable-list-item {

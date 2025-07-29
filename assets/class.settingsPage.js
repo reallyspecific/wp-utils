@@ -56,14 +56,16 @@ export default class settingsPage {
 			} else {
 
 				group = this.form.querySelector(`#${toggle.dataset.togglesGroup}`);
-				group.setAttribute('aria-hidden', toggle.checked ? 'false' : 'true');
-				group.setAttribute('data-toggled-by', toggle.id);
+				if ( group ) {
+					group.setAttribute('aria-hidden', toggle.checked ? 'false' : 'true');
+					group.setAttribute('data-toggled-by', toggle.id);
+				}
 
 			}
 
 			toggle.setAttribute('aria-expanded', toggle.checked ? 'true' : 'false');
-			toggle.setAttribute('aria-controls', `[data-toggled-by="${toggle.id}"]`);
-			toggle.setAttribute('data-controls', `[data-toggled-by="${toggle.id}"]`);
+			toggle.setAttribute('aria-controls', group?.id ?? '');
+			toggle.setAttribute('data-controls', `#${group?.id ?? ''}`);
 
 		});
 
@@ -102,15 +104,24 @@ export default class settingsPage {
 
 		});
 
-		const orderingGroups = this.form.querySelectorAll('[data-ordering-group]');
+		const orderingGroups = this.form.querySelectorAll('[data-ordered]');
 		orderingGroups.forEach(group => {
 			[...group.children]
 				.sort((a, b) => (a.currentOrder - b.currentOrder))
 				.forEach(node => group.appendChild(node));
 
-			settingsPage.makeSortable(group, {
+			this.makeSortable( group, {
 				handle: '.rs-util-settings-field-row-ordering--grabber',
 				onSort: () => this.updateSortingIds(group),
+			});
+		});
+
+		const sortableFields = this.form.querySelectorAll('[data-sortable="list"]');
+		sortableFields.forEach( field => {
+			const parent = field.parentElement;
+			this.makeSortable( parent, {
+				canCreate: true,
+				onSort: () => this.updateListValues(parent),
 			});
 		});
 
@@ -127,7 +138,7 @@ export default class settingsPage {
 	handleAction(button) {
 		switch (button.dataset.action) {
 			case 'remove-item':
-				settingsPage.removeListItem(button.closest('.rs-util-settings-sortable-list-item'));
+				this.removeListItem( button.closest('.rs-util-settings-sortable-list-item') );
 				this.enableSaveButton();
 				break;
 		}
@@ -230,7 +241,7 @@ export default class settingsPage {
 			}
 
 			this.enableSaveButton();
-			this.updateSortingIds(field.closest('[data-ordering-group]'));
+			this.updateSortingIds(field.closest('[data-sortable="list"]'));
 
 		}
 
@@ -316,23 +327,6 @@ export default class settingsPage {
 			...moreArgs,
 		};
 
-		if (el.dataset.action === 'add-item') {
-			const group = el.closest('.rs-util-settings-field-value');
-			const list = group.querySelector('.rs-util-settings-sortable-list');
-			settingsPage.makeSortable(list, {
-				onSort: () => {
-					this.updateListValues(group);
-				}
-			});
-			const itemAdd = (value, ...args) => {
-				const label = el.currentResults?.[value] ?? value;
-				this.addListItem(group, value, label);
-				el.tom.clear();
-				el.tom.blur();
-			};
-			tomArgs.onItemAdd = itemAdd.bind(this);
-		}
-
 		if (el.dataset.source) {
 			const source = JSON.parse(el.dataset.source);
 			const valueField = source.value.split('.');
@@ -381,15 +375,49 @@ export default class settingsPage {
 		el.tom = new TomSelect(el, tomArgs);
 	}
 
-	static makeSortable(el, args = {}) {
+	makeSortable( el, args = {} ) {
 
-		Sortable.create(el, {
+		const list = el.querySelector('[data-sortable="list"]') || el;
+
+		Sortable.create( list, {
 			animation: 150,
 			ghostClass: 'sortable-ghost',
 			chosenClass: 'sortable-chosen',
 			handle: '.rs-util-settings-draggable-handle',
 			...args
-		});
+		} );
+
+		if ( args.canCreate ?? false ) {
+			const fields = el.querySelectorAll('[data-sortable="item-fields"] input, [data-sortable="item-fields"] select');
+			const addBtn = el.querySelector('[data-action="add-item"]');
+			if ( fields && addBtn ) {
+				addBtn.addEventListener('click', e => {
+					const newValue = {};
+					fields.forEach(field => {
+						newValue[field.dataset.key] = ['checkbox','radio'].includes( field.type ) ? field.checked : field.value;
+						field.value = '';
+					});
+					const label = this.makeListItemLabel( newValue, fields, list.dataset.label );
+					this.addListItem( el, newValue, label );
+				});
+			}
+		}
+
+	}
+
+	makeListItemLabel( valueGroup, fields, pattern = '{value}' ) {
+		let label = pattern + '';
+		fields.forEach( field => {
+			const value = valueGroup[field.dataset.key] ?? '';
+			if ( field.tagName === 'SELECT' ) {
+				const optionLabel = field.options[field.selectedIndex].innerHTML;
+				const optionValue = field.options[field.selectedIndex].value;
+				label = label.replace( `{${field.dataset.key}:label}`, optionLabel );
+				label = label.replace( `{${field.dataset.key}:label}`, optionValue );
+			}
+			label = label.replace( `{${field.dataset.key}}`, value );
+		} );
+		return label;
 	}
 
 	addListItem = (group, value, label) => {
@@ -410,6 +438,7 @@ export default class settingsPage {
 			<span>${label}</span>
 			<button type="button" class="rs-util-settings-trash-btn" data-action="remove-item">Remove Item</button>
 		`;
+		newItem.dataset.value = JSON.stringify(value);
 
 		const list = group.querySelector('.rs-util-settings-sortable-list');
 		list.append(newItem);
@@ -418,7 +447,7 @@ export default class settingsPage {
 
 	}
 
-	static removeListItem = (item) => {
+	removeListItem = (item) => {
 
 		const group = item.closest('.rs-util-settings-field-value');
 
@@ -434,9 +463,10 @@ export default class settingsPage {
 
 		const list = group.querySelector('.rs-util-settings-sortable-list');
 		const values = [];
-		list.querySelectorAll('.rs-util-settings-sortable-list-item').forEach(item => {
-			values.push(item.dataset.value);
-		});
+		list.querySelectorAll('.rs-util-settings-sortable-list-item').forEach( (item, index) => {
+			values.push( JSON.parse( item.dataset.value) );
+			item.dataset.order = index;
+		} );
 		hiddenValueField.value = JSON.stringify(values);
 
 		this.enableSaveButton();

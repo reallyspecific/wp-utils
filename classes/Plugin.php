@@ -35,13 +35,14 @@ abstract class Plugin {
 
 	protected $assets = [
 		'stylesheets' => [],
-		'scripts' => [],
+		'scripts'     => [],
 	];
 
 	public MultiArray $env;
 
 	/**
 	 * Creates a new instance of the plugin.
+	 *
 	 * @return Plugin
 	 */
 	public static function new( array $props = [] ): Plugin {
@@ -83,6 +84,10 @@ abstract class Plugin {
 		$this->attach_assets( $props['stylesheets'] ?? [], 'stylesheet' );
 		$this->attach_assets( $props['scripts'] ?? [], 'script' );
 
+		$this->register_settings();
+
+		$this->env = new MultiArray();
+
 		add_action( 'init', [ $this, 'get_wp_data' ] );
 		add_action( 'init', [ $this, 'setup_updater' ] );
 		add_action( 'init', [ $this, 'install_textdomain' ] );
@@ -92,23 +97,18 @@ abstract class Plugin {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'install_editor_assets' ] );
 		add_action( 'enqueue_block_assets', [ $this, 'install_fse_styles' ] );
 
-
 		if ( did_action( 'plugins_loaded' ) ) {
 			$this->setup();
 		} else {
 			add_action( 'plugins_loaded', [ $this, 'setup' ] );
 		}
-
-		$this->register_settings();
-
-		$this->env = new MultiArray();
 	}
 
 	public function get_version() {
 		$version = wp_cache_get( 'version', $this->name );
 		if ( ! $version ) {
 			$version_path = $this->get_path( 'assets/dist/version.php' );
-			$version = include $version_path;
+			$version      = include $version_path;
 			if ( empty( $version ) ) {
 				$version = get_plugin_data( $this->root_path )->get( 'Version' );
 			}
@@ -118,25 +118,27 @@ abstract class Plugin {
 	}
 
 	/**
-	 * Not necessary to be implemented, executed at the end of the constructor method.
+	 * Executed before the setup() method is called, this is where you should register
+	 * settings pages, but not the individual fields. This allows settings to be accessed
+	 * before 'init', without tripping "too early" i18n translation warnings.
 	 *
 	 * @return void
 	 */
 	public function register_settings( $namespaces = [] ): void {
-		foreach( $namespaces as $namespace => $props ) {
+		foreach ( $namespaces as $namespace => $props ) {
 			$this->settings[ $namespace ] = new Settings( $props );
 		}
 		add_action( 'wp_loaded', [ $this, 'install_settings' ], 10, 0 );
 	}
 
 	/**
-	 * Not necessary to be implemented, executed at the end of the constructor method.
+	 * Executed during 'wp_loaded', this is where you should add fields to the settings previously registered.
 	 *
 	 * @return void
 	 */
 	public function install_settings( array $settings = [] ): void {
-		foreach( $this->settings as $namespace => $props ) {
-			$this->settings[ $namespace ]->setup( $settings[$namespace] ?? [] );
+		foreach ( $this->settings as $namespace => $props ) {
+			$this->settings[ $namespace ]->setup( $settings[ $namespace ] ?? [] );
 		}
 	}
 
@@ -144,19 +146,21 @@ abstract class Plugin {
 		if ( empty( $this->get_wp_data( 'UpdateURI' ) ) ) {
 			return;
 		}
-		$this->updater = new Updater( [
-			'object'     => $this,
-			'update_uri' => $this->get_wp_data( 'UpdateURI' ),
-			'slug'       => $this->slug,
-			'file'       => $this->root_file,
-		] );
+		$this->updater = new Updater(
+			[
+				'object'     => $this,
+				'update_uri' => $this->get_wp_data( 'UpdateURI' ),
+				'slug'       => $this->slug,
+				'file'       => $this->root_file,
+			]
+		);
 	}
 
 	protected function load_wp_data() {
 		if ( ! function_exists( '\get_plugin_data' ) ) {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		$plugin = \get_plugin_data( $this->root_file );
+		$plugin     = \get_plugin_data( $this->root_file );
 		$this->data = $plugin;
 		return $plugin;
 	}
@@ -178,7 +182,7 @@ abstract class Plugin {
 	}
 
 	public function __get( $key ) {
-		switch( $key ) {
+		switch ( $key ) {
 			case 'name':
 				return $this->get_name();
 			case 'domain':
@@ -204,8 +208,8 @@ abstract class Plugin {
 	}
 
 	public function get_domain() {
-		if ( empty( $this->i18n_domain ) && did_action('init') ) {
-			$this->i18n_domain = $this->get_wp_data('TextDomain');
+		if ( empty( $this->i18n_domain ) && did_action( 'init' ) ) {
+			$this->i18n_domain = $this->get_wp_data( 'TextDomain' );
 		}
 		return $this->i18n_domain ?? null;
 	}
@@ -238,11 +242,10 @@ abstract class Plugin {
 		if ( $plugin_file !== $this->root_file ) {
 			return $update;
 		}
-		
-		// TODO: implement update check
-	
-		return $update;
 
+		// TODO: implement update check
+
+		return $update;
 	}
 
 	public function &settings( $namespace = 'default' ) {
@@ -259,17 +262,20 @@ abstract class Plugin {
 
 	public function get_template_part( string $slug, ?string $name = null, array $args = [] ) {
 
-		$args = wp_parse_args( $args, [
-			'extension_type' => '.php',
-			'theme_folder'   => null,
-		] );
+		$args = wp_parse_args(
+			$args,
+			[
+				'extension_type' => '.php',
+				'theme_folder'   => null,
+			]
+		);
 
 		if ( ! empty( $args['theme_folder'] ) ) {
 			$path = $args['theme_folder'] . '/' . $slug;
 		}
 
 		ob_start();
-		$found = get_template_part( $path ?? $slug, $name, $args );
+		$found  = get_template_part( $path ?? $slug, $name, $args );
 		$output = ob_get_clean();
 
 		if ( $found ) {
@@ -285,7 +291,7 @@ abstract class Plugin {
 			return false;
 		}
 
-		$encapsulator = function( $template_file_path ) use ( $slug, $name, $args ) {
+		$encapsulator = function ( $template_file_path ) use ( $slug, $name, $args ) {
 			ob_start();
 			if ( pathinfo( $template_file_path, PATHINFO_EXTENSION ) === '.php' ) {
 				include $template_file_path;
@@ -296,7 +302,6 @@ abstract class Plugin {
 		};
 
 		return $encapsulator( $template );
-
 	}
 
 	protected function attach_assets( $assets, $type, $dest = 'public' ) {
@@ -308,21 +313,21 @@ abstract class Plugin {
 			$asset_path = substr( $resource['path'], 0, 1 ) === '/'
 				? $resource['path']
 				: $this->get_path( $resource['path'] );
-			$asset_uri = $this->get_url( $resource['path'] );
-			$dep_path = dirname( $asset_path ) . '/' . basename( $asset_path, '.js' ) . '.asset.php';
+			$asset_uri  = $this->get_url( $resource['path'] );
+			$dep_path   = dirname( $asset_path ) . '/' . basename( $asset_path, '.js' ) . '.asset.php';
 			if ( file_exists( $dep_path ) ) {
 				$dep = include $dep_path;
-				foreach( $dep as $key => $value ) {
+				foreach ( $dep as $key => $value ) {
 					$resource[ $key ] ??= $value;
 				}
 			}
 			$this->assets[ $type . 's' ][] = [
-				'name' => $name,
-				'dest' => $dest,
-				'url'  => $asset_uri,
-				'path' => $asset_path,
-				'env'  => $resource['env'] ?? null,
-				'version' => $resource['version'] ?? $this->get_version(),
+				'name'         => $name,
+				'dest'         => $dest,
+				'url'          => $asset_uri,
+				'path'         => $asset_path,
+				'env'          => $resource['env'] ?? null,
+				'version'      => $resource['version'] ?? $this->get_version(),
 				'dependencies' => $resource['dependencies'] ?? [],
 			];
 		}
@@ -342,18 +347,16 @@ abstract class Plugin {
 
 		$this->install_scripts( 'editor', false );
 		$this->install_styles( 'editor' );
-
 	}
 
 	public function install_fse_styles() {
 		if ( is_admin() ) {
 			$this->install_styles( 'fse' );
 		}
-
 	}
 
 	private function install_scripts( $dest, $in_footer = true ) {
-		foreach( $this->assets['scripts'] as $script ) {
+		foreach ( $this->assets['scripts'] as $script ) {
 			if ( $script['dest'] !== $dest ) {
 				continue;
 			}
@@ -376,7 +379,7 @@ abstract class Plugin {
 	}
 
 	private function install_styles( $dest ) {
-		foreach( $this->assets['stylesheets'] as $stylesheet ) {
+		foreach ( $this->assets['stylesheets'] as $stylesheet ) {
 			if ( $stylesheet['dest'] !== $dest ) {
 				continue;
 			}
@@ -394,7 +397,7 @@ abstract class Plugin {
 	}
 
 	public function get_env( $key ) {
-		$env = $this->env[$key];
+		$env = $this->env[ $key ];
 		if ( $env instanceof MultiArray ) {
 			return $env->to_array();
 		}
