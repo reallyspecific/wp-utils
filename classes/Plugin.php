@@ -81,10 +81,10 @@ abstract class Plugin {
 		$this->name = $props['name'];
 		$this->slug = $props['slug'] ?? sanitize_title( basename( $this->root_path ) );
 
+		$this->register_settings();
+
 		$this->attach_assets( $props['stylesheets'] ?? [], 'stylesheet' );
 		$this->attach_assets( $props['scripts'] ?? [], 'script' );
-
-		$this->register_settings();
 
 		$this->env = new MultiArray();
 
@@ -293,7 +293,7 @@ abstract class Plugin {
 
 		$encapsulator = function ( $template_file_path ) use ( $slug, $name, $args ) {
 			ob_start();
-			if ( pathinfo( $template_file_path, PATHINFO_EXTENSION ) === '.php' ) {
+			if ( pathinfo( $template_file_path, PATHINFO_EXTENSION ) === 'php' ) {
 				include $template_file_path;
 			} else {
 				return file_get_contents( $template_file_path );
@@ -319,6 +319,13 @@ abstract class Plugin {
 				$dep = include $dep_path;
 				foreach ( $dep as $key => $value ) {
 					$resource[ $key ] ??= $value;
+				}
+			}
+			if ( ! empty( $resource['dependencies'] ) ) {
+				foreach ( $resource['dependencies'] as $index => $value ) {
+					if ( $value === 'rs-settings-util-page' ) {
+						$resource['dependencies'][ $index ] = Settings::$page_namespace;
+					}
 				}
 			}
 			$this->assets[ $type . 's' ][] = [

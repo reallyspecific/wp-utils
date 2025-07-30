@@ -19,6 +19,7 @@ export default class settingsPage {
 		settingsPage.listen('click', '.rs-util-settings-field-row-ordering', button => this.clickReorderButton(button));
 		settingsPage.listen('click', '.rs-util-settings-page [data-action]', button => this.handleAction(button));
 		settingsPage.listen( 'submit', '.rs-util-settings-form', this.onSubmit.bind(this) );
+		settingsPage.listen( 'click', '.rs-util-settings-form [data-on-click-event]', this.onClick.bind(this) );
 
 		window.addEventListener('popstate', this.onPopState );
 
@@ -148,6 +149,8 @@ export default class settingsPage {
 		this.onSubmit();
 	}
 
+
+
 	addMessage( message, level = 'info' ) {
 		const messageContainer = this.form.querySelector('.rs-util-settings-form-messages');
 		const messageElement = document.createElement('p');
@@ -159,6 +162,10 @@ export default class settingsPage {
 	clearMessages() {
 		const messageContainer = this.form.querySelector('.rs-util-settings-form-messages');
 		messageContainer.innerHTML = '';
+	}
+
+	onClick( self ) {
+		document.dispatchEvent( new CustomEvent( self.dataset.onClickEvent, { detail: self.closest('[data-on-click-event]') } ) );
 	}
 
 	onSubmit() {

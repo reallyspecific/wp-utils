@@ -943,13 +943,16 @@
 	.rs-util-settings-field-value &__new-field {
 		display: grid;
 		grid-template-rows: [label] auto [input] auto;
-		grid-auto-columns: minmax(min-content,200px);
+		grid-auto-columns: auto;
 		grid-auto-flow: column dense;
+		justify-content: start;
+		width: auto;
+		max-width: 100%;
 		gap: 0.5rem 0.25rem;
 
+		> button.rs-util-settings-field--button,
 		> button {
 			grid-row: input;
-			/*grid-column: -1 / span 1;*/
 			max-width: max-content;
 		}
 
@@ -974,7 +977,9 @@
 		grid-template-columns: auto;
 		grid-template-areas: "label" "value";
 		gap: inherit;
-
+		> button {
+			max-width: max-content;
+		}
 	}
 }
 

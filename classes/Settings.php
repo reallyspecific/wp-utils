@@ -486,12 +486,13 @@ endforeach;
 			'select'    => 'select',
 			'sortable'  => 'sortable',
 			'textarea'  => 'textarea',
+			'button'    => 'button',
 			default     => 'input',
 		};
 		$attrs = wp_parse_args(
 			$field['attrs'] ?? [],
 			[
-				'id'       => $field['id'],
+				'id'       => $field['id'] ?? null,
 				'name'     => null,
 				'required' => filter_var( $field['required'] ?? null, FILTER_VALIDATE_BOOLEAN ) ? 'required' : null,
 				'class'    => $field['class'] ?? [],
@@ -525,6 +526,10 @@ endforeach;
 		$value = $value ?? $field['default'] ?? ( empty( $attrs['multiple'] ) ? '' : [] );
 
 		switch ( $tag ) {
+			case 'button':
+				$attrs['class'] = 'button ' . $attrs['class'];
+				$render_template = '<button type="button" %1$s>' . ( $field['contents'] ?? '' ) . '</button>';
+				break;
 			case 'input':
 				$attrs['size']        = $field['size'] ?? null;
 				$attrs['type']        = $field['type'] ?? 'text';
@@ -798,6 +803,9 @@ endforeach;
 				case 'select':
 					$buffer .= $this->render_select( $new_field, null, [] );
 					break;
+                case 'button':
+	                $buffer .= $this->render_field( $new_field, null, [] );
+                    break;
 				default:
 					$new_field['attrs']['type'] = $new_field['type'] === 'input' ? 'text' : $new_field['type'];
 					$new_field['type']          = 'input';
