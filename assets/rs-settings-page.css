@@ -942,9 +942,8 @@
 
 	.rs-util-settings-field-value &__new-field {
 		display: grid;
-		grid-template-rows: [label] auto [input] auto;
+		grid-auto-rows: [label] auto [input] auto;
 		grid-auto-columns: auto;
-		grid-auto-flow: column dense;
 		justify-content: start;
 		width: auto;
 		max-width: 100%;
@@ -952,24 +951,34 @@
 
 		> button.rs-util-settings-field--button,
 		> button {
-			grid-row: input;
+			grid-column: input;
 			max-width: max-content;
 		}
 
 		> label {
-			grid-row: label;
+			grid-column: label;
 			font-size: 11px;
 			font-weight: bold;
 			text-transform: uppercase;
 			letter-spacing: 0.05em;
 			color: var(--rs-util-settings-input-label-color);
 		}
-		> .rs-util-settings-field {
+		> .rs-util-settings-field,
+		> .ts-wrapper {
 			grid-area: unset !important;
 			grid-row: input;
 			max-width: 200px;
 		}
+
+		> .is-state-invalid .ts-control {
+			outline: 2px solid var(--rs-util-settings-alert-color);
+		}
 	}
+
+	.rs-util-settings-field-value &__new-field {
+		grid-auto-flow: column dense;
+	}
+
 	.rs-util-settings-field-value &__new-field-property {
 		grid-row: 1 / span 2;
 		display: grid;

@@ -40,18 +40,26 @@ return [
 
     'php-version' => '8.2',
 
-    'patchers' => [
-        static function ( string $filePath, string $prefix, string $contents ): string {
-            if ( str_contains( $prefix, 'ReallySpecific' ) ) {
-                return str_replace(
-                    "{$prefix}\ReallySpecific\Utils",
-                    "{$prefix}\RS_Utils",
-                    $contents
-                );
-            }
-            return $contents;
-        }
-    ],
+	'patchers' => [
+		static function ( string $filePath, string $prefix, string $contents ) use ( $patch_hooks ): string {
+			$patched = $contents;
+			if ( str_contains( $prefix, 'ReallySpecific' ) ) {
+				$patched = str_replace(
+					"{$prefix}\ReallySpecific\Utils",
+					"{$prefix}\RS_Utils",
+					$patched
+				);
+			}
+			if ( $patch_hooks ) {
+				$patched = preg_replace(
+					'/([\'"])rs_util_/',
+					"$1{$patch_hooks}_rs_util_",
+					$patched
+				);
+			}
+			return $patched;
+		}
+	],
 
     'exclude-namespaces' => [
         '~^((?!Parsedown).)$~', // The root namespace only

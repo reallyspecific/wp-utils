@@ -368,7 +368,7 @@ export default class settingsPage {
 
 		if ( el.dataset.useTomSelect !== 'true' ) {
 			try {
-				const additionalArgs = JSON.parse(el.dataset.tomSelectArgs ?? '{}');
+				const additionalArgs = JSON.parse(el.dataset.useTomSelect ?? el.dataset.tomSelectAgs ?? '{}');
 				if ( additionalArgs ) {
 					Object.keys( additionalArgs ).forEach( key => {
 						tomArgs[key] = additionalArgs[key];
@@ -379,7 +379,18 @@ export default class settingsPage {
 
 		}
 
+		console.log( el, tomArgs );
+
 		el.tom = new TomSelect(el, tomArgs);
+
+		if ( tomArgs.closeAfterSelect ?? false ) {
+			el.tom.on( 'item_select', () => {
+				el.tom.blur();
+			} );
+			el.tom.on( 'item_add', () => {
+				el.tom.blur();
+			} );
+		}
 	}
 
 	makeSortable( el, args = {} ) {
@@ -400,12 +411,44 @@ export default class settingsPage {
 			if ( fields && addBtn ) {
 				addBtn.addEventListener('click', e => {
 					const newValue = {};
+					let passedValidation = true;
+					fields.forEach( field => {
+						if ( ! ( field.required ?? false ) ) {
+							return;
+						}
+						if ( ! field.checkValidity() ) {
+							field.classList.add('is-state-invalid');
+							if ( ! field.tom ) {
+								field.reportValidity();
+							} else {
+								field.tom.wrapper.classList.add('is-state-invalid');
+							}
+							passedValidation = false;
+						} else {
+							field.classList.remove('is-state-invalid');
+							if ( field.tom ) {
+								field.tom.wrapper.classList.remove('is-state-invalid');
+							}
+						}
+					} );
+					if ( ! passedValidation ) {
+						return;
+					}
 					fields.forEach(field => {
 						newValue[field.dataset.key] = ['checkbox','radio'].includes( field.type ) ? field.checked : field.value;
-						field.value = '';
 					});
 					const label = this.makeListItemLabel( newValue, fields, list.dataset.label );
 					this.addListItem( el, newValue, label );
+
+					fields.forEach( field => {
+						field.value = '';
+						field.checked = false;
+						field.classList.remove('is-state-invalid');
+						if ( field.tom ) {
+							field.tom.wrapper.classList.remove('is-state-invalid');
+							field.tom.clear(true);
+						}
+					})
 				});
 			}
 		}
@@ -417,10 +460,11 @@ export default class settingsPage {
 		fields.forEach( field => {
 			const value = valueGroup[field.dataset.key] ?? '';
 			if ( field.tagName === 'SELECT' ) {
-				const optionLabel = field.options[field.selectedIndex].innerHTML;
+				const option = field.options[field.selectedIndex];
 				const optionValue = field.options[field.selectedIndex].value;
-				label = label.replace( `{${field.dataset.key}:label}`, optionLabel );
-				label = label.replace( `{${field.dataset.key}:label}`, optionValue );
+				label = label.replace( `{${field.dataset.key}.label}`, option.innerHTML );
+				label = label.replace( `{${field.dataset.key}.value}`, option.value );
+				label = label.replace( `{${field.dataset.key}}`, optionValue );
 			}
 			label = label.replace( `{${field.dataset.key}}`, value );
 		} );
